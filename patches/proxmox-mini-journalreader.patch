@@ -1,5 +1,5 @@
 From ec5a9825066665ae18d939ad906013f2502f463c Mon Sep 17 00:00:00 2001
-From: Your Name <you@example.com>
+From: Kamil Trzcinski <ayufan@ayufan.eu>
 Date: Mon, 7 Dec 2020 16:54:10 +0000
 Subject: [PATCH] Fix getopt usage
 

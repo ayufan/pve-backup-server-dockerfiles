@@ -22,7 +22,7 @@ ARG PROXMOX_BACKUP_VERSION=master
 
 # Clone ALL
 RUN git clone git://git.proxmox.com/git/pve-eslint.git
-RUN git clone git://git.proxmox.com/git/proxmox-backup.git -b $PROXMOX_BACKUP_VERSION
+RUN git clone git://git.proxmox.com/git/proxmox-backup.git -b ${PROXMOX_BACKUP_VERSION}
 RUN git clone git://git.proxmox.com/git/proxmox.git
 RUN git clone git://git.proxmox.com/git/proxmox-fuse.git
 RUN git clone git://git.proxmox.com/git/pxar.git
@@ -33,7 +33,7 @@ RUN git clone git://git.proxmox.com/git/proxmox-i18n.git
 RUN git clone git://git.proxmox.com/git/pve-xtermjs.git
 
 # Patch ALL
-RUN patch -p1 -d proxmox-backup/ < /patches/proxmox-backup.patch
+RUN patch -p1 -d proxmox-backup/ < /patches/proxmox-backup-${PROXMOX_BACKUP_VERSION}.patch
 RUN patch -p1 -d pve-xtermjs/ < /patches/pve-xtermjs.patch
 RUN patch -p1 -d proxmox-mini-journalreader/ < /patches/proxmox-mini-journalreader.patch
 
