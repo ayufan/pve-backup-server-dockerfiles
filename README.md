@@ -12,9 +12,26 @@ docker-compose up -d
 Then login to `https://<ip>:8007/` with `admin / pbspbs`.
 After that change a password.
 
+## Features
+
+There are some features missing, ex.:
+
+- ZFS (it is not installed in a container)
+
 ## Configure
 
-### 1. Persist config, graphs, and logs
+### 1. Add to Proxmox VE
+
+Since it runs in a container, it is by default self-signed.
+Follow the tutorial: https://pbs.proxmox.com/docs/pve-integration.html.
+
+You might need to read a PBS fingerprint:
+
+```bash
+docker-compose exec server proxmox-backup-manager cert info | grep Fingerprint
+```
+
+### 2. Persist config, graphs, and logs
 
 Create a new file: `docker-compose.override.yml`:
 
@@ -42,7 +59,7 @@ volumes:
       device: /srv/pbs/lib
 ```
 
-### 2. Add a new directory to store data
+### 3. Add a new directory to store data
 
 Create a new file: `docker-compose.override.yml`:
 
