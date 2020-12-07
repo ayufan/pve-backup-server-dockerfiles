@@ -39,11 +39,9 @@ ARG GIT_PROXMOX_VERSION=master
 RUN git -C proxmox-backup checkout ${GIT_PROXMOX_BACKUP_VERSION}
 RUN git -C proxmox checkout ${GIT_PROXMOX_VERSION}
 
-# Patch ALL
+# Apply all patches
 ADD /versions/${GIT_PROXMOX_BACKUP_VERSION}/ /patches/
-RUN patch -p1 -d proxmox-backup/ < /patches/proxmox-backup.patch
-RUN patch -p1 -d pve-xtermjs/ < /patches/pve-xtermjs.patch
-RUN patch -p1 -d proxmox-mini-journalreader/ < /patches/proxmox-mini-journalreader.patch
+RUN set -e; for i in /patches/*.patch; do echo $i... && patch -p1 -d $(basename "$i" .patch) < "$i"; done
 
 # Deps for all rest
 RUN apt-get -y build-dep $PWD/proxmox-backup
