@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [[ ! -e /etc/proxmox-backup/csrf.key ]]; then
+  echo "PROXY: The proxmox-backup is not yet configured!"
+  exit 1
+fi
+
+echo "PROXY: Starting..."
+exec chpst -u backup:backup /usr/lib/aarch64-linux-gnu/proxmox-backup/proxmox-backup-proxy

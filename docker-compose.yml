@@ -1,0 +1,18 @@
+version: '2.1'
+
+services:
+  server:
+    image: proxmox-backup
+    network_mode: host
+    mem_limit: 2G
+    volumes:
+      - cfg:/etc/proxmox-backup
+      - logs:/var/log/proxmox-backup
+      - lib:/var/lib/proxmox-backup
+    stop_signal: SIGHUP
+
+volumes:
+  cfg:
+  logs:
+  lib:
+
