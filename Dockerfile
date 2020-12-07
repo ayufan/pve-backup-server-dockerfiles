@@ -33,6 +33,7 @@ RUN git clone git://git.proxmox.com/git/proxmox-i18n.git
 RUN git clone git://git.proxmox.com/git/pve-xtermjs.git
 
 # Patch ALL
+RUN patch -p1 -d proxmox/ < /patches/proxmox.patch
 RUN patch -p1 -d proxmox-backup/ < /patches/proxmox-backup-${PROXMOX_BACKUP_VERSION}.patch
 RUN patch -p1 -d pve-xtermjs/ < /patches/pve-xtermjs.patch
 RUN patch -p1 -d proxmox-mini-journalreader/ < /patches/proxmox-mini-journalreader.patch
