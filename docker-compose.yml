@@ -9,6 +9,7 @@ services:
       - cfg:/etc/proxmox-backup
       - logs:/var/log/proxmox-backup
       - lib:/var/lib/proxmox-backup
+    restart: unless-stopped
     stop_signal: SIGHUP
 
 volumes:
