@@ -10,12 +10,11 @@ RUN apt-get -y update && \
     libacl1-dev libpam0g-dev libfuse3-dev \
     libsystemd-dev uuid-dev libssl-dev \
     libclang-dev libjson-perl libcurl4-openssl-dev \
-    dh-exec runit
+    dh-exec
 
 WORKDIR /src
 ADD /patches/ /patches/
 
-ENV JOBS=4
 ENV PATH=/root/.cargo/bin:$PATH
 ENV PATH=/root/bin:$PATH
 
@@ -34,8 +33,9 @@ RUN git clone git://git.proxmox.com/git/pve-xtermjs.git
 # Patch ALL
 RUN patch -p1 -d proxmox-backup/ < /patches/proxmox-backup.patch
 RUN patch -p1 -d pve-xtermjs/ < /patches/pve-xtermjs.patch
+RUN patch -p1 -d proxmox-mini-journalreader/ < /patches/proxmox-mini-journalreader.patch
 
-# Install PVE eslint
+# Install PVE eslint (as it is dev dependency)
 RUN apt-get -y build-dep $PWD/pve-eslint
 RUN cd pve-eslint/ && make dinstall
 
@@ -53,15 +53,9 @@ RUN cd extjs/ && make deb && mv *.deb ../
 RUN cd proxmox-widget-toolkit/ && make deb && mv *.deb ../
 RUN cd proxmox-i18n/ && make deb && mv *.deb ../
 RUN cd pve-xtermjs/ && dpkg-buildpackage -us -uc -b
-
-# mini-journalreader.c: In function 'main':
-# mini-journalreader.c:220:61: error: comparison is always true due to limited range of data type [-Werror=type-limits]
-#   220 |     while ((c = (char)getopt (argc, argv, "b:e:d:n:f:t:h")) != -1) {
-#       |                                                             ^~
-# cc1: all warnings being treated as errors
-RUN sed -i -e 's/char c;/int c;/g' -e 's/(char)getopt/getopt/g' proxmox-mini-journalreader/src/mini-journalreader.c
 RUN cd proxmox-mini-journalreader/ && make deb && mv *.deb ../
 
+#=================================
 
 FROM debian:bullseye
 COPY --from=builder /src/*.deb /src/
@@ -69,9 +63,10 @@ COPY --from=builder /src/*.deb /src/
 # Install all packages
 RUN export DEBIAN_FRONTEND=noninteractive && \
   apt-get update -y && \
+  apt-get install -y runit && \
   apt install -y /src/*.deb
 
-RUN apt-get install -y runit
+# Add default configs
 ADD /pbs/ /etc/proxmox-backup/
 
 VOLUME /etc/proxmox-backup
