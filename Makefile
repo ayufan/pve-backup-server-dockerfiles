@@ -1,14 +1,21 @@
 ARCHS = arm64v8 amd64
 REGISTRY ?= ayufan/proxmox-backup-server
-DEV_IMAGE ?= $(REGISTRY):latest-dev
+TAG ?= latest
+DEV_IMAGE ?= $(REGISTRY):$(TAG)-dev
 
 .PHONY: dev-build dev-push dev-run dev-shell
 
 %-build:
-	docker build -t $(REGISTRY):latest-$* --build-arg ARCH=$*/ .
+	docker build -t $(REGISTRY):$(TAG)-$* --build-arg ARCH=$*/ .
 
 %-push: %-build
-	docker push $(REGISTRY):latest-$*
+	docker push $(REGISTRY):$(TAG)-$*
+
+manifest:
+	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
+	docker manifest create --amend $(REGISTRY):$(TAG) \
+		$(addprefix $(REGISTRY):$(TAG)-, $(ARCHS))
+	docker push $(REGISTRY):$(TAG)
 
 dev-build:
 	docker build -t $(DEV_IMAGE) .
