@@ -18,12 +18,13 @@ ADD /patches/ /patches/
 ENV PATH=/root/.cargo/bin:$PATH
 ENV PATH=/root/bin:$PATH
 
-ARG PROXMOX_BACKUP_VERSION=master
+ARG GIT_PROXMOX_BACKUP_VERSION=master
+ARG GIT_PROXMOX_VERSION=master
 
 # Clone ALL
 RUN git clone git://git.proxmox.com/git/pve-eslint.git
-RUN git clone git://git.proxmox.com/git/proxmox-backup.git -b ${PROXMOX_BACKUP_VERSION}
-RUN git clone git://git.proxmox.com/git/proxmox.git
+RUN git clone git://git.proxmox.com/git/proxmox-backup.git -b ${GIT_PROXMOX_BACKUP_VERSION}
+RUN git clone git://git.proxmox.com/git/proxmox.git -b ${GIT_PROXMOX_VERSION}
 RUN git clone git://git.proxmox.com/git/proxmox-fuse.git
 RUN git clone git://git.proxmox.com/git/pxar.git
 RUN git clone git://git.proxmox.com/git/proxmox-mini-journalreader.git
