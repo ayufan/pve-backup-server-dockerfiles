@@ -1,18 +1,15 @@
-From 90faddd0ce9e521aac403f23f9d5d1bca25e0012 Mon Sep 17 00:00:00 2001
+From 691dac0717f99a28dc910679c60a24d1d28a22f5 Mon Sep 17 00:00:00 2001
 From: Kamil Trzcinski <ayufan@ayufan.eu>
-Date: Sun, 6 Dec 2020 17:08:24 +0000
-Subject: [PATCH] Use local paths
+Date: Mon, 7 Dec 2020 20:17:19 +0000
+Subject: [PATCH] Support local compile
 
-multiarch
-
-dh-exec
 ---
  .cargo/config                        |  5 ---
  Cargo.toml                           | 11 ++---
  debian/control                       | 67 ----------------------------
  debian/proxmox-backup-server.install |  9 ++--
  debian/rules                         |  3 +-
- 6 files changed, 15 insertions(+), 84 deletions(-)
+ 5 files changed, 13 insertions(+), 82 deletions(-)
  delete mode 100644 .cargo/config
  mode change 100644 => 100755 debian/proxmox-backup-server.install
 
@@ -176,4 +173,3 @@ index 2bc0f694..83889ac5 100755
  override_dh_auto_build:
 -- 
 2.20.1
-

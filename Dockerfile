@@ -36,13 +36,12 @@ RUN git clone git://git.proxmox.com/git/pve-xtermjs.git
 ARG GIT_PROXMOX_BACKUP_VERSION=master
 ARG GIT_PROXMOX_VERSION=master
 
-RUN git -C proxmox-backup checkout -b ${GIT_PROXMOX_BACKUP_VERSION}
-RUN git -C proxmox checkout -b ${GIT_PROXMOX_VERSION}
+RUN git -C proxmox-backup checkout ${GIT_PROXMOX_BACKUP_VERSION}
+RUN git -C proxmox checkout ${GIT_PROXMOX_VERSION}
 
 # Patch ALL
-ADD /patches/ /patches/
-RUN patch -p1 -d proxmox/ < /patches/proxmox-${GIT_PROXMOX_VERSION}.patch
-RUN patch -p1 -d proxmox-backup/ < /patches/proxmox-backup-${GIT_PROXMOX_BACKUP_VERSION}.patch
+ADD /versions/${GIT_PROXMOX_BACKUP_VERSION}/ /patches/
+RUN patch -p1 -d proxmox-backup/ < /patches/proxmox-backup.patch
 RUN patch -p1 -d pve-xtermjs/ < /patches/pve-xtermjs.patch
 RUN patch -p1 -d proxmox-mini-journalreader/ < /patches/proxmox-mini-journalreader.patch
 
