@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   server:
-    image: proxmox-backup
+    image: ayufan/proxmox-backup-server:latest
     network_mode: host
     mem_limit: 2G
     volumes:
