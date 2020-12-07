@@ -68,7 +68,7 @@ Then, add a new datastore in a PBS: `https://<IP>:8007/`.
 ## Build on your own
 
 ```bash
-make build
+make dev-build
 ```
 
 It builds on any platform, which can be: `amd64`, `arm32v7`, `arm64v8`,
@@ -77,8 +77,18 @@ etc. Wait a around 1-3h to compile.
 Then you can push to your registry:
 
 ```bash
-
+make dev-push
 ```
+
+Or run locally:
+
+```bash
+make dev-shell
+make dev-run
+```
+
+You might as well pull the `*.deb` from within the image
+and install on Debian Bullseye.
 
 ## Author
 
