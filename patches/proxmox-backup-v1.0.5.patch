@@ -12,7 +12,6 @@ dh-exec
  debian/control                       | 67 ----------------------------
  debian/proxmox-backup-server.install |  9 ++--
  debian/rules                         |  3 +-
- www/OnlineHelpInfo.js                |  4 +-
  6 files changed, 15 insertions(+), 84 deletions(-)
  delete mode 100644 .cargo/config
  mode change 100644 => 100755 debian/proxmox-backup-server.install
@@ -175,21 +174,6 @@ index 2bc0f694..83889ac5 100755
  	dh_auto_configure
  
  override_dh_auto_build:
-diff --git a/www/OnlineHelpInfo.js b/www/OnlineHelpInfo.js
-index c54912d8..f2521c4b 100644
---- a/www/OnlineHelpInfo.js
-+++ b/www/OnlineHelpInfo.js
-@@ -19,8 +19,8 @@ const proxmoxOnlineHelpInfo = {
-     "link": "/docs/backup-client.html#backup-pruning",
-     "title": "Pruning and Removing Backups"
-   },
--  "id3": {
--    "link": "/docs/backup-client.html#id3",
-+  "id4": {
-+    "link": "/docs/backup-client.html#id4",
-     "title": "Garbage Collection"
-   },
-   "pxar-format": {
 -- 
 2.20.1
 
