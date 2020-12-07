@@ -18,13 +18,11 @@ ADD /patches/ /patches/
 ENV PATH=/root/.cargo/bin:$PATH
 ENV PATH=/root/bin:$PATH
 
-ARG GIT_PROXMOX_BACKUP_VERSION=master
-ARG GIT_PROXMOX_VERSION=master
 
 # Clone ALL
 RUN git clone git://git.proxmox.com/git/pve-eslint.git
-RUN git clone git://git.proxmox.com/git/proxmox-backup.git -b ${GIT_PROXMOX_BACKUP_VERSION}
-RUN git clone git://git.proxmox.com/git/proxmox.git -b ${GIT_PROXMOX_VERSION}
+RUN git clone git://git.proxmox.com/git/proxmox-backup.git
+RUN git clone git://git.proxmox.com/git/proxmox.git
 RUN git clone git://git.proxmox.com/git/proxmox-fuse.git
 RUN git clone git://git.proxmox.com/git/pxar.git
 RUN git clone git://git.proxmox.com/git/proxmox-mini-journalreader.git
@@ -33,9 +31,15 @@ RUN git clone git://git.proxmox.com/git/extjs.git
 RUN git clone git://git.proxmox.com/git/proxmox-i18n.git
 RUN git clone git://git.proxmox.com/git/pve-xtermjs.git
 
+ARG GIT_PROXMOX_BACKUP_VERSION=master
+ARG GIT_PROXMOX_VERSION=master
+
+RUN git -C proxmox-backup checkout -b ${GIT_PROXMOX_BACKUP_VERSION}
+RUN git -C proxmox checkout -b ${GIT_PROXMOX_VERSION}
+
 # Patch ALL
-RUN patch -p1 -d proxmox/ < /patches/proxmox.patch
-RUN patch -p1 -d proxmox-backup/ < /patches/proxmox-backup-${PROXMOX_BACKUP_VERSION}.patch
+RUN patch -p1 -d proxmox/ < /patches/proxmox-${GIT_PROXMOX_VERSION}.patch
+RUN patch -p1 -d proxmox-backup/ < /patches/proxmox-backup-${GIT_PROXMOX_BACKUP_VERSION}.patch
 RUN patch -p1 -d pve-xtermjs/ < /patches/pve-xtermjs.patch
 RUN patch -p1 -d proxmox-mini-journalreader/ < /patches/proxmox-mini-journalreader.patch
 
