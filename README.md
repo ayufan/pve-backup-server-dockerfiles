@@ -97,6 +97,21 @@ volumes:
       device: /srv/pbs/lib
 ```
 
+## Install on bare-metal host
+
+Docker is convienient, but in some cases it might be simply better to install natively.
+Since the packages are built against `Debian Buster` your system needs to run soon
+to be stable distribution.
+
+You can copy compiled `*.deb` (it will automatically pick `amd64` or `arm64v8` based on your distribution)
+from the container and install:
+
+```bash
+cd /tmp
+docker run --rm ayufan/proxmox-backup-server:latest tar c /src/ | tar x
+apt install $PWD/src/*.deb
+```
+
 ## Recompile latest version or master
 
 You can compile latest version or master with a set of commands
