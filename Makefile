@@ -16,9 +16,15 @@ DEV_IMAGE ?= $(REGISTRY):$(TAG)-dev
 		--build-arg GIT_PROXMOX_BACKUP_VERSION=$(GIT_PROXMOX_BACKUP_VERSION) \
 		--build-arg GIT_PROXMOX_VERSION=$(GIT_PROXMOX_VERSION) \
 		.
+ifneq (,$(TAG_AS_LATEST))
+	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):latest-$*
+endif
 
 %-push: %-build
 	docker push $(REGISTRY):$(TAG)-$*
+ifneq (,$(TAG_AS_LATEST))
+	docker push $(REGISTRY):latest-$*
+endif
 
 all-build: $(addsuffix -build, $(ARCHS))
 
@@ -27,13 +33,15 @@ all-push: $(addsuffix -push, $(ARCHS))
 
 manifest:
 	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
-	docker manifest create --amend $(REGISTRY):$(TAG) \
+	-rm -rf ~/.docker/manifests
+	docker manifest create $(REGISTRY):$(TAG) \
 		$(addprefix $(REGISTRY):$(TAG)-, $(ARCHS))
-	docker push $(REGISTRY):$(TAG)
+	docker manifest push $(REGISTRY):$(TAG)
 
 ifneq (,$(TAG_AS_LATEST))
-	docker tag $(REGISTRY):$(TAG) $(REGISTRY):latest
-	docker push $(REGISTRY):latest
+	docker manifest create $(REGISTRY):latest \
+		$(addprefix $(REGISTRY):latest-, $(ARCHS))
+	docker manifest push $(REGISTRY):latest
 endif
 
 dev-build:
