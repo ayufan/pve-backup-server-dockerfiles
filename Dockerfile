@@ -61,14 +61,13 @@ RUN cd proxmox-mini-journalreader/ && make deb && mv *.deb ../
 
 #=================================
 
-FROM debian:bullseye
+FROM ${ARCH}debian:bullseye
 COPY --from=builder /src/*.deb /src/
 
 # Install all packages
 RUN export DEBIAN_FRONTEND=noninteractive && \
-  apt-get update -y && \
-  apt-get install -y runit && \
-  apt install -y /src/*.deb
+  apt update -y && \
+  apt install -y runit /src/*.deb
 
 # Add default configs
 ADD /pbs/ /etc/proxmox-backup/
