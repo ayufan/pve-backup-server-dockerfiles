@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [[ -n "$TZ" ]]; then
+  echo "$TZ" > /etc/timezone
+fi
+
 chown backup:backup /etc/proxmox-backup
 chmod 700 /etc/proxmox-backup
 

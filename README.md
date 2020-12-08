@@ -31,7 +31,45 @@ You might need to read a PBS fingerprint:
 docker-compose exec server proxmox-backup-manager cert info | grep Fingerprint
 ```
 
-### 2. Persist config, graphs, and logs
+### 2. Add a new directory to store data
+
+Create a new file: `docker-compose.override.yml`:
+
+```yaml
+version: '2.1'
+
+services:
+  pbs:
+    volumes:
+      - backups:/backups
+
+volumes:
+  backups:
+    driver: local
+    driver_opts:
+      type: ''
+      o: bind
+      device: /srv/dev-disk-by-label-backups
+```
+
+Then, add a new datastore in a PBS: `https://<IP>:8007/`.
+
+### 3. Configure TZ (optional)
+
+If you are running in Docker it might be advised to configure timezone.
+
+Create a new file: `docker-compose.override.yml`:
+
+```yaml
+version: '2.1'
+
+services:
+  pbs:
+    environment:
+      TZ: Europe/Warsaw
+```
+
+### 4. Persist config, graphs, and logs (optional, but advised)
 
 Create a new file: `docker-compose.override.yml`:
 
@@ -58,29 +96,6 @@ volumes:
       o: bind
       device: /srv/pbs/lib
 ```
-
-### 3. Add a new directory to store data
-
-Create a new file: `docker-compose.override.yml`:
-
-```yaml
-version: '2.1'
-
-services:
-  pbs:
-    volumes:
-      - backups:/backups
-
-volumes:
-  backups:
-    driver: local
-    driver_opts:
-      type: ''
-      o: bind
-      device: /srv/dev-disk-by-label-backups
-```
-
-Then, add a new datastore in a PBS: `https://<IP>:8007/`.
 
 ## Recompile latest version or master
 
