@@ -20,6 +20,11 @@ DEV_IMAGE ?= $(REGISTRY):$(TAG)-dev
 %-push: %-build
 	docker push $(REGISTRY):$(TAG)-$*
 
+all-build: $(addsuffix -build, $(ARCHS))
+
+all-push: $(addsuffix -push, $(ARCHS))
+	make manifest
+
 manifest:
 	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
 	docker manifest create --amend $(REGISTRY):$(TAG) \

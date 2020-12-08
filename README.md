@@ -39,19 +39,19 @@ Create a new file: `docker-compose.override.yml`:
 version: '2.1'
 
 volumes:
-  cfg:
+  pbs_etc:
     driver: local
     driver_opts:
       type: ''
       o: bind
-      device: /srv/pbs/cfg
-  logs:
+      device: /srv/pbs/etc
+  pbs_logs:
     driver: local
     driver_opts:
       type: ''
       o: bind
       device: /srv/pbs/logs
-  lib:
+  pbs_lib:
     driver: local
     driver_opts:
       type: ''
@@ -67,7 +67,7 @@ Create a new file: `docker-compose.override.yml`:
 version: '2.1'
 
 services:
-  server:
+  pbs:
     volumes:
       - backups:/backups
 
@@ -81,6 +81,25 @@ volumes:
 ```
 
 Then, add a new datastore in a PBS: `https://<IP>:8007/`.
+
+## Recompile latest version or master
+
+You can compile latest version or master with a set of commands
+and push them to the registry.
+
+```bash
+# build v1.0.5
+make all-build VERSION=v1.0.5
+
+# build master
+make all-build
+
+# build and push to registry v1.0.5
+make all-push VERSION=v1.0.5 REGISTRY=my.registry.com/pbs
+
+# build and push to registry v1.0.5
+make all-push REGISTRY=my.registry.com/pbs
+```
 
 ## Build on your own
 
