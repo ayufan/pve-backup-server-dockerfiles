@@ -3,6 +3,17 @@
 This is a try to compile Proxmox Backup Server
 to run it in a container.
 
+## Pre-built images
+
+For starting quickly all images are precompiled and hosted
+at https://hub.docker.com/repository/docker/ayufan/proxmox-backup-server.
+
+Or:
+
+```bash
+docker pull ayufan/proxmox-backup-server:latest
+```
+
 ## Run
 
 ```bash
