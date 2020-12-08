@@ -1,19 +1,19 @@
 version: '2.1'
 
 services:
-  server:
+  pbs:
     image: ayufan/proxmox-backup-server:latest
     network_mode: host
     mem_limit: 2G
     volumes:
-      - cfg:/etc/proxmox-backup
-      - logs:/var/log/proxmox-backup
-      - lib:/var/lib/proxmox-backup
+      - pbs_etc:/etc/proxmox-backup
+      - pbs_logs:/var/log/proxmox-backup
+      - pbs_lib:/var/lib/proxmox-backup
     restart: unless-stopped
     stop_signal: SIGHUP
 
 volumes:
-  cfg:
-  logs:
-  lib:
+  pbs_etc:
+  pbs_logs:
+  pbs_lib:
 
