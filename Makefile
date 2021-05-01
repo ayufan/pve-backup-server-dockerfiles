@@ -38,7 +38,7 @@ manifest:
 		$(addprefix $(REGISTRY):$(TAG)-, $(ARCHS))
 	docker manifest push $(REGISTRY):$(TAG)
 
-ifneq (1,$(TAG_AS_LATEST))
+ifeq (1,$(TAG_AS_LATEST))
 	docker manifest create $(REGISTRY):latest \
 		$(addprefix $(REGISTRY):latest-, $(ARCHS))
 	docker manifest push $(REGISTRY):latest
