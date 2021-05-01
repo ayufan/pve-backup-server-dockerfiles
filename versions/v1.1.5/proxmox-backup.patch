@@ -1,4 +1,4 @@
-commit b1d1340c089399cda7f1fe5b2d2b5b6d16821a5a
+commit 7bf03d3245a37b0e221fa0ab14c9850069248c4a
 Author: Kamil Trzciński <ayufan@ayufan.eu>
 Date:   Sat May 1 14:40:06 2021 +0200
 
@@ -133,6 +133,19 @@ index 05a3ccd3..a9f3f13e 100644
   libacl1-dev,
   libfuse3-dev,
   libsystemd-dev,
+diff --git a/debian/proxmox-backup-file-restore.install b/debian/proxmox-backup-file-restore.install
+old mode 100644
+new mode 100755
+index d952836e..e6888c5f
+--- a/debian/proxmox-backup-file-restore.install
++++ b/debian/proxmox-backup-file-restore.install
+@@ -1,4 +1,5 @@
++#! /usr/bin/dh-exec
+ usr/bin/proxmox-file-restore
+ usr/share/man/man1/proxmox-file-restore.1
+ usr/share/zsh/vendor-completions/_proxmox-file-restore
+-usr/lib/x86_64-linux-gnu/proxmox-backup/file-restore/proxmox-restore-daemon
++usr/lib/${DEB_HOST_MULTIARCH}/proxmox-backup/file-restore/proxmox-restore-daemon
 diff --git a/debian/proxmox-backup-server.install b/debian/proxmox-backup-server.install
 old mode 100644
 new mode 100755
