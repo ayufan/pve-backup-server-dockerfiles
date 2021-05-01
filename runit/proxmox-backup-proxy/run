@@ -6,4 +6,4 @@ if [[ ! -e /etc/proxmox-backup/csrf.key ]]; then
 fi
 
 echo "PROXY: Starting..."
-exec chpst -u backup:backup /usr/lib/aarch64-linux-gnu/proxmox-backup/proxmox-backup-proxy
+exec chpst -u backup:backup /usr/lib/*/proxmox-backup/proxmox-backup-proxy

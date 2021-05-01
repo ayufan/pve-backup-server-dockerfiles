@@ -8,4 +8,4 @@ chown backup:backup /etc/proxmox-backup
 chmod 700 /etc/proxmox-backup
 
 echo "API: Starting..."
-exec /usr/lib/aarch64-linux-gnu/proxmox-backup/proxmox-backup-api
+exec /usr/lib/*/proxmox-backup/proxmox-backup-api

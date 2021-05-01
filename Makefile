@@ -13,8 +13,8 @@ DEV_IMAGE ?= $(REGISTRY):$(TAG)-dev
 	docker build \
 		--tag $(REGISTRY):$(TAG)-$* \
 		--build-arg ARCH=$*/ \
-		--build-arg GIT_PROXMOX_BACKUP_VERSION=$(GIT_PROXMOX_BACKUP_VERSION) \
-		--build-arg GIT_PROXMOX_VERSION=$(GIT_PROXMOX_VERSION) \
+		--build-arg TAG=$(TAG) \
+		--build-arg VERSION=$(VERSION) \
 		.
 ifeq (1,$(TAG_AS_LATEST))
 	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):latest-$*

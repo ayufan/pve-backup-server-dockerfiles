@@ -1,25 +1,24 @@
-From 24b6b060463434eacc97c6e275681019645e321b Mon Sep 17 00:00:00 2001
+From 0726bf0e7a2617c20992d946eb65665edc81a229 Mon Sep 17 00:00:00 2001
 From: Kamil Trzcinski <ayufan@ayufan.eu>
 Date: Sun, 6 Dec 2020 20:51:31 +0000
-Subject: [PATCH] Support debian
+Subject: [PATCH] Compile using on-disk sources
 
 ---
- .cargo/config              |  5 -----
- Cargo.toml                 |  2 +-
- debian/SOURCE              |  2 ++
- debian/cargo-checksum.json |  1 +
- debian/cargo_config        |  2 ++
- debian/compat              |  1 +
- debian/control             | 33 +++++++++++++++++++++++++++++++++
- debian/rules               |  7 ++++++-
- debian/source/format       |  1 +
- 9 files changed, 47 insertions(+), 7 deletions(-)
+ .cargo/config              | 5 -----
+ Cargo.toml                 | 2 +-
+ debian/SOURCE              | 2 ++
+ debian/cargo-checksum.json | 1 +
+ debian/cargo_config        | 2 ++
+ debian/compat              | 1 +
+ debian/control             | 8 +-------
+ debian/rules               | 7 ++++++-
+ debian/source/format       | 1 +
+ 9 files changed, 15 insertions(+), 14 deletions(-)
  delete mode 100644 .cargo/config
  create mode 100644 debian/SOURCE
  create mode 100644 debian/cargo-checksum.json
  create mode 100644 debian/cargo_config
  create mode 100644 debian/compat
- create mode 100644 debian/control
  create mode 100644 debian/source/format
 
 diff --git a/.cargo/config b/.cargo/config
@@ -34,14 +33,14 @@ index 3b5b6e4..0000000
 -[source.crates-io]
 -replace-with = "debian-packages"
 diff --git a/Cargo.toml b/Cargo.toml
-index baaa075..9ce0b80 100644
+index 8b28453..5ad4f29 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
 @@ -14,4 +14,4 @@ exclude = [ "build", "debian" ]
- mio = "0.6"
+ mio = { version = "0.7", features = [ "net", "os-ext" ] }
  curl = "0.4"
  clap = "2.33"
--proxmox = { version = "0.8.0", default-features = false }
+-proxmox = { version = "0.10.0", default-features = false }
 +proxmox = { path = "../proxmox/proxmox", default-features = false }
 diff --git a/debian/SOURCE b/debian/SOURCE
 new file mode 100644
@@ -50,7 +49,7 @@ index 0000000..7d29df3
 +++ b/debian/SOURCE
 @@ -0,0 +1,2 @@
 +git clone git://git.proxmox.com/git/pve-xtermjs.git
-+git checkout 64954e6b8662a983dac211d704564afb3993c6a9
++git checkout d82a762636249e80e67b4de4fdf99fbbda57983c
 diff --git a/debian/cargo-checksum.json b/debian/cargo-checksum.json
 new file mode 100644
 index 0000000..b5623be
@@ -74,44 +73,24 @@ index 0000000..b4de394
 @@ -0,0 +1 @@
 +11
 diff --git a/debian/control b/debian/control
-new file mode 100644
-index 0000000..ed3c462
---- /dev/null
+index c61699e..ed3c462 100644
+--- a/debian/control
 +++ b/debian/control
-@@ -0,0 +1,33 @@
-+Source: rust-termproxy
-+Section: admin
-+Priority: optional
-+Build-Depends: debhelper (>= 11),
-+ dh-cargo (>= 18),
-+ cargo:native,
-+ rustc:native,
+@@ -5,13 +5,7 @@ Build-Depends: debhelper (>= 11),
+  dh-cargo (>= 18),
+  cargo:native,
+  rustc:native,
+- libstd-rust-dev,
+- librust-clap-2+default-dev (>= 2.33-~~),
+- librust-curl-0.4+default-dev,
+- librust-mio-0.7+default-dev,
+- librust-mio-0.7+net-dev,
+- librust-mio-0.7+os-ext-dev,
+- librust-proxmox-0.10-dev
 + libstd-rust-dev
-+Maintainer: Proxmox Support Team <support@proxmox.com>
-+Standards-Version: 4.4.1
-+Vcs-Git: git://git.proxmox.com/git/pve-xtermjs.git
-+Vcs-Browser: https://git.proxmox.com/?p=pve-xtermjs.git;a=summary
-+Homepage: http://www.proxmox.com
-+
-+Package: pve-xtermjs
-+Architecture: any
-+Multi-Arch: allowed
-+Depends:
-+ ${misc:Depends},
-+ ${shlibs:Depends},
-+ ${cargo:Depends}
-+Recommends:
-+ ${cargo:Recommends}
-+Suggests:
-+ ${cargo:Suggests}
-+Provides:
-+ ${cargo:Provides}
-+Built-Using: ${cargo:Built-Using}
-+XB-X-Cargo-Built-Using: ${cargo:X-Cargo-Built-Using}
-+Description: Binaries built from the Rust termproxy crate
-+ This package contains the following binaries built from the Rust crate
-+ "termproxy":
-+  - termproxy
+ Maintainer: Proxmox Support Team <support@proxmox.com>
+ Standards-Version: 4.4.1
+ Vcs-Git: git://git.proxmox.com/git/pve-xtermjs.git
 diff --git a/debian/rules b/debian/rules
 index 2b62edd..4a43cb0 100755
 --- a/debian/rules
@@ -139,4 +118,5 @@ index 0000000..163aaf8
 @@ -0,0 +1 @@
 +3.0 (quilt)
 -- 
-2.20.1
+2.25.1
+

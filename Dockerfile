@@ -22,25 +22,10 @@ RUN git clone git://git.proxmox.com/git/pve-eslint.git
 RUN apt-get -y build-dep $PWD/pve-eslint
 RUN cd pve-eslint/ && make dinstall
 
-# Clone ALL
-RUN git clone git://git.proxmox.com/git/proxmox-backup.git
-RUN git clone git://git.proxmox.com/git/proxmox.git
-RUN git clone git://git.proxmox.com/git/proxmox-fuse.git
-RUN git clone git://git.proxmox.com/git/pxar.git
-RUN git clone git://git.proxmox.com/git/proxmox-mini-journalreader.git
-RUN git clone git://git.proxmox.com/git/proxmox-widget-toolkit.git
-RUN git clone git://git.proxmox.com/git/extjs.git
-RUN git clone git://git.proxmox.com/git/proxmox-i18n.git
-RUN git clone git://git.proxmox.com/git/pve-xtermjs.git
-
-ARG GIT_PROXMOX_BACKUP_VERSION=master
-ARG GIT_PROXMOX_VERSION=master
-
-RUN git -C proxmox-backup checkout ${GIT_PROXMOX_BACKUP_VERSION}
-RUN git -C proxmox checkout ${GIT_PROXMOX_VERSION}
-
 # Apply all patches
-ADD /versions/${GIT_PROXMOX_BACKUP_VERSION}/ /patches/
+ARG VERSION=master
+ADD /versions/${VERSION}/ /patches/
+RUN /patches/clone.bash
 RUN set -e; for i in /patches/*.patch; do echo $i... && patch -p1 -d $(basename "$i" .patch) < "$i"; done
 
 # Deps for all rest
@@ -50,6 +35,7 @@ RUN apt-get -y build-dep $PWD/extjs
 RUN apt-get -y build-dep $PWD/proxmox-widget-toolkit
 RUN apt-get -y build-dep $PWD/proxmox-i18n
 RUN apt-get -y build-dep $PWD/pve-xtermjs
+RUN apt-get -y build-dep $PWD/libjs-qrcodejs
 
 # Compile ALL
 RUN cd proxmox-backup/ && dpkg-buildpackage -us -uc -b
@@ -58,6 +44,7 @@ RUN cd proxmox-widget-toolkit/ && make deb && mv *.deb ../
 RUN cd proxmox-i18n/ && make deb && mv *.deb ../
 RUN cd pve-xtermjs/ && dpkg-buildpackage -us -uc -b
 RUN cd proxmox-mini-journalreader/ && make deb && mv *.deb ../
+RUN cd libjs-qrcodejs/ && make deb && mv *.deb ../
 
 #=================================
 
