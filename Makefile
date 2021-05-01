@@ -16,13 +16,13 @@ DEV_IMAGE ?= $(REGISTRY):$(TAG)-dev
 		--build-arg GIT_PROXMOX_BACKUP_VERSION=$(GIT_PROXMOX_BACKUP_VERSION) \
 		--build-arg GIT_PROXMOX_VERSION=$(GIT_PROXMOX_VERSION) \
 		.
-ifneq (,$(TAG_AS_LATEST))
+ifeq (1,$(TAG_AS_LATEST))
 	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):latest-$*
 endif
 
 %-push: %-build
 	docker push $(REGISTRY):$(TAG)-$*
-ifneq (,$(TAG_AS_LATEST))
+ifeq (1,$(TAG_AS_LATEST))
 	docker push $(REGISTRY):latest-$*
 endif
 
@@ -38,7 +38,7 @@ manifest:
 		$(addprefix $(REGISTRY):$(TAG)-, $(ARCHS))
 	docker manifest push $(REGISTRY):$(TAG)
 
-ifneq (,$(TAG_AS_LATEST))
+ifneq (1,$(TAG_AS_LATEST))
 	docker manifest create $(REGISTRY):latest \
 		$(addprefix $(REGISTRY):latest-, $(ARCHS))
 	docker manifest push $(REGISTRY):latest

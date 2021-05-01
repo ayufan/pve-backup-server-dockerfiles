@@ -1,7 +1,10 @@
 # Proxmox Backup Server in a Container
 
-This is a try to compile Proxmox Backup Server
-to run it in a container.
+This is an unofficial compilation of Proxmox Backup Server
+to run it in a container for AMD64 and ARM64.
+
+Running in a container might result in some functions not working
+properly. Feel free to create an issue to debug those.
 
 ## Pre-built images
 
