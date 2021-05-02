@@ -2,10 +2,9 @@ ARCHS = arm64v8 amd64
 REGISTRY ?= ayufan/proxmox-backup-server
 VERSION ?= master
 
-include versions/$(VERSION).mk
-
 TAG ?= $(VERSION)
 DEV_IMAGE ?= $(REGISTRY):$(TAG)-dev
+LATEST ?= 0
 
 .PHONY: dev-build dev-push dev-run dev-shell
 
@@ -16,13 +15,13 @@ DEV_IMAGE ?= $(REGISTRY):$(TAG)-dev
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
 		.
-ifeq (1,$(TAG_AS_LATEST))
+ifeq (1,$(LATEST))
 	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):latest-$*
 endif
 
 %-push: %-build
 	docker push $(REGISTRY):$(TAG)-$*
-ifeq (1,$(TAG_AS_LATEST))
+ifeq (1,$(LATEST))
 	docker push $(REGISTRY):latest-$*
 endif
 
@@ -38,7 +37,7 @@ manifest:
 		$(addprefix $(REGISTRY):$(TAG)-, $(ARCHS))
 	docker manifest push $(REGISTRY):$(TAG)
 
-ifeq (1,$(TAG_AS_LATEST))
+ifeq (1,$(LATEST))
 	docker manifest create $(REGISTRY):latest \
 		$(addprefix $(REGISTRY):latest-, $(ARCHS))
 	docker manifest push $(REGISTRY):latest
@@ -47,8 +46,8 @@ endif
 dev-build:
 	docker build \
 		--tag $(DEV_IMAGE) \
-		--build-arg GIT_PROXMOX_BACKUP_VERSION=$(GIT_PROXMOX_BACKUP_VERSION) \
-		--build-arg GIT_PROXMOX_VERSION=$(GIT_PROXMOX_VERSION) \
+		--build-arg TAG=$(TAG) \
+		--build-arg VERSION=$(VERSION) \
 		.
 
 dev-push: dev-build
