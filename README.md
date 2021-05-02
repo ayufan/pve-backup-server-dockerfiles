@@ -1,5 +1,7 @@
 # Proxmox Backup Server in a Container
 
+[![Docker Image Version (latest semver)](https://img.shields.io/docker/v/ayufan/proxmox-backup-server?sort=semver)](https://hub.docker.com/repository/docker/ayufan/proxmox-backup-server)
+
 This is an unofficial compilation of Proxmox Backup Server
 to run it in a container for AMD64 and ARM64.
 
