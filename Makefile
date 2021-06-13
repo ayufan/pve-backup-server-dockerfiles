@@ -87,3 +87,12 @@ dev-run: dev-build
 dev-shell: dev-build
 	-docker rm -f proxmox-backup
 	docker run --name=proxmox-backup -it --rm $(REGISTRY):$(TAG)-dev /bin/bash
+
+%-deb:
+	mkdir -p deb/$(TAG)
+	-docker rm -f proxmox-backup-$(TAG)-$*
+	docker create --name=proxmox-backup-$(TAG)-$* $(REGISTRY):$(TAG)-$*
+	docker cp proxmox-backup-$(TAG)-$*:/src/ deb/$(TAG)
+	-docker rm -f proxmox-backup-$(TAG)-$*
+
+all-deb: $(addsuffix -deb, $(BUILD_ARCHS))
