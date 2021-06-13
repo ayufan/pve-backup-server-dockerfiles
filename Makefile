@@ -28,16 +28,19 @@ ifneq (,$(LATEST_TAG))
 endif
 
 arm32v7-client: DOCKER_ARCH=arm32v7
-arm32v7-client: MUSL_ARCH=arm-linux-musleabihf
-arm32v7-client: RUST_ARCH=armv7-unknown-linux-musleabihf
+arm32v7-client: MUSL_ARCH=arm-linux-musleabi
+arm32v7-client: RUST_ARCH=armv7-unknown-linux-musleabi
+arm32v7-client: DOCKERFILE=Dockerfile.client-cross
 
 arm64v8-client: DOCKER_ARCH=arm64v8
 arm64v8-client: MUSL_ARCH=aarch64-linux-musl
 arm64v8-client: RUST_ARCH=aarch64-unknown-linux-musl
+arm64v8-client: DOCKERFILE=Dockerfile.client-alpine
 
 amd64-client: DOCKER_ARCH=amd64
 amd64-client: MUSL_ARCH=x86_64-linux-musl
 amd64-client: RUST_ARCH=x86_64-unknown-linux-musl
+amd64-client: DOCKERFILE=Dockerfile.client-alpine
 
 %-client:
 	docker build \
@@ -47,7 +50,7 @@ amd64-client: RUST_ARCH=x86_64-unknown-linux-musl
 		--build-arg MUSL_ARCH=$(MUSL_ARCH) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
-		-f Dockerfile.client \
+		-f $(DOCKERFILE) \
 		.
 
 	docker run --rm $(REGISTRY):$(TAG)-client-$* sh -c 'cat /proxmox-backup-client*.tgz' > proxmox-backup-client-$(VERSION)-$*.tgz

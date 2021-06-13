@@ -1,5 +1,5 @@
-ARG ARCH=
-FROM ${ARCH}alpine AS builder
+ARG DOCKER_ARCH
+FROM ${DOCKER_ARCH}/alpine AS builder
 
 RUN apk add -U rustup build-base git patch pkgconf openssl-dev clang-dev \
   llvm10-dev clang-static libudev-zero-dev acl-dev linux-pam-dev fuse3-dev \

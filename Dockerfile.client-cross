@@ -1,0 +1,51 @@
+ARG DOCKER_ARCH
+FROM ${DOCKER_ARCH}/alpine AS chroot
+RUN apk add -U pkgconf openssl-dev clang-dev \
+  llvm10-dev clang-static libudev-zero-dev acl-dev linux-pam-dev fuse3-dev \
+  util-linux-dev sg3_utils-dev
+
+FROM debian:bullseye AS builder
+
+RUN apt-get -y update && \
+  apt-get -y install \
+    build-essential git-core pkg-config patch curl wget
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh /dev/stdin -y
+
+ARG RUST_ARCH
+RUN . $HOME/.cargo/env; \
+  rustup target add $RUST_ARCH
+
+ARG MUSL_ARCH
+RUN wget https://github.com/richfelker/musl-cross-make/archive/master.tar.gz && \
+  tar xzf master.tar.gz && \
+  cd musl-cross-make-master && \
+  make TARGET=$MUSL_ARCH OUTPUT=/usr/local MUSL_VER=1.1.19 MAKEFLAGS=-j6 install
+
+WORKDIR /src
+
+# Clone all sources
+ARG VERSION=master
+ADD /versions/${VERSION}/ /patches/
+RUN /patches/clone.bash
+
+# Apply all patches
+ADD /scripts/ /scripts/
+RUN /scripts/apply-patches.bash /patches/server/*.patch /patches/client/*.patch
+
+# Remove APT from Proxmox-Backup
+RUN cd proxmox-backup/ && \
+  rm src/api2/node/apt.rs src/tools/apt.rs src/bin/proxmox-daily-update.rs
+
+# Copy chroot libraries
+COPY --from=chroot / /chroot
+ENV PKG_CONFIG_PATH=/chroot/usr/lib/pkgconfig \
+  PKG_CONFIG_SYSROOT_DIR=/chroot
+
+# Build
+RUN . $HOME/.cargo/env && \
+  cd proxmox-backup/ && \
+  cargo build --target=$RUST_ARCH --release --bin pxar --bin dump-catalog-shell-cli --bin proxmox-backup-client
+
+# Bundle client
+RUN /scripts/bundle-client.bash
