@@ -34,3 +34,4 @@ perform pve-xtermjs 3b087ebf80621a39e2977cad327056ff4b425efe
 perform proxmox-acme-rs ee7fe8f93c9ca5823ec65ce87dc301f2d8c6a55c
 perform libjs-qrcodejs 1cc4649f55853d7d890aa444a7a58a8466f10493
 perform proxmox-acme 085b9535c4cbd581a277d93e2af0bc84fc2c8bac
+perform pve-eslint bd400de844c664b93ca653bca0b4919a1c029532

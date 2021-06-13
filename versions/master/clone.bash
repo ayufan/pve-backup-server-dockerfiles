@@ -30,3 +30,4 @@ perform pve-xtermjs master
 perform proxmox-acme-rs master
 perform libjs-qrcodejs master
 perform proxmox-acme master
+perform pve-eslint master

@@ -17,11 +17,6 @@ WORKDIR /src
 ENV PATH=/root/.cargo/bin:$PATH
 ENV PATH=/root/bin:$PATH
 
-# Install PVE eslint (as it is dev dependency)
-RUN git clone git://git.proxmox.com/git/pve-eslint.git
-RUN apt-get -y build-dep $PWD/pve-eslint
-RUN cd pve-eslint/ && make dinstall
-
 # Apply all patches
 ARG VERSION=master
 ADD /versions/${VERSION}/ /patches/
@@ -29,6 +24,7 @@ RUN /patches/clone.bash
 RUN set -e; for i in /patches/*.patch; do echo $i... && patch -p1 -d $(basename "$i" .patch) < "$i"; done
 
 # Deps for all rest
+RUN apt-get -y build-dep $PWD/pve-eslint
 RUN apt-get -y build-dep $PWD/proxmox-backup
 RUN apt-get -y build-dep $PWD/proxmox-mini-journalreader
 RUN apt-get -y build-dep $PWD/extjs
@@ -39,6 +35,7 @@ RUN apt-get -y build-dep $PWD/libjs-qrcodejs
 RUN apt-get -y build-dep $PWD/proxmox-acme
 
 # Compile ALL
+RUN cd pve-eslint/ && make dinstall
 RUN cd proxmox-backup/ && dpkg-buildpackage -us -uc -b
 RUN cd extjs/ && make deb && mv *.deb ../
 RUN cd proxmox-widget-toolkit/ && make deb && mv *.deb ../
