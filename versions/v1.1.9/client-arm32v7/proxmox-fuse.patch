@@ -1,0 +1,31 @@
+diff --git a/src/requests.rs b/src/requests.rs
+index 4ca5a3e..f1b07ae 100644
+--- a/src/requests.rs
++++ b/src/requests.rs
+@@ -593,7 +593,7 @@ impl Setattr {
+     /// `Some` if the atime field should be modified.
+     pub fn atime(&self) -> Option<SetTime> {
+         if (self.to_set & sys::setattr::ATIME) != 0 {
+-            Some(SetTime::from_c(self.stat.st_atime, self.stat.st_atime_nsec))
++            Some(SetTime::from_c(self.stat.st_atime, self.stat.st_atime_nsec as i64))
+         } else if (self.to_set & sys::setattr::ATIME_NOW) != 0 {
+             Some(SetTime::Now)
+         } else {
+@@ -604,7 +604,7 @@ impl Setattr {
+     /// `Some` if the mtime field should be modified.
+     pub fn mtime(&self) -> Option<SetTime> {
+         if (self.to_set & sys::setattr::MTIME) != 0 {
+-            Some(SetTime::from_c(self.stat.st_mtime, self.stat.st_mtime_nsec))
++            Some(SetTime::from_c(self.stat.st_mtime, self.stat.st_mtime_nsec as i64))
+         } else if (self.to_set & sys::setattr::MTIME_NOW) != 0 {
+             Some(SetTime::Now)
+         } else {
+@@ -615,7 +615,7 @@ impl Setattr {
+     /// `Some` if the ctime field should be modified.
+     pub fn ctime(&self) -> Option<Duration> {
+         if (self.to_set & sys::setattr::CTIME) != 0 {
+-            Some(c_duration(self.stat.st_ctime, self.stat.st_ctime_nsec))
++            Some(c_duration(self.stat.st_ctime, self.stat.st_ctime_nsec as i64))
+         } else {
+             None
+         }

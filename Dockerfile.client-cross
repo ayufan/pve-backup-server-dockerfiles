@@ -30,8 +30,9 @@ ADD /versions/${VERSION}/ /patches/
 RUN /patches/clone.bash
 
 # Apply all patches
+ARG DOCKER_ARCH
 ADD /scripts/ /scripts/
-RUN /scripts/apply-patches.bash /patches/server/*.patch /patches/client/*.patch
+RUN /scripts/apply-patches.bash /patches/server/*.patch /patches/client/*.patch /patches/client-${DOCKER_ARCH}/*.patch
 
 # Remove APT from Proxmox-Backup
 RUN cd proxmox-backup/ && \
@@ -40,9 +41,11 @@ RUN cd proxmox-backup/ && \
 # Copy chroot libraries
 COPY --from=chroot / /chroot
 ENV PKG_CONFIG_PATH=/chroot/usr/lib/pkgconfig \
-  PKG_CONFIG_SYSROOT_DIR=/chroot
+  PKG_CONFIG_SYSROOT_DIR=/chroot \
+  RUSTFLAGS="-L /chroot/lib"
 
 # Build
+ARG RUST_ARCH2
 RUN . $HOME/.cargo/env && \
   cd proxmox-backup/ && \
   cargo build --target=$RUST_ARCH --release --bin pxar --bin dump-catalog-shell-cli --bin proxmox-backup-client

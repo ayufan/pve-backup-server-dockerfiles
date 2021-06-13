@@ -1,0 +1,161 @@
+diff --git a/.cargo/config b/.cargo/config
+new file mode 100644
+index 00000000..d30782ca
+--- /dev/null
++++ b/.cargo/config
+@@ -0,0 +1,3 @@
++[target.arm-unknown-linux-musleabihf]
++linker = "arm-linux-musleabihf-gcc"
++
+diff --git a/src/api2/node/time.rs b/src/api2/node/time.rs
+index 3c8e6abd..c8f1b694 100644
+--- a/src/api2/node/time.rs
++++ b/src/api2/node/time.rs
+@@ -58,7 +58,7 @@ fn read_etc_localtime() -> Result<String, Error> {
+ fn get_time(_param: Value) -> Result<Value, Error> {
+     let time = proxmox::tools::time::epoch_i64();
+     let tm = proxmox::tools::time::localtime(time)?;
+-    let offset = tm.tm_gmtoff;
++    let offset = tm.tm_gmtoff as i64;
+ 
+     let localtime = time + offset;
+ 
+diff --git a/src/backup/chunk_store.rs b/src/backup/chunk_store.rs
+index 31e8307c..1c6edbcc 100644
+--- a/src/backup/chunk_store.rs
++++ b/src/backup/chunk_store.rs
+@@ -162,8 +162,8 @@ impl ChunkStore {
+         const UTIME_OMIT: i64 = (1 << 30) - 2;
+ 
+         let times: [libc::timespec; 2] = [
+-            libc::timespec { tv_sec: 0, tv_nsec: UTIME_NOW },
+-            libc::timespec { tv_sec: 0, tv_nsec: UTIME_OMIT }
++            libc::timespec { tv_sec: 0, tv_nsec: UTIME_NOW as _ },
++            libc::timespec { tv_sec: 0, tv_nsec: UTIME_OMIT as _ }
+         ];
+ 
+         use nix::NixPath;
+@@ -329,7 +329,7 @@ impl ChunkStore {
+             let lock = self.mutex.lock();
+ 
+             if let Ok(stat) = fstatat(dirfd, filename, nix::fcntl::AtFlags::AT_SYMLINK_NOFOLLOW) {
+-                if stat.st_atime < min_atime {
++                if (stat.st_atime as i64) < min_atime {
+                     //let age = now - stat.st_atime;
+                     //println!("UNLINK {}  {:?}", age/(3600*24), filename);
+                     if let Err(err) = unlinkat(Some(dirfd), filename, UnlinkatFlags::NoRemoveDir) {
+@@ -349,7 +349,7 @@ impl ChunkStore {
+                         status.removed_chunks += 1;
+                     }
+                     status.removed_bytes += stat.st_size as u64;
+-                } else if stat.st_atime < oldest_writer {
++                } else if (stat.st_atime as i64) < oldest_writer {
+                     if bad {
+                         status.still_bad += 1;
+                     } else {
+diff --git a/src/config/acl.rs b/src/config/acl.rs
+index 04d42854..29a4b129 100644
+--- a/src/config/acl.rs
++++ b/src/config/acl.rs
+@@ -873,7 +873,7 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
+         let cache = CACHED_CONFIG.read().unwrap();
+         if let Some(ref config) = cache.data {
+             if let Some(stat) = stat {
+-                if stat.st_mtime == cache.last_mtime && stat.st_mtime_nsec == cache.last_mtime_nsec
++                if (stat.st_mtime as i64) == cache.last_mtime && (stat.st_mtime_nsec as i64) == cache.last_mtime_nsec
+                 {
+                     return Ok(config.clone());
+                 }
+@@ -888,8 +888,8 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
+ 
+     let mut cache = CACHED_CONFIG.write().unwrap();
+     if let Some(stat) = stat {
+-        cache.last_mtime = stat.st_mtime;
+-        cache.last_mtime_nsec = stat.st_mtime_nsec;
++        cache.last_mtime = stat.st_mtime as _;
++        cache.last_mtime_nsec = stat.st_mtime_nsec as _;
+     }
+     cache.data = Some(config.clone());
+ 
+diff --git a/src/config/cached_user_info.rs b/src/config/cached_user_info.rs
+index c85d643c..2f5fe897 100644
+--- a/src/config/cached_user_info.rs
++++ b/src/config/cached_user_info.rs
+@@ -18,7 +18,7 @@ pub struct CachedUserInfo {
+     acl_tree: Arc<AclTree>,
+ }
+ 
+-fn now() -> i64 { unsafe { libc::time(std::ptr::null_mut()) } }
++fn now() -> i64 { unsafe { libc::time(std::ptr::null_mut()) as _ } }
+ 
+ struct ConfigCache {
+     data: Option<Arc<CachedUserInfo>>,
+diff --git a/src/config/user.rs b/src/config/user.rs
+index ff7e54e4..db49fd90 100644
+--- a/src/config/user.rs
++++ b/src/config/user.rs
+@@ -202,7 +202,7 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
+         let cache = CACHED_CONFIG.read().unwrap();
+         if let Some(ref config) = cache.data {
+             if let Some(stat) = stat {
+-                if stat.st_mtime == cache.last_mtime && stat.st_mtime_nsec == cache.last_mtime_nsec {
++                if (stat.st_mtime as i64) == cache.last_mtime && (stat.st_mtime_nsec as i64) == cache.last_mtime_nsec {
+                     return Ok(config.clone());
+                 }
+             } else if cache.last_mtime == 0 && cache.last_mtime_nsec == 0 {
+@@ -216,8 +216,8 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
+ 
+     let mut cache = CACHED_CONFIG.write().unwrap();
+     if let Some(stat) = stat {
+-        cache.last_mtime = stat.st_mtime;
+-        cache.last_mtime_nsec = stat.st_mtime_nsec;
++        cache.last_mtime = stat.st_mtime as _;
++        cache.last_mtime_nsec = stat.st_mtime_nsec as _;
+     }
+     cache.data = Some(config.clone());
+ 
+--- a/src/pxar/metadata.rs
++++ b/src/pxar/metadata.rs
+@@ -45,10 +45,10 @@ fn timestamp_to_update_timespec(mtime: &pxar::format::StatxTimestamp) -> [libc::
+     [
+         libc::timespec {
+             tv_sec: 0,
+-            tv_nsec: UTIME_OMIT,
++            tv_nsec: UTIME_OMIT as _,
+         },
+         libc::timespec {
+-            tv_sec: mtime.secs,
++            tv_sec: mtime.secs as _,
+             tv_nsec: mtime.nanos as _,
+         },
+     ]
+diff --git a/src/tape/mod.rs b/src/tape/mod.rs
+index ed03d8a7..fb448a44 100644
+--- a/src/tape/mod.rs
++++ b/src/tape/mod.rs
+@@ -55,10 +55,10 @@ pub const CHANGER_STATE_DIR: &str = concat!(PROXMOX_BACKUP_RUN_DIR_M!(), "/chang
+ /// We limit chunk archive size, so that we can faster restore a
+ /// specific chunk (The catalog only store file numbers, so we
+ /// need to read the whole archive to restore a single chunk)
+-pub const MAX_CHUNK_ARCHIVE_SIZE: usize = 4*1024*1024*1024; // 4GB for now
++pub const MAX_CHUNK_ARCHIVE_SIZE: usize = 1*1024*1024*1024; // 4GB for now
+ 
+ /// To improve performance, we need to avoid tape drive buffer flush.
+-pub const COMMIT_BLOCK_SIZE: usize = 128*1024*1024*1024; // 128 GiB
++pub const COMMIT_BLOCK_SIZE: usize = 2*1024*1024*1024; // 128 GiB
+ 
+ 
+ /// Create tape status dir with correct permission
+diff --git a/src/tools/process_locker.rs b/src/tools/process_locker.rs
+index 6ab2e1c1..de41b05e 100644
+--- a/src/tools/process_locker.rs
++++ b/src/tools/process_locker.rs
+@@ -149,7 +149,7 @@ impl ProcessLocker {
+ 
+         let now = unsafe { libc::time(std::ptr::null_mut()) };
+ 
+-        data.shared_guard_list.insert(guard.guard_id, now);
++        data.shared_guard_list.insert(guard.guard_id, now as i64);
+ 
+         Ok(guard)
+     }

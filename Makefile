@@ -28,8 +28,8 @@ ifneq (,$(LATEST_TAG))
 endif
 
 arm32v7-client: DOCKER_ARCH=arm32v7
-arm32v7-client: MUSL_ARCH=arm-linux-musleabi
-arm32v7-client: RUST_ARCH=armv7-unknown-linux-musleabi
+arm32v7-client: MUSL_ARCH=arm-linux-musleabihf
+arm32v7-client: RUST_ARCH=arm-unknown-linux-musleabihf
 arm32v7-client: DOCKERFILE=Dockerfile.client-cross
 
 arm64v8-client: DOCKER_ARCH=arm64v8
