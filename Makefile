@@ -1,4 +1,4 @@
-ARCHS = arm32v7 arm64v8 amd64
+ARCHS = amd64 arm32v7 arm64v8
 REGISTRY ?= ayufan/proxmox-backup-server
 VERSION ?= master
 
