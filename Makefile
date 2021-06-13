@@ -18,7 +18,7 @@ dev-build: DOCKER_ARCH=amd64
 %-build:
 	docker build \
 		--tag $(REGISTRY):$(TAG)-$* \
-		--build-arg ARCH=$(DOCKER_ARCH)/) \
+		--build-arg ARCH=$(DOCKER_ARCH)/ \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
 		-f Dockerfile \
