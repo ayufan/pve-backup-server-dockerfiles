@@ -2,12 +2,10 @@ ARCHS = amd64 arm32v7 arm64v8
 REGISTRY ?= ayufan/proxmox-backup-server
 VERSION ?= master
 
-VARIANT ?=
-TAG ?= $(VERSION)$(VARIANT)
+TAG ?= $(VERSION)
 ifeq (1,$(LATEST))
-LATEST_TAG ?= latest$(VARIANT)
+LATEST_TAG ?= latest
 endif
-DEV_IMAGE ?= $(REGISTRY):$(TAG)-dev
 LATEST ?= 0
 
 .PHONY: dev-build dev-push dev-run dev-shell
@@ -15,14 +13,25 @@ LATEST ?= 0
 %-build:
 	docker build \
 		--tag $(REGISTRY):$(TAG)-$* \
-		--build-arg ARCH=$*/ \
+		--build-arg ARCH=$(filter $*/, $(addsuffix /, $(ARCHS))) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
-		-f Dockerfile$(VARIANT) \
+		-f Dockerfile \
 		.
 ifneq (,$(LATEST_TAG))
 	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):$(LATEST_TAG)-$*
 endif
+
+%-client:
+	docker build \
+		--tag $(REGISTRY):$(TAG)-client-$* \
+		--build-arg ARCH=$(filter $*/, $(addsuffix /, $(ARCHS))) \
+		--build-arg TAG=$(TAG) \
+		--build-arg VERSION=$(VERSION) \
+		-f Dockerfile.client \
+		.
+
+	docker run --rm $(REGISTRY):$(TAG)-client-$* sh -c 'cat /proxmox-backup-client*.tgz' > proxmox-backup-client-$(VERSION)-$*.tgz
 
 %-push: %-build
 	docker push $(REGISTRY):$(TAG)-$*
@@ -48,21 +57,10 @@ ifneq (,$(LATEST_TAG))
 	docker manifest push $(REGISTRY):$(LATEST_TAG)
 endif
 
-dev-build:
-	docker build \
-		--tag $(DEV_IMAGE) \
-		--build-arg TAG=$(TAG) \
-		--build-arg VERSION=$(VERSION) \
-		-f Dockerfile$(VARIANT) \
-		.
-
-dev-push: dev-build
-	docker push $(DEV_IMAGE)
-
 dev-run: dev-build
 	-docker rm -f proxmox-backup
-	docker run --name=proxmox-backup --net=host -it --rm $(DEV_IMAGE)
+	docker run --name=proxmox-backup --net=host -it --rm $(REGISTRY):$(TAG)-dev
 
 dev-shell: dev-build
 	-docker rm -f proxmox-backup
-	docker run --name=proxmox-backup -it --rm $(DEV_IMAGE) /bin/bash
+	docker run --name=proxmox-backup -it --rm $(REGISTRY):$(TAG)-dev /bin/bash

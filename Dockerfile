@@ -17,11 +17,15 @@ WORKDIR /src
 ENV PATH=/root/.cargo/bin:$PATH
 ENV PATH=/root/bin:$PATH
 
-# Apply all patches
+# Clone all sources
 ARG VERSION=master
 ADD /versions/${VERSION}/ /patches/
 RUN /patches/clone.bash
-RUN set -e; for i in /patches/*.patch; do echo $i... && patch -p1 -d $(basename "$i" .patch) < "$i"; done
+
+# Apply all patches
+ADD /scripts/ /scripts/
+RUN /scripts/apply-patches.bash /patches/server/*.patch /patches/client/*.patch
+RUN /scripts/strip-cargo.bash
 
 # A first required dep
 RUN apt-get -y build-dep $PWD/pve-eslint

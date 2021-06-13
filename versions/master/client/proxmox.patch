@@ -1,0 +1,25 @@
+commit 2addc654b3dd3327c67621da8857678978dfee44
+Author: Kamil Trzciński <ayufan@ayufan.eu>
+Date:   Wed Jun 2 12:44:40 2021 +0200
+
+    SIGEV_THREAD_ID is 4 for musl
+
+diff --git a/proxmox/src/sys/timer.rs b/proxmox/src/sys/timer.rs
+index 40877a1..0e7d1b7 100644
+--- a/proxmox/src/sys/timer.rs
++++ b/proxmox/src/sys/timer.rs
+@@ -180,12 +180,12 @@ impl Timer {
+             }
+             TimerEvent::ThreadSignal(tid, signo) => {
+                 ev.sigev_signo = signo.0;
+-                ev.sigev_notify = libc::SIGEV_THREAD_ID;
++                ev.sigev_notify = 4; // libc::SIGEV_THREAD_ID;
+                 ev.sigev_notify_thread_id = tid.0;
+             }
+             TimerEvent::ThisThreadSignal(signo) => {
+                 ev.sigev_signo = signo.0;
+-                ev.sigev_notify = libc::SIGEV_THREAD_ID;
++                ev.sigev_notify = 4; // libc::SIGEV_THREAD_ID;
+                 ev.sigev_notify_thread_id = gettid().0;
+             }
+         }

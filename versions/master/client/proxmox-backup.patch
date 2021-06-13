@@ -1,0 +1,133 @@
+commit bc4526093e2ecb8b76242aa762d5d5d2e5f8b8a6
+Author: Kamil Trzciński <ayufan@ayufan.eu>
+Date:   Thu Jun 3 11:49:55 2021 +0200
+
+    Support client compilation on alpine
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 14805b82..f9918eee 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -79,9 +79,11 @@ url = "2.1"
+ walkdir = "2"
+ webauthn-rs = "0.2.5"
+ xdg = "2.2"
+-zstd = { version = "0.4", features = [ "bindgen" ] }
++zstd = { version = "0.4" }
+ nom = "5.1"
+ crossbeam-channel = "0.5"
++#bindgen = { version = "0.58", features = ["static"] }
++#clang-sys = { features = ["static"] }
+ 
+ # proxmox-acme-rs = "0.2.1"
+ proxmox-acme-rs = { path = "../proxmox-acme-rs" }
+diff --git a/src/pxar/create.rs b/src/pxar/create.rs
+index ec3dc057..0834daca 100644
+--- a/src/pxar/create.rs
++++ b/src/pxar/create.rs
+@@ -52,7 +52,7 @@ fn detect_fs_type(fd: RawFd) -> Result<i64, Error> {
+     Errno::result(res)?;
+     let fs_stat = unsafe { fs_stat.assume_init() };
+ 
+-    Ok(fs_stat.f_type)
++    Ok(fs_stat.f_type as i64)
+ }
+ 
+ #[rustfmt::skip]
+diff --git a/src/tools/daemon.rs b/src/tools/daemon.rs
+index d298bf16..d4d66172 100644
+--- a/src/tools/daemon.rs
++++ b/src/tools/daemon.rs
+@@ -19,7 +19,7 @@ use proxmox::tools::io::{ReadExt, WriteExt};
+ use crate::server;
+ use crate::tools::{fd_change_cloexec, self};
+ 
+-#[link(name = "systemd")]
++//#[link(name = "systemd")]
+ extern "C" {
+     fn sd_journal_stream_fd(identifier: *const c_uchar, priority: c_int, level_prefix: c_int) -> c_int;
+ }
+@@ -346,7 +346,7 @@ async fn wait_service_is_not_state(service: &str, state: &str) -> Result<(), Err
+     Ok(())
+ }
+ 
+-#[link(name = "systemd")]
++//#[link(name = "systemd")]
+ extern "C" {
+     fn sd_notify(unset_environment: c_int, state: *const c_char) -> c_int;
+ }
+commit 7985be1cc1a202b40fbb10b6003cdeea2cc06a0c
+Author: Dominik Csapak <dominik.csapak@gmail.com>
+Date:   Sun Aug 2 10:05:20 2020 +0200
+
+    remove apt dependency
+    
+    not needed for the client, and would depend on libapt-pkg-dev
+    
+    Signed-off-by: Dominik Csapak <dominik.csapak@gmail.com>
+    Signed-off-by: Thomas Lamprecht <thomas@lamprecht.org>
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 852d58ed..14805b82 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -24,7 +24,6 @@ name = "proxmox_backup"
+ path = "src/lib.rs"
+ 
+ [dependencies]
+-apt-pkg-native = "0.3.2"
+ base64 = "0.12"
+ bitflags = "1.2.1"
+ bytes = "1.0"
+diff --git a/src/api2/node.rs b/src/api2/node.rs
+index af9ecf69..ed709dec 100644
+--- a/src/api2/node.rs
++++ b/src/api2/node.rs
+@@ -26,7 +26,6 @@ use crate::server::WorkerTask;
+ use crate::tools;
+ use crate::tools::ticket::{self, Empty, Ticket};
+ 
+-pub mod apt;
+ pub mod certificates;
+ pub mod config;
+ pub mod disks;
+@@ -315,7 +314,6 @@ fn upgrade_to_websocket(
+ }
+ 
+ pub const SUBDIRS: SubdirMap = &[
+-    ("apt", &apt::ROUTER),
+     ("certificates", &certificates::ROUTER),
+     ("config", &config::ROUTER),
+     ("disks", &disks::ROUTER),
+diff --git a/src/api2/node/config.rs b/src/api2/node/config.rs
+index d7d96c34..0be11fe2 100644
+--- a/src/api2/node/config.rs
++++ b/src/api2/node/config.rs
+@@ -4,7 +4,6 @@ use proxmox::api::schema::Updatable;
+ use proxmox::api::{api, Permission, Router, RpcEnvironment};
+ 
+ use crate::api2::types::NODE_SCHEMA;
+-use crate::api2::node::apt::update_apt_proxy_config;
+ use crate::config::acl::{PRIV_SYS_AUDIT, PRIV_SYS_MODIFY};
+ use crate::config::node::{NodeConfig, NodeConfigUpdater};
+ 
+@@ -81,7 +80,5 @@ pub fn update_node_config(
+ 
+     crate::config::node::save_config(&config)?;
+ 
+-    update_apt_proxy_config(config.http_proxy().as_ref())?;
+-
+     Ok(())
+ }
+diff --git a/src/tools.rs b/src/tools.rs
+index 65049b1e..f38bf705 100644
+--- a/src/tools.rs
++++ b/src/tools.rs
+@@ -25,7 +25,6 @@ use proxmox_http::{
+ };
+ 
+ pub mod acl;
+-pub mod apt;
+ pub mod async_io;
+ pub mod borrow;
+ pub mod cert;

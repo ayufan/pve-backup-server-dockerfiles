@@ -1,0 +1,64 @@
+commit ea6957221067669e15f2d6aed451c29da5a2f2f5
+Author: Kamil Trzciński <ayufan@ayufan.eu>
+Date:   Thu Jun 3 11:41:44 2021 +0200
+
+    Compile using on-disk sources
+
+diff --git a/Cargo.toml b/Cargo.toml
+index ffd72b2..80ba2c8 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -14,4 +14,4 @@ exclude = [ "build", "debian" ]
+ mio = { version = "0.7", features = [ "net", "os-ext" ] }
+ curl = "0.4"
+ clap = "2.33"
+-proxmox = { version = "0.10.0", default-features = false }
++proxmox = { path = "../proxmox/proxmox", default-features = false }
+diff --git a/debian/cargo-checksum.json b/debian/cargo-checksum.json
+new file mode 100644
+index 0000000..0967ef4
+--- /dev/null
++++ b/debian/cargo-checksum.json
+@@ -0,0 +1 @@
++{}
+diff --git a/debian/cargo_config b/debian/cargo_config
+new file mode 100644
+index 0000000..38bd089
+--- /dev/null
++++ b/debian/cargo_config
+@@ -0,0 +1,2 @@
++[build]
++rustflags = []
+diff --git a/debian/compat b/debian/compat
+new file mode 100644
+index 0000000..b4de394
+--- /dev/null
++++ b/debian/compat
+@@ -0,0 +1 @@
++11
+diff --git a/debian/docs b/debian/docs
+deleted file mode 100644
+index 8696672..0000000
+--- a/debian/docs
++++ /dev/null
+@@ -1 +0,0 @@
+-debian/SOURCE
+diff --git a/debian/rules b/debian/rules
+index 2b62edd..b34534f 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -3,8 +3,14 @@
+ %:
+ 	dh $@ --buildsystem cargo
+ 
++override_dh_auto_configure:
++	mkdir -p debian/cargo_home/
++	cp -av debian/cargo_config debian/cargo_home/config
++
+ override_dh_auto_build:
+ 	dh_auto_build
+ 	sed -e 's/@VERSION@/${VERSION}/' src/www/index.html.tpl.in > src/www/index.html.tpl
+ 	sed -e 's/@VERSION@/${VERSION}/' src/www/index.html.hbs.in > src/www/index.html.hbs
+ 	rm src/www/index.html.tpl.in src/www/index.html.hbs.in
++
++override_dh_auto_test:

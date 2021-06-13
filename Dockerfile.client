@@ -1,0 +1,33 @@
+ARG ARCH=
+FROM ${ARCH}alpine AS builder
+
+RUN apk add -U rustup build-base git patch pkgconf openssl-dev clang-dev \
+  llvm10-dev clang-static libudev-zero-dev acl-dev linux-pam-dev fuse3-dev \
+  util-linux-dev sg3_utils-dev bash
+
+RUN rustup-init -y
+
+WORKDIR /src
+
+# Clone all sources
+ARG VERSION=master
+ADD /versions/${VERSION}/ /patches/
+RUN /patches/clone.bash
+
+# Apply all patches
+ADD /scripts/ /scripts/
+RUN /scripts/apply-patches.bash /patches/server/*.patch /patches/client/*.patch
+
+# Remove APT from Proxmox-Backup
+RUN cd proxmox-backup/ && \
+  rm src/api2/node/apt.rs src/tools/apt.rs src/bin/proxmox-daily-update.rs
+
+# Build
+RUN source $HOME/.cargo/env && \
+  cd proxmox-backup/ && \
+  cargo build --release --bin pxar && \
+  cargo build --release --bin dump-catalog-shell-cli && \
+  cargo build --release --bin proxmox-backup-client
+
+# Bundle client
+RUN /scripts/bundle-client.bash
