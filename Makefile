@@ -8,7 +8,7 @@ LATEST_TAG ?= latest
 endif
 LATEST ?= 0
 
-.PHONY: dev-build dev-push dev-run dev-shell
+.PHONY: dev-build dev-push dev-run dev-shell all-deb all-build all-push
 
 arm32v7-build: DOCKER_ARCH=arm32v7
 arm64v8-build: DOCKER_ARCH=arm64v8
