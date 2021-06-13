@@ -29,3 +29,4 @@ perform proxmox-i18n master
 perform pve-xtermjs master
 perform proxmox-acme-rs master
 perform libjs-qrcodejs master
+perform proxmox-acme master
