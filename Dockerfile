@@ -24,7 +24,7 @@ RUN /patches/clone.bash
 
 # Apply all patches
 ADD /scripts/ /scripts/
-RUN /scripts/apply-patches.bash /patches/server/*.patch /patches/client/*.patch
+RUN /scripts/apply-patches.bash /patches/server/*.patch
 RUN /scripts/strip-cargo.bash
 
 # A first required dep
