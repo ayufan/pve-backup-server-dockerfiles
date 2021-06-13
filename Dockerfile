@@ -23,8 +23,11 @@ ADD /versions/${VERSION}/ /patches/
 RUN /patches/clone.bash
 RUN set -e; for i in /patches/*.patch; do echo $i... && patch -p1 -d $(basename "$i" .patch) < "$i"; done
 
-# Deps for all rest
+# A first required dep
 RUN apt-get -y build-dep $PWD/pve-eslint
+RUN cd pve-eslint/ && make dinstall
+
+# Deps for all rest
 RUN apt-get -y build-dep $PWD/proxmox-backup
 RUN apt-get -y build-dep $PWD/proxmox-mini-journalreader
 RUN apt-get -y build-dep $PWD/extjs
@@ -35,7 +38,6 @@ RUN apt-get -y build-dep $PWD/libjs-qrcodejs
 RUN apt-get -y build-dep $PWD/proxmox-acme
 
 # Compile ALL
-RUN cd pve-eslint/ && make dinstall
 RUN cd proxmox-backup/ && dpkg-buildpackage -us -uc -b
 RUN cd extjs/ && make deb && mv *.deb ../
 RUN cd proxmox-widget-toolkit/ && make deb && mv *.deb ../
