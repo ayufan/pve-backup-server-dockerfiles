@@ -1,0 +1,20 @@
+#!/bin/sh
+
+if [[ ! -e /etc/default/proxmox-backup-client ]]; then
+  cat <<EOF
+Missing /etc/default/proxmox-backup-client. Create one with:
+
+export PBS_REPOSITORY='USER@SERVER:STORAGE'
+export PBS_PASSWORD='PASSWORD'
+export PBS_FINGERPRINT='FINGERPRINT'
+export PBS_PXAR='root.pxar:/'
+EOF
+  exit 1
+fi
+
+source /etc/default/proxmox-backup-client
+
+SCRIPT_PATH=$(readlink -f "$0")
+SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+
+exec "$SCRIPT_DIR/proxmox-backup-client.sh" backup "$PBS_PXAR"
