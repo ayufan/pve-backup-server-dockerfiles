@@ -58,6 +58,7 @@ amd64-client: DOCKERFILE=Dockerfile.client-alpine
 %-push: %-build
 	docker push $(REGISTRY):$(TAG)-$*
 ifneq (,$(LATEST_TAG))
+	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):$(LATEST_TAG)-$*
 	docker push $(REGISTRY):$(LATEST_TAG)-$*
 endif
 
@@ -75,7 +76,7 @@ manifest:
 
 ifneq (,$(LATEST_TAG))
 	docker manifest create $(REGISTRY):$(LATEST_TAG) \
-		$(addprefix $(REGISTRY):$(LATEST_TAG)-, $(BUILD_ARCHS))
+		$(addprefix $(REGISTRY):$(TAG)-, $(BUILD_ARCHS))
 	docker manifest push $(REGISTRY):$(LATEST_TAG)
 endif
 
