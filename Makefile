@@ -2,7 +2,11 @@ ARCHS = arm64v8 amd64
 REGISTRY ?= ayufan/proxmox-backup-server
 VERSION ?= master
 
-TAG ?= $(VERSION)
+VARIANT ?=
+TAG ?= $(VERSION)$(VARIANT)
+ifeq (1,$(LATEST))
+LATEST_TAG ?= latest$(VARIANT)
+endif
 DEV_IMAGE ?= $(REGISTRY):$(TAG)-dev
 LATEST ?= 0
 
@@ -14,15 +18,16 @@ LATEST ?= 0
 		--build-arg ARCH=$*/ \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
+		-f Dockerfile$(VARIANT) \
 		.
-ifeq (1,$(LATEST))
-	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):latest-$*
+ifneq (,$(LATEST_TAG))
+	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):$(LATEST_TAG)-$*
 endif
 
 %-push: %-build
 	docker push $(REGISTRY):$(TAG)-$*
-ifeq (1,$(LATEST))
-	docker push $(REGISTRY):latest-$*
+ifneq (,$(LATEST_TAG))
+	docker push $(REGISTRY):$(LATEST_TAG)-$*
 endif
 
 all-build: $(addsuffix -build, $(ARCHS))
@@ -37,10 +42,10 @@ manifest:
 		$(addprefix $(REGISTRY):$(TAG)-, $(ARCHS))
 	docker manifest push $(REGISTRY):$(TAG)
 
-ifeq (1,$(LATEST))
-	docker manifest create $(REGISTRY):latest \
-		$(addprefix $(REGISTRY):latest-, $(ARCHS))
-	docker manifest push $(REGISTRY):latest
+ifneq (,$(LATEST_TAG))
+	docker manifest create $(REGISTRY):$(LATEST_TAG) \
+		$(addprefix $(REGISTRY):$(LATEST_TAG)-, $(ARCHS))
+	docker manifest push $(REGISTRY):$(LATEST_TAG)
 endif
 
 dev-build:
@@ -48,6 +53,7 @@ dev-build:
 		--tag $(DEV_IMAGE) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
+		-f Dockerfile$(VARIANT) \
 		.
 
 dev-push: dev-build
