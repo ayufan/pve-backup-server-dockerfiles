@@ -1,5 +1,4 @@
 BUILD_ARCHS = amd64 arm64v8
-VALID_ARCHS = amd64 arm32v7 arm64v8
 REGISTRY ?= ayufan/proxmox-backup-server
 VERSION ?= master
 
@@ -11,10 +10,15 @@ LATEST ?= 0
 
 .PHONY: dev-build dev-push dev-run dev-shell
 
+arm32v7-build: DOCKER_ARCH=arm32v7
+arm64v8-build: DOCKER_ARCH=arm64v8
+amd64-build: DOCKER_ARCH=amd64
+dev-build: DOCKER_ARCH=amd64
+
 %-build:
 	docker build \
 		--tag $(REGISTRY):$(TAG)-$* \
-		--build-arg ARCH=$(filter $*/, $(addsuffix /, $(VALID_ARCHS))) \
+		--build-arg ARCH=$(DOCKER_ARCH)/) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
 		-f Dockerfile \
@@ -23,10 +27,24 @@ ifneq (,$(LATEST_TAG))
 	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):$(LATEST_TAG)-$*
 endif
 
+arm32v7-client: DOCKER_ARCH=arm32v7
+arm32v7-client: MUSL_ARCH=arm-linux-musleabihf
+arm32v7-client: RUST_ARCH=armv7-unknown-linux-musleabihf
+
+arm64v8-client: DOCKER_ARCH=arm64v8
+arm64v8-client: MUSL_ARCH=aarch64-linux-musl
+arm64v8-client: RUST_ARCH=aarch64-unknown-linux-musl
+
+amd64-client: DOCKER_ARCH=amd64
+amd64-client: MUSL_ARCH=x86_64-linux-musl
+amd64-client: RUST_ARCH=x86_64-unknown-linux-musl
+
 %-client:
 	docker build \
 		--tag $(REGISTRY):$(TAG)-client-$* \
-		--build-arg ARCH=$(filter $*/, $(addsuffix /, $(VALID_ARCHS))) \
+		--build-arg DOCKER_ARCH=$(DOCKER_ARCH) \
+		--build-arg RUST_ARCH=$(RUST_ARCH) \
+		--build-arg MUSL_ARCH=$(MUSL_ARCH) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
 		-f Dockerfile.client \
