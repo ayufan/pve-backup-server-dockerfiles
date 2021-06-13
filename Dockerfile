@@ -36,6 +36,7 @@ RUN apt-get -y build-dep $PWD/proxmox-widget-toolkit
 RUN apt-get -y build-dep $PWD/proxmox-i18n
 RUN apt-get -y build-dep $PWD/pve-xtermjs
 RUN apt-get -y build-dep $PWD/libjs-qrcodejs
+RUN apt-get -y build-dep $PWD/proxmox-acme
 
 # Compile ALL
 RUN cd proxmox-backup/ && dpkg-buildpackage -us -uc -b
@@ -45,6 +46,7 @@ RUN cd proxmox-i18n/ && make deb && mv *.deb ../
 RUN cd pve-xtermjs/ && dpkg-buildpackage -us -uc -b
 RUN cd proxmox-mini-journalreader/ && make deb && mv *.deb ../
 RUN cd libjs-qrcodejs/ && make deb && mv *.deb ../
+RUN export DEB_BUILD_OPTIONS=nocheck && cd proxmox-acme/ && make deb && rm libproxmox-acme-perl* && mv *.deb ../
 
 #=================================
 
