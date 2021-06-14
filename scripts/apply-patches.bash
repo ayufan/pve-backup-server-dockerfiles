@@ -3,6 +3,8 @@
 set -eo pipefail
 
 for patch; do
-  echo $i...
-  patch -p1 -d $(basename "$patch" .patch) < "$patch"
+  if [[ -e $patch ]]; then
+    echo $patch...
+    patch -p1 -d $(basename "$patch" .patch) < "$patch"
+  fi
 done

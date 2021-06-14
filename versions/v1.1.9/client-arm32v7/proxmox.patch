@@ -1,5 +1,5 @@
 diff --git a/proxmox/src/sys/timer.rs b/proxmox/src/sys/timer.rs
-index 40877a1..8de973b 100644
+index 40877a1..6c2dabb 100644
 --- a/proxmox/src/sys/timer.rs
 +++ b/proxmox/src/sys/timer.rs
 @@ -106,8 +106,8 @@ fn opt_duration_to_timespec(v: Option<Duration>) -> libc::timespec {
@@ -14,7 +14,7 @@ index 40877a1..8de973b 100644
      }
  }
 diff --git a/proxmox/src/tools/time/mod.rs b/proxmox/src/tools/time/mod.rs
-index 31174bd..64ba84d 100644
+index 31174bd..20bec7f 100644
 --- a/proxmox/src/tools/time/mod.rs
 +++ b/proxmox/src/tools/time/mod.rs
 @@ -15,7 +15,7 @@ pub fn timelocal(t: &mut libc::tm) -> Result<i64, Error> {
@@ -22,7 +22,7 @@ index 31174bd..64ba84d 100644
          bail!("libc::mktime failed for {:?}", t);
      }
 -    Ok(epoch)
-+    Ok(epoch as i64)
++    Ok(epoch as _)
  }
  
  /// Safe bindings to libc timegm
@@ -31,7 +31,7 @@ index 31174bd..64ba84d 100644
          bail!("libc::timegm failed for {:?}", t);
      }
 -    Ok(epoch)
-+    Ok(epoch as i64)
++    Ok(epoch as _)
  }
  
  fn new_libc_tm() -> libc::tm {
@@ -40,7 +40,7 @@ index 31174bd..64ba84d 100644
  
      unsafe {
 -        if libc::localtime_r(&epoch, &mut result).is_null() {
-+        let epoch32 = epoch as i32; if libc::localtime_r(&epoch32, &mut result).is_null() {
++        let epocht = epoch as libc::time_t; if libc::localtime_r(&epocht, &mut result).is_null() {
              bail!("libc::localtime failed for '{}'", epoch);
          }
      }
@@ -49,7 +49,7 @@ index 31174bd..64ba84d 100644
  
      unsafe {
 -        if libc::gmtime_r(&epoch, &mut result).is_null() {
-+        let epoch32 = epoch as i32; if libc::gmtime_r(&epoch32, &mut result).is_null() {
++        let epocht = epoch as libc::time_t; if libc::gmtime_r(&epocht, &mut result).is_null() {
              bail!("libc::gmtime failed for '{}'", epoch);
          }
      }

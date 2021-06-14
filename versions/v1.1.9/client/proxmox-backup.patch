@@ -17,19 +17,6 @@ index 14805b82..f9918eee 100644
  nom = "5.1"
  crossbeam-channel = "0.5"
  
-diff --git a/src/pxar/create.rs b/src/pxar/create.rs
-index ec3dc057..0834daca 100644
---- a/src/pxar/create.rs
-+++ b/src/pxar/create.rs
-@@ -52,7 +52,7 @@ fn detect_fs_type(fd: RawFd) -> Result<i64, Error> {
-     Errno::result(res)?;
-     let fs_stat = unsafe { fs_stat.assume_init() };
- 
--    Ok(fs_stat.f_type)
-+    Ok(fs_stat.f_type as i64)
- }
- 
- #[rustfmt::skip]
 diff --git a/src/tools/daemon.rs b/src/tools/daemon.rs
 index d298bf16..d4d66172 100644
 --- a/src/tools/daemon.rs

@@ -30,7 +30,7 @@ endif
 arm32v7-client: DOCKER_ARCH=arm32v7
 arm32v7-client: MUSL_ARCH=arm-linux-musleabihf
 arm32v7-client: RUST_ARCH=arm-unknown-linux-musleabihf
-arm32v7-client: DOCKERFILE=Dockerfile.client-cross
+arm32v7-client: DOCKERFILE=Dockerfile.client-buster
 
 arm64v8-client: DOCKER_ARCH=arm64v8
 arm64v8-client: MUSL_ARCH=aarch64-linux-musl
