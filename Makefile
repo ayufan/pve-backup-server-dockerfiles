@@ -35,12 +35,12 @@ arm32v7-client: DOCKERFILE=Dockerfile.client-buster
 arm64v8-client: DOCKER_ARCH=arm64v8
 arm64v8-client: MUSL_ARCH=aarch64-linux-musl
 arm64v8-client: RUST_ARCH=aarch64-unknown-linux-musl
-arm64v8-client: DOCKERFILE=Dockerfile.client-alpine
+arm64v8-client: DOCKERFILE=Dockerfile.client-buster
 
 amd64-client: DOCKER_ARCH=amd64
 amd64-client: MUSL_ARCH=x86_64-linux-musl
 amd64-client: RUST_ARCH=x86_64-unknown-linux-musl
-amd64-client: DOCKERFILE=Dockerfile.client-alpine
+amd64-client: DOCKERFILE=Dockerfile.client-buster
 
 %-client:
 	docker build \

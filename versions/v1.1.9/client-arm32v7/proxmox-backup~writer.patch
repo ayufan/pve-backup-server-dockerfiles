@@ -105,3 +105,30 @@ index 95720973..eee0a80a 100644
  
                  Ok(())
              })
+diff --git a/src/tools/format.rs b/src/tools/format.rs
+index 70d0490b..d7ed971f 100644
+--- a/src/tools/format.rs
++++ b/src/tools/format.rs
+@@ -64,7 +64,7 @@ pub fn render_bytes_human_readable(value: &Value, _record: &Value) -> Result<Str
+ }
+ 
+ pub struct HumanByte {
+-    b: usize,
++    b: u64,
+ }
+ impl std::fmt::Display for HumanByte {
+     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+@@ -93,12 +93,12 @@ impl std::fmt::Display for HumanByte {
+ }
+ impl From<usize> for HumanByte {
+     fn from(v: usize) -> Self {
+-        HumanByte { b: v }
++        HumanByte { b: v as u64 }
+     }
+ }
+ impl From<u64> for HumanByte {
+     fn from(v: u64) -> Self {
+-        HumanByte { b: v as usize }
++        HumanByte { b: v as u64 }
+     }
+ }
