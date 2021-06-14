@@ -7,7 +7,9 @@ for patch; do
     continue
   fi
 
-  local patch_dest=${patch%%~.*}
+  patch_dest=$(basename "$patch". patch)
+  patch_dest=${patch_dest%%~*}
+  patch_dest=${patch_dest%%.*}
 
   echo "$patch => $patch_dest..."
   patch -p1 -d $patch_dest < "$patch"
