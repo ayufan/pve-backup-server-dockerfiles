@@ -3,8 +3,12 @@
 set -eo pipefail
 
 for patch; do
-  if [[ -e $patch ]]; then
-    echo $patch...
-    patch -p1 -d $(basename "$patch" .patch) < "$patch"
+  if [[ ! -e $patch ]]; then
+    continue
   fi
+
+  local patch_dest=${patch%%~.*}
+
+  echo "$patch => $patch_dest..."
+  patch -p1 -d $patch_dest < "$patch"
 done
