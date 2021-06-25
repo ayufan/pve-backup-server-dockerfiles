@@ -7,5 +7,11 @@ fi
 chown backup:backup /etc/proxmox-backup
 chmod 700 /etc/proxmox-backup
 
+if [[ ! -e /etc/proxmox-backup/csrf.key ]] && [[ ! -e /etc/proxmox-backup/.initialized ]]; then
+  echo 'Copying defaults into `/etc/proxmox-backup/`'
+  cp -rv /etc/proxmox-backup-default/. /etc/proxmox-backup/
+  touch /etc/proxmox-backup/.initialized
+fi
+
 echo "API: Starting..."
 exec /usr/lib/*/proxmox-backup/proxmox-backup-api

@@ -62,7 +62,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
   apt install -y runit /src/*.deb
 
 # Add default configs
-ADD /pbs/ /etc/proxmox-backup/
+ADD /pbs/ /etc/proxmox-backup-default/
 
 VOLUME /etc/proxmox-backup
 VOLUME /var/log/proxmox-backup

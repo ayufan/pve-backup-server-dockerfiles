@@ -8,7 +8,7 @@ LATEST_TAG ?= latest
 endif
 LATEST ?= 0
 
-.PHONY: dev-build dev-push dev-run dev-shell all-deb all-build all-push
+.PHONY: dev-run dev-shell all-deb all-build all-push
 
 arm32v7-build: DOCKER_ARCH=arm32v7
 arm64v8-build: DOCKER_ARCH=arm64v8
@@ -82,7 +82,7 @@ endif
 
 dev-run: dev-build
 	-docker rm -f proxmox-backup
-	docker run --name=proxmox-backup --net=host -it --rm $(REGISTRY):$(TAG)-dev
+	docker run --name=proxmox-backup --net=host --rm $(REGISTRY):$(TAG)-dev
 
 dev-shell: dev-build
 	-docker rm -f proxmox-backup
