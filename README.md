@@ -145,6 +145,9 @@ make all-push VERSION=v1.0.5 REGISTRY=my.registry.com/pbs
 
 # build and push to registry v1.0.5
 make all-push REGISTRY=my.registry.com/pbs
+
+# make the given version latest
+make all-latest VERSION=v1.0.5
 ```
 
 ## Build on your own

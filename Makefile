@@ -3,10 +3,6 @@ REGISTRY ?= ayufan/proxmox-backup-server
 VERSION ?= master
 
 TAG ?= $(VERSION)
-ifeq (1,$(LATEST))
-LATEST_TAG ?= latest
-endif
-LATEST ?= 0
 
 .PHONY: dev-run dev-shell all-deb all-build all-push
 
@@ -23,9 +19,6 @@ dev-build: DOCKER_ARCH=amd64
 		--build-arg VERSION=$(VERSION) \
 		-f Dockerfile \
 		.
-ifneq (,$(LATEST_TAG))
-	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):$(LATEST_TAG)-$*
-endif
 
 arm32v7-client: DOCKER_ARCH=arm32v7
 arm32v7-client: MUSL_ARCH=arm-linux-musleabihf
@@ -57,28 +50,29 @@ amd64-client: DOCKERFILE=Dockerfile.client-buster
 
 %-push: %-build
 	docker push $(REGISTRY):$(TAG)-$*
-ifneq (,$(LATEST_TAG))
-	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):$(LATEST_TAG)-$*
-	docker push $(REGISTRY):$(LATEST_TAG)-$*
-endif
 
 all-build: $(addsuffix -build, $(BUILD_ARCHS))
 
 all-push: $(addsuffix -push, $(BUILD_ARCHS))
-	make manifest
+	make all-manifest
 
-manifest:
+all-manifest:
 	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
 	-rm -rf ~/.docker/manifests
 	docker manifest create $(REGISTRY):$(TAG) \
 		$(addprefix $(REGISTRY):$(TAG)-, $(BUILD_ARCHS))
 	docker manifest push $(REGISTRY):$(TAG)
 
-ifneq (,$(LATEST_TAG))
-	docker manifest create $(REGISTRY):$(LATEST_TAG) \
+%-latest:
+	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):latest-$*
+	docker push $(REGISTRY):latest-$*
+
+all-latest: $(addsuffix -latest, $(BUILD_ARCHS))
+	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
+	-rm -rf ~/.docker/manifests
+	docker manifest create $(REGISTRY):latest \
 		$(addprefix $(REGISTRY):$(TAG)-, $(BUILD_ARCHS))
-	docker manifest push $(REGISTRY):$(LATEST_TAG)
-endif
+	docker manifest push $(REGISTRY):latest
 
 dev-run: dev-build
 	-docker rm -f proxmox-backup
