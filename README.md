@@ -25,7 +25,7 @@ docker pull ayufan/proxmox-backup-server:latest
 docker-compose up -d
 ```
 
-Then login to `https://<ip>:8007/` with `admin / pbspbs`.
+Then login to `https://<ip>:8007/` with `admin / pbspbs` (Realm: `Proxmox Backup authentication server`).
 After that change a password.
 
 ## Features
