@@ -1,0 +1,23 @@
+commit 1b425b8fd31147524f81c549ccbf0318a75f1c9e
+Author: Kamil Trzciński <ayufan@ayufan.eu>
+Date:   Sat May 1 14:40:06 2021 +0200
+
+    Support local compile
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 2804632c..2854259b 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -106,3 +106,12 @@ pbs-tools = { path = "pbs-tools" }
+ [features]
+ default = []
+ #valgrind = ["valgrind_request"]
++
++[patch.crates-io]
++proxmox = { path = "../proxmox/proxmox" }
++proxmox-http = { path = "../proxmox/proxmox-http" }
++proxmox-fuse = { path = "../proxmox-fuse" }
++pxar = { path = "../pxar" }
++proxmox-acme-rs = { path = "../proxmox-acme-rs" }
++proxmox-openid = { path = "../proxmox-openid-rs" }
++proxmox-apt = { path = "../proxmox-apt" }

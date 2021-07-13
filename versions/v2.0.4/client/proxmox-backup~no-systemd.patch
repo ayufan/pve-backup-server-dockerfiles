@@ -1,0 +1,22 @@
+diff --git a/src/tools/daemon.rs b/src/tools/daemon.rs
+index d298bf16..d4d66172 100644
+--- a/src/tools/daemon.rs
++++ b/src/tools/daemon.rs
+@@ -19,7 +19,7 @@ use proxmox::tools::io::{ReadExt, WriteExt};
+ use crate::server;
+ use crate::tools::{fd_change_cloexec, self};
+ 
+-#[link(name = "systemd")]
++//#[link(name = "systemd")]
+ extern "C" {
+     fn sd_journal_stream_fd(identifier: *const c_uchar, priority: c_int, level_prefix: c_int) -> c_int;
+ }
+@@ -346,7 +346,7 @@ async fn wait_service_is_not_state(service: &str, state: &str) -> Result<(), Err
+     Ok(())
+ }
+ 
+-#[link(name = "systemd")]
++//#[link(name = "systemd")]
+ extern "C" {
+     fn sd_notify(unset_environment: c_int, state: *const c_char) -> c_int;
+ }

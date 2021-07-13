@@ -1,0 +1,55 @@
+diff --git a/proxmox/src/sys/timer.rs b/proxmox/src/sys/timer.rs
+index 40877a1..6c2dabb 100644
+--- a/proxmox/src/sys/timer.rs
++++ b/proxmox/src/sys/timer.rs
+@@ -106,8 +106,8 @@ fn opt_duration_to_timespec(v: Option<Duration>) -> libc::timespec {
+             tv_nsec: 0,
+         },
+         Some(value) => libc::timespec {
+-            tv_sec: value.as_secs() as i64,
+-            tv_nsec: value.subsec_nanos() as i64,
++            tv_sec: value.as_secs() as _,
++            tv_nsec: value.subsec_nanos() as _,
+         },
+     }
+ }
+diff --git a/proxmox/src/tools/time/mod.rs b/proxmox/src/tools/time/mod.rs
+index 31174bd..20bec7f 100644
+--- a/proxmox/src/tools/time/mod.rs
++++ b/proxmox/src/tools/time/mod.rs
+@@ -15,7 +15,7 @@ pub fn timelocal(t: &mut libc::tm) -> Result<i64, Error> {
+     if epoch == -1 {
+         bail!("libc::mktime failed for {:?}", t);
+     }
+-    Ok(epoch)
++    Ok(epoch as _)
+ }
+ 
+ /// Safe bindings to libc timegm
+@@ -29,7 +29,7 @@ pub fn timegm(t: &mut libc::tm) -> Result<i64, Error> {
+     if epoch == -1 {
+         bail!("libc::timegm failed for {:?}", t);
+     }
+-    Ok(epoch)
++    Ok(epoch as _)
+ }
+ 
+ fn new_libc_tm() -> libc::tm {
+@@ -53,7 +53,7 @@ pub fn localtime(epoch: i64) -> Result<libc::tm, Error> {
+     let mut result = new_libc_tm();
+ 
+     unsafe {
+-        if libc::localtime_r(&epoch, &mut result).is_null() {
++        let epocht = epoch as libc::time_t; if libc::localtime_r(&epocht, &mut result).is_null() {
+             bail!("libc::localtime failed for '{}'", epoch);
+         }
+     }
+@@ -66,7 +66,7 @@ pub fn gmtime(epoch: i64) -> Result<libc::tm, Error> {
+     let mut result = new_libc_tm();
+ 
+     unsafe {
+-        if libc::gmtime_r(&epoch, &mut result).is_null() {
++        let epocht = epoch as libc::time_t; if libc::gmtime_r(&epocht, &mut result).is_null() {
+             bail!("libc::gmtime failed for '{}'", epoch);
+         }
+     }

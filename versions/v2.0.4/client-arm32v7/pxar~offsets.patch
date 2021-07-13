@@ -1,0 +1,37 @@
+diff --git a/src/format/mod.rs b/src/format/mod.rs
+index d66435e..a5c1337 100644
+--- a/src/format/mod.rs
++++ b/src/format/mod.rs
+@@ -246,7 +246,7 @@ impl StatxTimestamp {
+     }
+ 
+     #[cfg(all(test, target_os = "linux"))]
+-    /// From data found in `struct stat` (`libc::stat`).
++    /// From data found in `struct stat` (`libc::stat64`).
+     pub fn from_stat(sec: i64, nsec: u32) -> Self {
+         if sec < 0 {
+             Self::from_duration_before_epoch(Duration::new((-sec) as u64, nsec))
+diff --git a/src/lib.rs b/src/lib.rs
+index 86a8d6e..22756cc 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -140,8 +140,8 @@ impl Metadata {
+     }
+ 
+     #[cfg(all(test, target_os = "linux"))]
+-    /// A more convenient way to create metadata starting from `libc::stat`.
+-    pub fn builder_from_stat(stat: &libc::stat) -> MetadataBuilder {
++    /// A more convenient way to create metadata starting from `libc::stat64`.
++    pub fn builder_from_stat(stat: &libc::stat64) -> MetadataBuilder {
+         MetadataBuilder::new(0).fill_from_stat(stat)
+     }
+ }
+@@ -290,7 +290,7 @@ impl MetadataBuilder {
+ 
+     #[cfg(all(test, target_os = "linux"))]
+     /// Fill the metadata with information from `struct stat`.
+-    pub fn fill_from_stat(self, stat: &libc::stat) -> Self {
++    pub fn fill_from_stat(self, stat: &libc::stat64) -> Self {
+         self.st_mode(u64::from(stat.st_mode))
+             .owner(stat.st_uid, stat.st_gid)
+             .mtime_full(format::StatxTimestamp::from_stat(
