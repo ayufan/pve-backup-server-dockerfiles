@@ -4,18 +4,24 @@ FROM ${ARCH}debian:bullseye AS builder
 RUN apt-get -y update && \
   apt-get -y install \
     build-essential git-core \
-    lintian pkg-config quilt patch cargo \
+    lintian pkg-config quilt patch \
     nodejs node-colors node-commander \
     libudev-dev libapt-pkg-dev \
     libacl1-dev libpam0g-dev libfuse3-dev \
     libsystemd-dev uuid-dev libssl-dev \
     libclang-dev libjson-perl libcurl4-openssl-dev \
-    dh-exec
+    dh-exec wget
+
+RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
+  chmod +x rustup-init.sh && \
+  ./rustup-init.sh -y
 
 WORKDIR /src
 
 ENV PATH=/root/.cargo/bin:$PATH
 ENV PATH=/root/bin:$PATH
+
+RUN rustc --version
 
 # Clone all sources
 ARG VERSION=master
@@ -31,11 +37,14 @@ RUN /scripts/strip-cargo.bash
 RUN apt-get -y build-dep $PWD/pve-eslint
 RUN cd pve-eslint/ && make dinstall
 
+# Install dev dependencies of widget toolkit
+RUN apt-get -y build-dep $PWD/proxmox-widget-toolkit
+RUN cd proxmox-widget-toolkit/ && make deb && dpkg -i proxmox-widget-toolkit-dev*.deb && mv *.deb ../
+
 # Deps for all rest
 RUN apt-get -y build-dep $PWD/proxmox-backup
 RUN apt-get -y build-dep $PWD/proxmox-mini-journalreader
 RUN apt-get -y build-dep $PWD/extjs
-RUN apt-get -y build-dep $PWD/proxmox-widget-toolkit
 RUN apt-get -y build-dep $PWD/proxmox-i18n
 RUN apt-get -y build-dep $PWD/pve-xtermjs
 RUN apt-get -y build-dep $PWD/libjs-qrcodejs
@@ -44,7 +53,6 @@ RUN apt-get -y build-dep $PWD/proxmox-acme
 # Compile ALL
 RUN cd proxmox-backup/ && dpkg-buildpackage -us -uc -b
 RUN cd extjs/ && make deb && mv *.deb ../
-RUN cd proxmox-widget-toolkit/ && make deb && mv *.deb ../
 RUN cd proxmox-i18n/ && make deb && mv *.deb ../
 RUN cd pve-xtermjs/ && dpkg-buildpackage -us -uc -b
 RUN cd proxmox-mini-journalreader/ && make deb && mv *.deb ../

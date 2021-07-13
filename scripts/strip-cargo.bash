@@ -3,13 +3,13 @@
 set -eo pipefail
 
 for package in *; do
-  if [[ ! -d "$package/.cargo/config" ]]; then
-    continue
+  if [[ -f "$package/.cargo/config" ]]; then
+    rm -v "$package/.cargo/config"
   fi
 
-  # remove .cargo/config
-  rm "$package/.cargo/config"
-
   # remove ex.: librust-anyhow-1+default-dev
-  sed -i 's/librust-.*-dev[^,]*/libstd-rust-dev/g' "$package/debian/control"
+  if [[ -f "$package/debian/control" ]]; then
+    echo "Stripping '$package/debian/control'..."
+    sed -i 's/librust-.*-dev[^,]*/libstd-rust-dev/g' "$package/debian/control"
+  fi
 done

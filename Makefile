@@ -1,6 +1,6 @@
 BUILD_ARCHS = amd64 arm64v8
 REGISTRY ?= ayufan/proxmox-backup-server
-VERSION ?= master
+VERSION ?= $(shell ls versions | sort -V | tail -n 1)
 
 TAG ?= $(VERSION)
 
