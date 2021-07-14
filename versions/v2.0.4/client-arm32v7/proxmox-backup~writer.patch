@@ -76,8 +76,8 @@ index 1e54d39d..acae35cf 100644
                  let csum = guard.take().unwrap().finish();
 diff --git a/src/client/pull.rs b/src/client/pull.rs
 index 95720973..eee0a80a 100644
---- a/src/client/pull.rs
-+++ b/src/client/pull.rs
+--- a/src/server/pull.rs
++++ b/src/server/pull.rs
 @@ -5,7 +5,7 @@ use serde_json::json;
  use std::collections::{HashMap, HashSet};
  use std::convert::TryFrom;
@@ -105,10 +105,10 @@ index 95720973..eee0a80a 100644
  
                  Ok(())
              })
-diff --git a/src/tools/format.rs b/src/tools/format.rs
+diff --git a/pbs-tools/src/format.rs b/pbs-tools/src/format.rs
 index 70d0490b..d7ed971f 100644
---- a/src/tools/format.rs
-+++ b/src/tools/format.rs
+--- a/pbs-tools/src/format.rs
++++ b/pbs-tools/src/format.rs
 @@ -64,7 +64,7 @@ pub fn render_bytes_human_readable(value: &Value, _record: &Value) -> Result<Str
  }
  

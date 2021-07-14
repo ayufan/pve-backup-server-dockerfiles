@@ -11,10 +11,10 @@ index 3c8e6abd..c8f1b694 100644
  
      let localtime = time + offset;
  
-diff --git a/src/backup/chunk_store.rs b/src/backup/chunk_store.rs
+diff --git a/pbs-datastore/src/chunk_store.rs b/pbs-datastore/src/chunk_store.rs
 index 31e8307c..f23f4821 100644
---- a/src/backup/chunk_store.rs
-+++ b/src/backup/chunk_store.rs
+--- a/pbs-datastore/src/chunk_store.rs
++++ b/pbs-datastore/src/chunk_store.rs
 @@ -162,8 +162,8 @@ impl ChunkStore {
          const UTIME_OMIT: i64 = (1 << 30) - 2;
  
@@ -44,14 +44,14 @@ index 31e8307c..f23f4821 100644
                      if bad {
                          status.still_bad += 1;
                      } else {
-diff --git a/src/backup/fixed_index.rs b/src/backup/fixed_index.rs
+diff --git a/pbs-datastore/src/fixed_index.rs b/pbs-datastore/src/fixed_index.rs
 index ebf64456..aecb4bf1 100644
---- a/src/backup/fixed_index.rs
-+++ b/src/backup/fixed_index.rs
+--- a/pbs-datastore/src/fixed_index.rs
++++ b/pbs-datastore/src/fixed_index.rs
 @@ -11,6 +11,7 @@ use std::io::Write;
- use std::os::unix::io::AsRawFd;
  use std::path::{Path, PathBuf};
  use std::sync::Arc;
+ use std::io::{Seek, SeekFrom};
 +use std::convert::TryInto;
  
  use super::ChunkInfo;
@@ -107,19 +107,6 @@ index 04d42854..29a4b129 100644
      }
      cache.data = Some(config.clone());
  
-diff --git a/src/config/cached_user_info.rs b/src/config/cached_user_info.rs
-index c85d643c..ec60836c 100644
---- a/src/config/cached_user_info.rs
-+++ b/src/config/cached_user_info.rs
-@@ -18,7 +18,7 @@ pub struct CachedUserInfo {
-     acl_tree: Arc<AclTree>,
- }
- 
--fn now() -> i64 { unsafe { libc::time(std::ptr::null_mut()) } }
-+fn now() -> i64 { unsafe { libc::time(std::ptr::null_mut()) as i64 } }
- 
- struct ConfigCache {
-     data: Option<Arc<CachedUserInfo>>,
 diff --git a/src/config/user.rs b/src/config/user.rs
 index ff7e54e4..db49fd90 100644
 --- a/src/config/user.rs
@@ -315,10 +302,10 @@ index b93381a5..f3a0095a 100644
      stat.st_mode = libc::S_IFREG;
      stat.st_ino = 1;
      stat.st_nlink = 1;
-diff --git a/src/tools/process_locker.rs b/src/tools/process_locker.rs
+diff --git a/pbs-tools/src/process_locker.rs b/pbs-tools/src/process_locker.rs
 index 6ab2e1c1..e2f09f18 100644
---- a/src/tools/process_locker.rs
-+++ b/src/tools/process_locker.rs
+--- a/pbs-tools/src/process_locker.rs
++++ b/pbs-tools/src/process_locker.rs
 @@ -149,7 +149,7 @@ impl ProcessLocker {
  
          let now = unsafe { libc::time(std::ptr::null_mut()) };

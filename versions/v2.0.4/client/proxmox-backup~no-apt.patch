@@ -21,10 +21,10 @@ index 852d58ed..14805b82 100644
  base64 = "0.12"
  bitflags = "1.2.1"
  bytes = "1.0"
-diff --git a/src/api2/node.rs b/src/api2/node.rs
+diff --git a/src/api2/node/mod.rs b/src/api2/node/mod.rs
 index af9ecf69..ed709dec 100644
---- a/src/api2/node.rs
-+++ b/src/api2/node.rs
+--- a/src/api2/node/mod.rs
++++ b/src/api2/node/mod.rs
 @@ -26,7 +26,6 @@ use crate::server::WorkerTask;
  use crate::tools;
  use crate::tools::ticket::{self, Empty, Ticket};
@@ -61,10 +61,10 @@ index d7d96c34..0be11fe2 100644
 -
      Ok(())
  }
-diff --git a/src/tools.rs b/src/tools.rs
+diff --git a/src/tools/mod.rs b/src/tools/mod.rs
 index 65049b1e..f38bf705 100644
---- a/src/tools.rs
-+++ b/src/tools.rs
+--- a/src/tools/mod.rs
++++ b/src/tools/mod.rs
 @@ -25,7 +25,6 @@ use proxmox_http::{
  };
  
