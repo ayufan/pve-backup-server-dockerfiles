@@ -12,14 +12,9 @@ RUN apt-get -y update && \
     libclang-dev libjson-perl libcurl4-openssl-dev \
     dh-exec wget
 
-RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
-  chmod +x rustup-init.sh && \
-  ./rustup-init.sh -y
-
 WORKDIR /src
 
 RUN /usr/bin/rustc --version
-RUN /root/.cargo/bin/rustc --version
 
 # Clone all sources
 ARG VERSION=master
@@ -44,8 +39,7 @@ RUN cd proxmox-widget-toolkit/ && make deb && dpkg -i proxmox-widget-toolkit-dev
 RUN apt-get -y build-dep $PWD/proxmox-backup
 
 # Build
-RUN . /root/.cargo/env && \
-  cd proxmox-backup/ && \
+RUN cd proxmox-backup/ && \
   cargo build --release --bin pxar && \
   cargo build --release --bin dump-catalog-shell-cli && \
   cargo build --release --bin proxmox-backup-client
