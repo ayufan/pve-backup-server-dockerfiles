@@ -4,7 +4,7 @@ FROM ${ARCH}debian:bullseye AS builder
 RUN apt-get -y update && \
   apt-get -y install \
     build-essential git-core \
-    lintian pkg-config quilt patch \
+    lintian pkg-config quilt patch cargo \
     nodejs node-colors node-commander \
     libudev-dev libapt-pkg-dev \
     libacl1-dev libpam0g-dev libfuse3-dev \
@@ -18,10 +18,8 @@ RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
 
 WORKDIR /src
 
-ENV PATH=/root/.cargo/bin:$PATH
-ENV PATH=/root/bin:$PATH
-
-RUN rustc --version
+RUN /usr/bin/rustc --version
+RUN /root/.cargo/bin/rustc --version
 
 # Clone all sources
 ARG VERSION=master
@@ -51,7 +49,7 @@ RUN apt-get -y build-dep $PWD/libjs-qrcodejs
 RUN apt-get -y build-dep $PWD/proxmox-acme
 
 # Compile ALL
-RUN cd proxmox-backup/ && dpkg-buildpackage -us -uc -b
+RUN . /root/.cargo/env && cd proxmox-backup/ && dpkg-buildpackage -us -uc -b
 RUN cd extjs/ && make deb && mv *.deb ../
 RUN cd proxmox-i18n/ && make deb && mv *.deb ../
 RUN cd pve-xtermjs/ && dpkg-buildpackage -us -uc -b
