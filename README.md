@@ -11,7 +11,7 @@ properly. Feel free to create an issue to debug those.
 ## Pre-built images
 
 For starting quickly all images are precompiled and hosted
-at https://hub.docker.com/repository/docker/ayufan/proxmox-backup-server.
+at https://hub.docker.com/r/ayufan/proxmox-backup-server/tags.
 
 Or:
 
@@ -25,7 +25,7 @@ docker pull ayufan/proxmox-backup-server:latest
 docker-compose up -d
 ```
 
-Then login to `https://<ip>:8007/` with `admin / pbspbs`.
+Then login to `https://<ip>:8007/` with `admin / pbspbs` (Realm: `Proxmox Backup authentication server`).
 After that change a password.
 
 ## Features
