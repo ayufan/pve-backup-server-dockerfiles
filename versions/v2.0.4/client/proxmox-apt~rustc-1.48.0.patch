@@ -1,0 +1,22 @@
+diff --git a/src/repositories/file/list_parser.rs b/src/repositories/file/list_parser.rs
+index 04c1729..3f32e19 100644
+--- a/src/repositories/file/list_parser.rs
++++ b/src/repositories/file/list_parser.rs
+@@ -183,12 +183,14 @@ impl<R: BufRead> APTListFileParser<R> {
+         }
+ 
+         // e.g. quoted "deb" is not accepted by APT, so no need for quote word parsing here
+-        line = match line.split_once(|c| char::is_ascii_whitespace(&c)) {
+-            Some((package_type, rest)) => {
++        let mut splits = line.splitn(2, |c| char::is_ascii_whitespace(&c));
++
++        line = match (splits.next(), splits.next()) {
++            (Some(package_type), Some(rest)) => {
+                 repo.types.push(package_type.try_into()?);
+                 rest
+             }
+-            None => return Ok(None), // empty line
++            _ => return Ok(None), // empty line
+         };
+ 
+         line = line.trim_start_matches(|c| char::is_ascii_whitespace(&c));
