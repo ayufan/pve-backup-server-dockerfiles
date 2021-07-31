@@ -1,0 +1,75 @@
+commit 7985be1cc1a202b40fbb10b6003cdeea2cc06a0c
+Author: Dominik Csapak <dominik.csapak@gmail.com>
+Date:   Sun Aug 2 10:05:20 2020 +0200
+
+    remove apt dependency
+    
+    not needed for the client, and would depend on libapt-pkg-dev
+    
+    Signed-off-by: Dominik Csapak <dominik.csapak@gmail.com>
+    Signed-off-by: Thomas Lamprecht <thomas@lamprecht.org>
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 852d58ed..14805b82 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -24,7 +24,6 @@ name = "proxmox_backup"
+ path = "src/lib.rs"
+ 
+ [dependencies]
+-apt-pkg-native = "0.3.2"
+ base64 = "0.12"
+ bitflags = "1.2.1"
+ bytes = "1.0"
+diff --git a/src/api2/node/mod.rs b/src/api2/node/mod.rs
+index af9ecf69..ed709dec 100644
+--- a/src/api2/node/mod.rs
++++ b/src/api2/node/mod.rs
+@@ -26,7 +26,6 @@ use crate::server::WorkerTask;
+ use crate::tools;
+ use crate::tools::ticket::{self, Empty, Ticket};
+ 
+-pub mod apt;
+ pub mod certificates;
+ pub mod config;
+ pub mod disks;
+@@ -315,7 +314,6 @@ fn upgrade_to_websocket(
+ }
+ 
+ pub const SUBDIRS: SubdirMap = &[
+-    ("apt", &apt::ROUTER),
+     ("certificates", &certificates::ROUTER),
+     ("config", &config::ROUTER),
+     ("disks", &disks::ROUTER),
+diff --git a/src/api2/node/config.rs b/src/api2/node/config.rs
+index d7d96c34..0be11fe2 100644
+--- a/src/api2/node/config.rs
++++ b/src/api2/node/config.rs
+@@ -4,7 +4,6 @@ use proxmox::api::schema::Updatable;
+ use proxmox::api::{api, Permission, Router, RpcEnvironment};
+ 
+ use crate::api2::types::NODE_SCHEMA;
+-use crate::api2::node::apt::update_apt_proxy_config;
+ use crate::config::acl::{PRIV_SYS_AUDIT, PRIV_SYS_MODIFY};
+ use crate::config::node::{NodeConfig, NodeConfigUpdater};
+ 
+@@ -81,7 +80,5 @@ pub fn update_node_config(
+ 
+     crate::config::node::save_config(&config)?;
+ 
+-    update_apt_proxy_config(config.http_proxy().as_ref())?;
+-
+     Ok(())
+ }
+diff --git a/src/tools/mod.rs b/src/tools/mod.rs
+index 65049b1e..f38bf705 100644
+--- a/src/tools/mod.rs
++++ b/src/tools/mod.rs
+@@ -25,7 +25,6 @@ use proxmox_http::{
+ };
+ 
+ pub mod acl;
+-pub mod apt;
+ pub mod async_io;
+ pub mod borrow;
+ pub mod cert;

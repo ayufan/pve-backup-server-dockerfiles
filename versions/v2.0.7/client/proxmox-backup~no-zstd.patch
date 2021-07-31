@@ -1,0 +1,19 @@
+commit bc4526093e2ecb8b76242aa762d5d5d2e5f8b8a6
+Author: Kamil Trzciński <ayufan@ayufan.eu>
+Date:   Thu Jun 3 11:49:55 2021 +0200
+
+    Support client compilation on alpine
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 14805b82..f9918eee 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -79,7 +79,7 @@ url = "2.1"
+ walkdir = "2"
+ webauthn-rs = "0.2.5"
+ xdg = "2.2"
+-zstd = { version = "0.6", features = [ "bindgen" ] }
++zstd = { version = "0.6" }
+ nom = "5.1"
+ crossbeam-channel = "0.5"
+ 

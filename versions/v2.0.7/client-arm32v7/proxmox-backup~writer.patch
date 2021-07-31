@@ -1,0 +1,134 @@
+diff --git a/src/client/backup_writer.rs b/src/client/backup_writer.rs
+index 1e54d39d..acae35cf 100644
+--- a/src/client/backup_writer.rs
++++ b/src/client/backup_writer.rs
+@@ -50,9 +50,9 @@ pub struct UploadOptions {
+ struct UploadStats {
+     chunk_count: usize,
+     chunk_reused: usize,
+-    size: usize,
+-    size_reused: usize,
+-    size_compressed: usize,
++    size: u64,
++    size_reused: u64,
++    size_compressed: u64,
+     duration: std::time::Duration,
+     csum: [u8; 32],
+ }
+@@ -337,7 +337,7 @@ impl BackupWriter {
+         };
+         if archive_name != CATALOG_NAME {
+             let speed: HumanByte =
+-                ((size_dirty * 1_000_000) / (upload_stats.duration.as_micros() as usize)).into();
++                ((size_dirty * 1_000_000) / (upload_stats.duration.as_micros() as u64)).into();
+             let size_dirty: HumanByte = size_dirty.into();
+             let size_compressed: HumanByte = upload_stats.size_compressed.into();
+             println!(
+@@ -369,7 +369,7 @@ impl BackupWriter {
+             println!(
+                 "{}: Average chunk size was {}.",
+                 archive,
+-                HumanByte::from(upload_stats.size / upload_stats.chunk_count)
++                HumanByte::from(upload_stats.size / (upload_stats.chunk_count as u64))
+             );
+             println!(
+                 "{}: Average time per request: {} microseconds.",
+@@ -634,11 +634,11 @@ impl BackupWriter {
+         let known_chunk_count = Arc::new(AtomicUsize::new(0));
+         let known_chunk_count2 = known_chunk_count.clone();
+ 
+-        let stream_len = Arc::new(AtomicUsize::new(0));
++        let stream_len = Arc::new(AtomicU64::new(0));
+         let stream_len2 = stream_len.clone();
+         let compressed_stream_len = Arc::new(AtomicU64::new(0));
+         let compressed_stream_len2 = compressed_stream_len.clone();
+-        let reused_len = Arc::new(AtomicUsize::new(0));
++        let reused_len = Arc::new(AtomicU64::new(0));
+         let reused_len2 = reused_len.clone();
+ 
+         let append_chunk_path = format!("{}_index", prefix);
+@@ -658,7 +658,7 @@ impl BackupWriter {
+                 let chunk_len = data.len();
+ 
+                 total_chunks.fetch_add(1, Ordering::SeqCst);
+-                let offset = stream_len.fetch_add(chunk_len, Ordering::SeqCst) as u64;
++                let offset = stream_len.fetch_add(chunk_len as _, Ordering::SeqCst) as u64;
+ 
+                 let mut chunk_builder = DataChunkBuilder::new(data.as_ref()).compress(compress);
+ 
+@@ -682,7 +682,7 @@ impl BackupWriter {
+                 let chunk_is_known = known_chunks.contains(digest);
+                 if chunk_is_known {
+                     known_chunk_count.fetch_add(1, Ordering::SeqCst);
+-                    reused_len.fetch_add(chunk_len, Ordering::SeqCst);
++                    reused_len.fetch_add(chunk_len as _, Ordering::SeqCst);
+                     future::ok(MergedChunkInfo::Known(vec![(offset, *digest)]))
+                 } else {
+                     let compressed_stream_len2 = compressed_stream_len.clone();
+@@ -761,7 +761,7 @@ impl BackupWriter {
+                 let chunk_reused = known_chunk_count2.load(Ordering::SeqCst);
+                 let size = stream_len2.load(Ordering::SeqCst);
+                 let size_reused = reused_len2.load(Ordering::SeqCst);
+-                let size_compressed = compressed_stream_len2.load(Ordering::SeqCst) as usize;
++                let size_compressed = compressed_stream_len2.load(Ordering::SeqCst);
+ 
+                 let mut guard = index_csum_2.lock().unwrap();
+                 let csum = guard.take().unwrap().finish();
+diff --git a/src/client/pull.rs b/src/client/pull.rs
+index 95720973..eee0a80a 100644
+--- a/src/server/pull.rs
++++ b/src/server/pull.rs
+@@ -5,7 +5,7 @@ use serde_json::json;
+ use std::collections::{HashMap, HashSet};
+ use std::convert::TryFrom;
+ use std::io::{Seek, SeekFrom};
+-use std::sync::atomic::{AtomicUsize, Ordering};
++use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+ use std::sync::{Arc, Mutex};
+ use std::time::SystemTime;
+ 
+@@ -62,7 +62,7 @@ async fn pull_index_chunks<I: IndexFile>(
+ 
+     let verify_and_write_channel = verify_pool.channel();
+ 
+-    let bytes = Arc::new(AtomicUsize::new(0));
++    let bytes = Arc::new(AtomicU64::new(0));
+ 
+     stream
+         .map(|info| {
+@@ -88,7 +88,7 @@ async fn pull_index_chunks<I: IndexFile>(
+                     verify_and_write_channel.send((chunk, info.digest, info.size()))
+                 })?;
+ 
+-                bytes.fetch_add(raw_size, Ordering::SeqCst);
++                bytes.fetch_add(raw_size as _, Ordering::SeqCst);
+ 
+                 Ok(())
+             })
+diff --git a/pbs-tools/src/format.rs b/pbs-tools/src/format.rs
+index 70d0490b..d7ed971f 100644
+--- a/pbs-tools/src/format.rs
++++ b/pbs-tools/src/format.rs
+@@ -64,7 +64,7 @@ pub fn render_bytes_human_readable(value: &Value, _record: &Value) -> Result<Str
+ }
+ 
+ pub struct HumanByte {
+-    b: usize,
++    b: u64,
+ }
+ impl std::fmt::Display for HumanByte {
+     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+@@ -93,12 +93,12 @@ impl std::fmt::Display for HumanByte {
+ }
+ impl From<usize> for HumanByte {
+     fn from(v: usize) -> Self {
+-        HumanByte { b: v }
++        HumanByte { b: v as u64 }
+     }
+ }
+ impl From<u64> for HumanByte {
+     fn from(v: u64) -> Self {
+-        HumanByte { b: v as usize }
++        HumanByte { b: v as u64 }
+     }
+ }
