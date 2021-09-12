@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [[ $# -ne 1 ]]; then
+  echo "usage: $0 <version>"
+  exit 1
+fi
+
+set -xeo pipefail
+
+mkdir -p tmp
+cd tmp
+
+"../versions/$1/clone.bash"
+../scripts/apply-patches.bash "../versions/$1/server"/*.patch
+../scripts/strip-cargo.bash
