@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -x
+
+sudo tc qdisc del dev ens18 root
+
+if [[ $# -ne 0 ]]; then
+  sudo tc qdisc add dev ens18 root netem delay "$@"
+fi

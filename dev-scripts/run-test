@@ -1,0 +1,46 @@
+#!/bin/bash
+
+set -eo pipefail
+
+cargo build \
+  --manifest-path tmp/proxmox-backup/Cargo.toml \
+  --release \
+  --bin proxmox-backup-api \
+  --bin proxmox-backup-proxy \
+  --bin proxmox-backup-client
+
+TARGET_DIR=tmp/proxmox-backup/target/release
+
+cat <<EOF > $TARGET_DIR/.dockerignore
+*
+!proxmox-backup-api
+!proxmox-backup-proxy
+!runit
+EOF
+
+cat <<EOF > $TARGET_DIR/Dockerfile
+FROM ayufan/proxmox-backup-server:latest
+
+RUN ln -s  /usr/lib/x86_64-linux-gnu/libsgutils2-1.45.so.2.0.0 /usr/lib/x86_64-linux-gnu/libsgutils2.so.2
+RUN ls -al  /usr/lib/x86_64-linux-gnu/libsgutils2.so.2
+ADD proxmox-backup-proxy proxmox-backup-api /usr/lib/x86_64-linux-gnu/proxmox-backup/
+RUN ls -al /usr/lib/*/proxmox-backup/
+
+ADD runit/ /runit/
+RUN sed -i 's/exec //g' /runit/proxmox-backup-api/run ; echo 'echo "API: Kill all!"; kill 1' >> /runit/proxmox-backup-api/run
+EOF
+
+rm -rf $TARGET_DIR/runit
+cp -a runit $TARGET_DIR/
+
+set -x
+
+docker build -t pbs-test "$TARGET_DIR"
+
+docker rm -f pbs-test || true
+docker run -it --net=host --name=pbs-test \
+  --cpu-quota   10000 \
+  --cpu-period 100000 \
+  -v "$PWD/tmp/backups/etc:/etc/proxmox-backup" \
+  -v "$PWD/tmp/backups/data:/backups" \
+  pbs-test

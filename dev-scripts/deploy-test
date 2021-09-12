@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -eo pipefail
+
+TARGET_DIR=tmp/proxmox-backup/target/release
+
+cat <<EOF > $TARGET_DIR/.dockerignore
+*
+!proxmox-backup-api
+!proxmox-backup-proxy
+EOF
+
+cat <<EOF > $TARGET_DIR/Dockerfile
+FROM ayufan/proxmox-backup-server:latest
+
+RUN ln -s  /usr/lib/x86_64-linux-gnu/libsgutils2-1.45.so.2.0.0 /usr/lib/x86_64-linux-gnu/libsgutils2.so.2
+RUN ls -al  /usr/lib/x86_64-linux-gnu/libsgutils2.so.2
+ADD proxmox-backup-proxy proxmox-backup-api /usr/lib/x86_64-linux-gnu/proxmox-backup/
+RUN ls -al /usr/lib/*/proxmox-backup/
+EOF
+
+docker build -t pbs-test "$TARGET_DIR"

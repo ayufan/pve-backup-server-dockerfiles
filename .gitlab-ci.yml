@@ -7,10 +7,10 @@ variables:
   REGISTRY: $CI_REGISTRY_IMAGE/pbs
 
 defaults:
-  image: docker:19.03.12
+  image: docker:20.10
 
   services:
-    - docker:dind
+    - docker:20.10-dind
 
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -39,3 +39,5 @@ all-latest:
   extends: .make_tag_version
   stage: latest
   tags: amd64
+  when: manual
+
