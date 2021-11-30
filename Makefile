@@ -1,6 +1,6 @@
 BUILD_ARCHS = amd64 arm64v8
 REGISTRY ?= ayufan/proxmox-backup-server
-VERSION ?= $(shell ls versions | sort -V | tail -n 1)
+VERSION ?= $(shell ls versions | grep -E -v '.(tmp|debug)' | sort -V | tail -n 1)
 
 TAG ?= $(VERSION)
 
@@ -90,3 +90,15 @@ dev-shell: dev-build
 	-docker rm -f proxmox-backup-$(TAG)-$*
 
 all-deb: $(addsuffix -deb, $(BUILD_ARCHS))
+
+fork-version:
+ifndef NEW_VERSION
+	@echo "Missing 'make fork-version NEW_VERSION=...'"
+	@exit 1
+endif
+
+	rm -rf "versions/v$(NEW_VERSION).tmp"
+	cp -rv "versions/$(VERSION)" "versions/v$(NEW_VERSION).tmp"
+	"versions/v$(NEW_VERSION).tmp/clone.bash" show-sha $(NEW_VERSION) > "versions/v$(NEW_VERSION).tmp/versions.tmp"
+	mv "versions/v$(NEW_VERSION).tmp/versions.tmp" "versions/v$(NEW_VERSION).tmp/versions"
+	mv "versions/v$(NEW_VERSION).tmp" "versions/v$(NEW_VERSION)"
