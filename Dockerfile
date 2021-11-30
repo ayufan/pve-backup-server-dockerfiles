@@ -14,7 +14,7 @@ RUN apt-get -y update && \
 
 RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
   chmod +x rustup-init.sh && \
-  ./rustup-init.sh -y
+  ./rustup-init.sh -y --default-toolchain nightly
 
 WORKDIR /src
 

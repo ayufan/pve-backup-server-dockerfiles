@@ -1,0 +1,317 @@
+diff --git a/examples/tmpfs/fs.rs b/examples/tmpfs/fs.rs
+index 411d7de..6512bb7 100644
+--- a/examples/tmpfs/fs.rs
++++ b/examples/tmpfs/fs.rs
+@@ -18,8 +18,8 @@ fn now() -> Duration {
+         .unwrap()
+ }
+ 
+-fn new_stat(inode: u64, mode: libc::mode_t, uid: libc::uid_t, gid: libc::gid_t) -> libc::stat {
+-    let mut stat: libc::stat = unsafe { mem::zeroed() };
++fn new_stat(inode: u64, mode: libc::mode_t, uid: libc::uid_t, gid: libc::gid_t) -> libc::stat64 {
++    let mut stat: libc::stat64 = unsafe { mem::zeroed() };
+     stat.st_ino = inode;
+     stat.st_mode = mode;
+     stat.st_uid = uid;
+@@ -34,7 +34,7 @@ fn new_stat(inode: u64, mode: libc::mode_t, uid: libc::uid_t, gid: libc::gid_t)
+     stat
+ }
+ 
+-fn new_dir_stat(inode: u64) -> libc::stat {
++fn new_dir_stat(inode: u64) -> libc::stat64 {
+     new_stat(inode, 0o755 | libc::S_IFDIR, 0, 0)
+ }
+ 
+@@ -270,7 +270,7 @@ impl Fs {
+         match &node.content {
+             FsContent::File(file) => {
+                 let new_size = file.write(data, offset)?;
+-                node.stat.write().unwrap().st_size = new_size as libc::off_t;
++                node.stat.write().unwrap().st_size = new_size as libc::off64_t;
+                 Ok(())
+             }
+             _ => io_return!(libc::EBADF),
+@@ -332,7 +332,7 @@ pub struct FsEntry {
+     pub parent: u64,
+     pub lookups: AtomicUsize,
+     pub links: AtomicUsize,
+-    pub stat: RwLock<libc::stat>,
++    pub stat: RwLock<libc::stat64>,
+     pub content: FsContent,
+ }
+ 
+diff --git a/examples/tmpfs/main.rs b/examples/tmpfs/main.rs
+index 4464d94..8006dbd 100644
+--- a/examples/tmpfs/main.rs
++++ b/examples/tmpfs/main.rs
+@@ -51,7 +51,7 @@ async fn main() -> Result<(), Error> {
+     Ok(())
+ }
+ 
+-fn to_entry_param(stat: &libc::stat) -> EntryParam {
++fn to_entry_param(stat: &libc::stat64) -> EntryParam {
+     EntryParam {
+         inode: stat.st_ino,
+         generation: 1,
+@@ -272,7 +272,7 @@ fn handle_setattr<'a>(
+     }
+ 
+     if let Some(size) = request.size() {
+-        stat.st_size = size as libc::off_t;
++        stat.st_size = size as libc::off64_t;
+     }
+ 
+     if let Some(time) = match request.atime() {
+diff --git a/src/requests.rs b/src/requests.rs
+index 4ca5a3e..d6fe4b5 100644
+--- a/src/requests.rs
++++ b/src/requests.rs
+@@ -228,7 +228,7 @@ impl FuseRequest for Getattr {
+ 
+ impl Getattr {
+     /// Send a reply for a `Getattr` request.
+-    pub fn reply(self, stat: &libc::stat, timeout: f64) -> io::Result<()> {
++    pub fn reply(self, stat: &libc::stat64, timeout: f64) -> io::Result<()> {
+         reply_result!(self: sys::fuse_reply_attr(self.request.raw, Some(stat), timeout))
+     }
+ }
+@@ -276,7 +276,7 @@ impl Readdir {
+     pub fn add_entry(
+         &mut self,
+         name: &OsStr,
+-        stat: &libc::stat,
++        stat: &libc::stat64,
+         next: isize,
+     ) -> io::Result<ReplyBufState> {
+         let name = CString::new(name.as_bytes()).map_err(|_| {
+@@ -344,7 +344,7 @@ impl ReaddirPlus {
+     pub fn add_entry(
+         &mut self,
+         name: &OsStr,
+-        stat: &libc::stat,
++        stat: &libc::stat64,
+         next: isize,
+         generation: u64,
+         attr_timeout: f64,
+@@ -593,7 +593,7 @@ impl Setattr {
+     /// `Some` if the atime field should be modified.
+     pub fn atime(&self) -> Option<SetTime> {
+         if (self.to_set & sys::setattr::ATIME) != 0 {
+-            Some(SetTime::from_c(self.stat.st_atime, self.stat.st_atime_nsec))
++            Some(SetTime::from_c(self.stat.st_atime as _, self.stat.st_atime_nsec as _))
+         } else if (self.to_set & sys::setattr::ATIME_NOW) != 0 {
+             Some(SetTime::Now)
+         } else {
+@@ -604,7 +604,7 @@ impl Setattr {
+     /// `Some` if the mtime field should be modified.
+     pub fn mtime(&self) -> Option<SetTime> {
+         if (self.to_set & sys::setattr::MTIME) != 0 {
+-            Some(SetTime::from_c(self.stat.st_mtime, self.stat.st_mtime_nsec))
++            Some(SetTime::from_c(self.stat.st_mtime as _, self.stat.st_mtime_nsec as _))
+         } else if (self.to_set & sys::setattr::MTIME_NOW) != 0 {
+             Some(SetTime::Now)
+         } else {
+@@ -615,14 +615,14 @@ impl Setattr {
+     /// `Some` if the ctime field should be modified.
+     pub fn ctime(&self) -> Option<Duration> {
+         if (self.to_set & sys::setattr::CTIME) != 0 {
+-            Some(c_duration(self.stat.st_ctime, self.stat.st_ctime_nsec))
++            Some(c_duration(self.stat.st_ctime as _, self.stat.st_ctime_nsec as _))
+         } else {
+             None
+         }
+     }
+ 
+     /// Send a reply for a `Setattr` request.
+-    pub fn reply(self, stat: &libc::stat, timeout: f64) -> io::Result<()> {
++    pub fn reply(self, stat: &libc::stat64, timeout: f64) -> io::Result<()> {
+         reply_result!(self: sys::fuse_reply_attr(self.request.raw, Some(stat), timeout))
+     }
+ }
+diff --git a/src/session.rs b/src/session.rs
+index 17dbd6b..afedf1c 100644
+--- a/src/session.rs
++++ b/src/session.rs
+@@ -99,7 +99,7 @@ impl FuseData {
+         request: sys::Request,
+         inode: u64,
+         size: libc::size_t,
+-        offset: libc::off_t,
++        offset: libc::off64_t,
+         _file_info: *const sys::FuseFileInfo,
+     ) {
+         let fuse_data = unsafe { &*(sys::fuse_req_userdata(request) as *mut FuseData) };
+@@ -118,7 +118,7 @@ impl FuseData {
+         request: sys::Request,
+         inode: u64,
+         size: libc::size_t,
+-        offset: libc::off_t,
++        offset: libc::off64_t,
+         _file_info: *const sys::FuseFileInfo,
+     ) {
+         let fuse_data = unsafe { &*(sys::fuse_req_userdata(request) as *mut FuseData) };
+@@ -242,7 +242,7 @@ impl FuseData {
+         request: sys::Request,
+         inode: u64,
+         size: libc::size_t,
+-        offset: libc::off_t,
++        offset: libc::off64_t,
+         file_info: *const sys::FuseFileInfo,
+     ) {
+         let (fuse_data, file_info) = unsafe {
+@@ -278,7 +278,7 @@ impl FuseData {
+     extern "C" fn setattr(
+         request: sys::Request,
+         inode: u64,
+-        stat: *const libc::stat,
++        stat: *const libc::stat64,
+         to_set: libc::c_int,
+         file_info: *const sys::FuseFileInfo,
+     ) {
+@@ -338,7 +338,7 @@ impl FuseData {
+         inode: u64,
+         buffer: *const u8,
+         size: libc::size_t,
+-        offset: libc::off_t,
++        offset: libc::off64_t,
+         file_info: *const sys::FuseFileInfo,
+     ) {
+         let (fuse_data, file_info) = unsafe {
+diff --git a/src/sys.rs b/src/sys.rs
+index f036e02..2174de5 100644
+--- a/src/sys.rs
++++ b/src/sys.rs
+@@ -4,7 +4,7 @@ use std::ffi::CStr;
+ use std::io;
+ use std::marker::PhantomData;
+ 
+-use libc::{c_char, c_int, c_void, off_t, size_t};
++use libc::{c_char, c_int, c_void, off64_t, size_t};
+ 
+ /// Node ID of the root i-node. This is fixed according to the FUSE API.
+ pub const ROOT_ID: u64 = 1;
+@@ -66,7 +66,7 @@ extern "C" {
+     pub fn fuse_session_mount(session: ConstPtr, mountpoint: StrPtr) -> c_int;
+     pub fn fuse_session_unmount(session: ConstPtr);
+     pub fn fuse_session_destroy(session: ConstPtr);
+-    pub fn fuse_reply_attr(req: Request, attr: Option<&libc::stat>, timeout: f64) -> c_int;
++    pub fn fuse_reply_attr(req: Request, attr: Option<&libc::stat64>, timeout: f64) -> c_int;
+     pub fn fuse_reply_err(req: Request, errno: c_int) -> c_int;
+     pub fn fuse_reply_buf(req: Request, buf: *const c_char, size: size_t) -> c_int;
+     pub fn fuse_reply_entry(req: Request, entry: Option<&EntryParam>) -> c_int;
+@@ -78,7 +78,7 @@ extern "C" {
+     pub fn fuse_reply_write(req: Request, count: libc::size_t) -> c_int;
+     pub fn fuse_req_userdata(req: Request) -> MutPtr;
+     pub fn fuse_add_direntry_plus(req: Request, buf: MutStrPtr, bufsize: size_t, name: StrPtr, stbuf: Option<&EntryParam>, off: c_int) -> size_t;
+-    pub fn fuse_add_direntry(req: Request, buf: MutStrPtr, bufsize: size_t, name: StrPtr, stbuf: Option<&libc::stat>, off: c_int) -> size_t;
++    pub fn fuse_add_direntry(req: Request, buf: MutStrPtr, bufsize: size_t, name: StrPtr, stbuf: Option<&libc::stat64>, off: c_int) -> size_t;
+     pub fn fuse_session_process_buf(session: ConstPtr, buf: Option<&FuseBuf>);
+     pub fn fuse_session_receive_buf(session: ConstPtr, buf: Option<&mut FuseBuf>) -> c_int;
+ }
+@@ -117,7 +117,7 @@ default_to_none! {
+         pub lookup:          Option<extern fn(req: Request, parent: u64, name: StrPtr)>,
+         pub forget:          Option<extern fn(req: Request, inode: u64, nlookup: u64)>,
+         pub getattr:         Option<extern fn(req: Request, inode: u64, file_info: *const FuseFileInfo)>,
+-        pub setattr:         Option<extern fn(req: Request, inode: u64, attr: *const libc::stat, to_set: c_int, file_info: *const FuseFileInfo)>,
++        pub setattr:         Option<extern fn(req: Request, inode: u64, attr: *const libc::stat64, to_set: c_int, file_info: *const FuseFileInfo)>,
+         pub readlink:        Option<extern fn(req: Request, inode: u64)>,
+         pub mknod:           Option<extern fn(req: Request, parent: u64, name: StrPtr, mode: libc::mode_t, rdev: libc::dev_t)>,
+         pub mkdir:           Option<extern fn(req: Request, parent: u64, name: StrPtr, mode: libc::mode_t)>,
+@@ -127,13 +127,13 @@ default_to_none! {
+         pub rename:          Option<extern fn(req: Request, parent: u64, name: StrPtr, newparent: u64, newname: StrPtr, flags: c_int)>,
+         pub link:            Option<extern fn(req: Request, inode: u64, newparent: u64, newname: StrPtr)>,
+         pub open:            Option<extern fn(req: Request, inode: u64, file_info: *const FuseFileInfo)>,
+-        pub read:            Option<extern fn(req: Request, inode: u64, size: size_t, offset: libc::off_t, file_info: *const FuseFileInfo)>,
+-        pub write:           Option<extern fn(req: Request, inode: u64, buffer: *const u8, size: size_t, offset: libc::off_t, file_info: *const FuseFileInfo)>,
++        pub read:            Option<extern fn(req: Request, inode: u64, size: size_t, offset: libc::off64_t, file_info: *const FuseFileInfo)>,
++        pub write:           Option<extern fn(req: Request, inode: u64, buffer: *const u8, size: size_t, offset: libc::off64_t, file_info: *const FuseFileInfo)>,
+         pub flush:           Option<extern fn(req: Request, inode: u64, file_info: *const FuseFileInfo)>,
+         pub release:         Option<extern fn(req: Request, inode: u64, file_info: *const FuseFileInfo)>,
+         pub fsync:           Option<extern fn(req: Request, inode: u64, datasync: c_int, file_info: *const FuseFileInfo)>,
+         pub opendir:         Option<extern fn(req: Request, inode: u64, file_info: *const FuseFileInfo)>,
+-        pub readdir:         Option<extern fn(req: Request, inode: u64, size: size_t, offset: off_t, file_info: *const FuseFileInfo)>,
++        pub readdir:         Option<extern fn(req: Request, inode: u64, size: size_t, offset: off64_t, file_info: *const FuseFileInfo)>,
+         pub releasedir:      Option<extern fn(req: Request, inode: u64, file_info: *const FuseFileInfo)>,
+         pub fsyncdir:        Option<extern fn(req: Request, inode: u64, datasync: c_int, file_info: *const FuseFileInfo)>,
+         pub statfs:          Option<extern fn(req: Request, inode: u64)>,
+@@ -148,13 +148,13 @@ default_to_none! {
+         pub bmap:            Option<extern fn(req: Request, inode: u64, blocksize: size_t, idx: u64)>,
+         pub ioctl:           Option<extern fn(req: Request, inode: u64, cmd: c_int, arg: MutPtr, file_info: *const FuseFileInfo, flags: c_int, in_buf: ConstPtr, in_bufsz: size_t, out_bufsz: size_t)>,
+         pub poll:            Option<extern fn(req: Request, inode: u64, file_info: *const FuseFileInfo, pollhandle: MutPtr)>,
+-        pub write_buf:       Option<extern fn(req: Request, inode: u64, bufv: MutPtr, offset: libc::off_t, file_info: *const FuseFileInfo)>,
+-        pub retrieve_reply:  Option<extern fn(req: Request, cookie: ConstPtr, inode: u64, offset: libc::off_t, bufv: MutPtr)>,
++        pub write_buf:       Option<extern fn(req: Request, inode: u64, bufv: MutPtr, offset: libc::off64_t, file_info: *const FuseFileInfo)>,
++        pub retrieve_reply:  Option<extern fn(req: Request, cookie: ConstPtr, inode: u64, offset: libc::off64_t, bufv: MutPtr)>,
+         pub forget_multi:    Option<extern fn(req: Request, count: size_t, forgets: MutPtr)>,
+         pub flock:           Option<extern fn(req: Request, inode: u64, file_info: *const FuseFileInfo, op: c_int)>,
+-        pub fallocate:       Option<extern fn(req: Request, inode: u64, mode: c_int, offset: libc::off_t, length: libc::off_t, file_info: *const FuseFileInfo)>,
+-        pub readdirplus:     Option<extern fn(req: Request, inode: u64, size: size_t, offset: off_t, file_info: *const FuseFileInfo)>,
+-        pub copy_file_range: Option<extern fn(req: Request, ino_in: u64, off_in: libc::off_t, fi_in: *const FuseFileInfo, ino_out: u64, off_out: libc::off_t, fi_out: *const FuseFileInfo, len: size_t, flags: c_int)>,
++        pub fallocate:       Option<extern fn(req: Request, inode: u64, mode: c_int, offset: libc::off64_t, length: libc::off64_t, file_info: *const FuseFileInfo)>,
++        pub readdirplus:     Option<extern fn(req: Request, inode: u64, size: size_t, offset: off64_t, file_info: *const FuseFileInfo)>,
++        pub copy_file_range: Option<extern fn(req: Request, ino_in: u64, off_in: libc::off64_t, fi_in: *const FuseFileInfo, ino_out: u64, off_out: libc::off64_t, fi_out: *const FuseFileInfo, len: size_t, flags: c_int)>,
+     }
+ }
+ 
+@@ -163,7 +163,7 @@ default_to_none! {
+ pub struct EntryParam {
+     pub inode: u64,
+     pub generation: u64,
+-    pub attr: libc::stat,
++    pub attr: libc::stat64,
+     pub attr_timeout: f64,
+     pub entry_timeout: f64,
+ }
+@@ -171,7 +171,7 @@ pub struct EntryParam {
+ impl EntryParam {
+     /// A simple entry has a maximum attribute/entry timeout value and always a generatio of 1.
+     /// This is a convenience method used since we mostly use this for static unchangable archives.
+-    pub fn simple(inode: u64, attr: libc::stat) -> Self {
++    pub fn simple(inode: u64, attr: libc::stat64) -> Self {
+         Self {
+             inode,
+             generation: 1,
+@@ -204,7 +204,7 @@ pub struct FuseBuf {
+     /// File position
+     ///
+     /// Used if FUSE_BUF_FD_SEEK flag is set.
+-    pos: off_t,
++    pos: off64_t,
+ }
+ 
+ impl Drop for FuseBuf {
+@@ -345,7 +345,7 @@ impl ReplyBuf {
+         self.after_add(size)
+     }
+ 
+-    pub fn add_readdir(&mut self, name: &CStr, attr: &libc::stat, next: isize) -> ReplyBufState {
++    pub fn add_readdir(&mut self, name: &CStr, attr: &libc::stat64, next: isize) -> ReplyBufState {
+         let size = unsafe {
+             let buffer = &mut self.buffer[self.filled..];
+             fuse_add_direntry(
+diff --git a/src/util.rs b/src/util.rs
+index c77c210..6df4f14 100644
+--- a/src/util.rs
++++ b/src/util.rs
+@@ -5,17 +5,17 @@ use std::fmt;
+ /// Helper for `Debug` derives.
+ #[derive(Clone)]
+ pub struct Stat {
+-    stat: libc::stat,
++    stat: libc::stat64,
+ }
+ 
+-impl From<libc::stat> for Stat {
+-    fn from(stat: libc::stat) -> Self {
++impl From<libc::stat64> for Stat {
++    fn from(stat: libc::stat64) -> Self {
+         Self { stat }
+     }
+ }
+ 
+ impl std::ops::Deref for Stat {
+-    type Target = libc::stat;
++    type Target = libc::stat64;
+ 
+     fn deref(&self) -> &Self::Target {
+         &self.stat

@@ -9,6 +9,8 @@ services:
       - pbs_etc:/etc/proxmox-backup
       - pbs_logs:/var/log/proxmox-backup
       - pbs_lib:/var/lib/proxmox-backup
+    tmpfs:
+      - /run
     restart: unless-stopped
     stop_signal: SIGHUP
 

@@ -1,5 +1,5 @@
 ARG DOCKER_ARCH
-FROM ${DOCKER_ARCH}/debian:bullseye AS builder
+FROM ${DOCKER_ARCH}/debian:bookworm AS builder
 
 RUN apt-get -y update && \
   apt-get -y install \
@@ -39,10 +39,9 @@ RUN cd proxmox-widget-toolkit/ && make deb && dpkg -i proxmox-widget-toolkit-dev
 RUN apt-get -y build-dep $PWD/proxmox-backup
 
 # Build
-RUN cd proxmox-backup/ && \
-  cargo build --release --bin pxar && \
-  cargo build --release --bin dump-catalog-shell-cli && \
-  cargo build --release --bin proxmox-backup-client
+RUN \
+  cargo build --manifest-path proxmox-backup/proxmox-backup-client/Cargo.toml --release && \
+  cargo build --manifest-path proxmox-backup/pxar-bin/Cargo.toml --release
 
 # Bundle client
 RUN /scripts/bundle-client.bash

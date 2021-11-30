@@ -1,0 +1,48 @@
+commit 1b425b8fd31147524f81c549ccbf0318a75f1c9e
+Author: Kamil Trzciński <ayufan@ayufan.eu>
+Date:   Sat May 1 14:40:06 2021 +0200
+
+    Support local compile
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 2804632c..2854259b 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -105,7 +105,7 @@ pbs-tools = { path = "pbs-tools" }
+ 
+ # Local path overrides
+ # NOTE: You must run `cargo update` after changing this for it to take effect!
+-[patch.crates-io]
++#[patch.crates-io]
+ #proxmox = { path = "../proxmox/proxmox" }
+ #proxmox-http = { path = "../proxmox/proxmox-http" }
+ #proxmox-tfa = { path = "../proxmox/proxmox-tfa" }
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -134,3 +134,26 @@ pbs-tape = { path = "pbs-tape" }
+ [features]
+ default = []
+ #valgrind = ["valgrind_request"]
++
++[patch.crates-io]
++proxmox = { path = "../proxmox/proxmox" }
++proxmox-fuse = { path = "../proxmox-fuse" }
++pxar = { path = "../pxar" }
++proxmox-acme-rs = { path = "../proxmox-acme-rs" }
++proxmox-openid = { path = "../proxmox-openid-rs" }
++proxmox-apt = { path = "../proxmox-apt" }
++proxmox-api-macro = { path = "../proxmox/proxmox-api-macro" }
++proxmox-async = { path = "../proxmox/proxmox-async" }
++proxmox-borrow = { path = "../proxmox/proxmox-borrow" }
++proxmox-http = { path = "../proxmox/proxmox-http" }
++proxmox-io = { path = "../proxmox/proxmox-io" }
++proxmox-lang = { path = "../proxmox/proxmox-lang" }
++proxmox-router = { path = "../proxmox/proxmox-router" }
++proxmox-schema = { path = "../proxmox/proxmox-schema" }
++proxmox-section-config = { path = "../proxmox/proxmox-section-config" }
++proxmox-shared-memory = { path = "../proxmox/proxmox-shared-memory" }
++proxmox-sortable-macro = { path = "../proxmox/proxmox-sortable-macro" }
++proxmox-sys = { path = "../proxmox/proxmox-sys" }
++proxmox-tfa = { path = "../proxmox/proxmox-tfa" }
++proxmox-time = { path = "../proxmox/proxmox-time" }
++proxmox-uuid = { path = "../proxmox/proxmox-uuid" }

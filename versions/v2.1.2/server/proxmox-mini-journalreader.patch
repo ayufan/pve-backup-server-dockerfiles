@@ -1,0 +1,29 @@
+From ec5a9825066665ae18d939ad906013f2502f463c Mon Sep 17 00:00:00 2001
+From: Kamil Trzcinski <ayufan@ayufan.eu>
+Date: Mon, 7 Dec 2020 16:54:10 +0000
+Subject: [PATCH] Fix getopt usage
+
+---
+ src/mini-journalreader.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/mini-journalreader.c b/src/mini-journalreader.c
+index 92176ac..f92d30c 100644
+--- a/src/mini-journalreader.c
++++ b/src/mini-journalreader.c
+@@ -213,11 +213,11 @@ int main(int argc, char *argv[]) {
+     const char *endcursor = NULL;
+     uint64_t begin = 0;
+     uint64_t end = 0;
+-    char c;
++    int c;
+ 
+     progname = argv[0];
+ 
+-    while ((c = (char)getopt (argc, argv, "b:e:d:n:f:t:h")) != -1) {
++    while ((c = getopt (argc, argv, "b:e:d:n:f:t:h")) != -1) {
+         switch (c) {
+             case 'b':
+                 begin = arg_to_uint64(optarg);
+-- 
+2.20.1

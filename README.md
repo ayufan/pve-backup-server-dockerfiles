@@ -34,6 +34,13 @@ There are some features missing, ex.:
 
 - ZFS (it is not installed in a container)
 
+## Changelog
+
+- v2.1.2 - 30 Nov, 2021 - this version requires `tmpfs` to be used for `/run`. Inspect `docker-compose.yml`
+- v2.0.7 - Jul 31, 2021
+- v2.0.4 - Jul 14, 2021
+- v1.1.9 - Jun 14, 2021
+
 ## Configure
 
 ### 1. Add to Proxmox VE
@@ -177,5 +184,5 @@ and install on Debian Bullseye.
 
 ## Author
 
-This is just built by Kamil Trzciński, 2020
+This is just built by Kamil Trzciński, 2020-2021
 from the sources found on http://git.proxmox.com/.
