@@ -102,3 +102,9 @@ endif
 	"versions/v$(NEW_VERSION).tmp/clone.bash" show-sha $(NEW_VERSION) > "versions/v$(NEW_VERSION).tmp/versions.tmp"
 	mv "versions/v$(NEW_VERSION).tmp/versions.tmp" "versions/v$(NEW_VERSION).tmp/versions"
 	mv "versions/v$(NEW_VERSION).tmp" "versions/v$(NEW_VERSION)"
+
+tmp-env:
+	mkdir -p "tmp/$(VERSION)"
+	cd "tmp/$(VERSION)" && ../../versions/$(VERSION)/clone.bash
+	cd "tmp/$(VERSION)" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch
+	cd "tmp/$(VERSION)" && ../../scripts/strip-cargo.bash
