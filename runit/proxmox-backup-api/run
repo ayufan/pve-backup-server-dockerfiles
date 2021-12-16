@@ -4,8 +4,13 @@ if [[ -n "$TZ" ]]; then
   echo "$TZ" > /etc/timezone
 fi
 
+# ensure that etc is owned by backup (due to configs)
 chown backup:backup /etc/proxmox-backup
 chmod 700 /etc/proxmox-backup
+
+# ensure that lib is owned by backup (due to jobstates and rrdb)
+chown backup:backup /var/lib/proxmox-backup
+chmod 700 /var/lib/proxmox-backup
 
 if [[ ! -e /etc/proxmox-backup/csrf.key ]] && [[ ! -e /etc/proxmox-backup/.initialized ]]; then
   echo 'Copying defaults into `/etc/proxmox-backup/`'
