@@ -12,6 +12,10 @@ chmod 700 /etc/proxmox-backup
 chown backup:backup /var/lib/proxmox-backup
 chmod 700 /var/lib/proxmox-backup
 
+# ensure that logs are owned by backup
+chown backup:backup /var/log/proxmox-backup
+chmod 700 /var/log/proxmox-backup
+
 if [[ ! -e /etc/proxmox-backup/csrf.key ]] && [[ ! -e /etc/proxmox-backup/.initialized ]]; then
   echo 'Copying defaults into `/etc/proxmox-backup/`'
   cp -rv /etc/proxmox-backup-default/. /etc/proxmox-backup/
