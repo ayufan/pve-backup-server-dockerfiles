@@ -43,19 +43,22 @@ amd64-client: DOCKERFILE=Dockerfile.client-buster
 %-push: %-build
 	docker push $(REGISTRY):$(TAG)-$*
 
+%-pull:
+	docker pull $(REGISTRY):$(TAG)-$*
+
 all-build: $(addsuffix -build, $(BUILD_ARCHS))
 
 all-push: $(addsuffix -push, $(BUILD_ARCHS))
 	make all-manifest
 
-all-manifest:
+all-manifest: $(addsuffix -pull, $(BUILD_ARCHS))
 	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
 	-rm -rf ~/.docker/manifests
 	docker manifest create $(REGISTRY):$(TAG) \
 		$(addprefix $(REGISTRY):$(TAG)-, $(BUILD_ARCHS))
 	docker manifest push $(REGISTRY):$(TAG)
 
-%-latest:
+%-latest: %-pull
 	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):latest-$*
 	docker push $(REGISTRY):latest-$*
 
