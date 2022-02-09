@@ -1,10 +1,15 @@
 BUILD_ARCHS = amd64 arm64v8
+CLIENT_BUILD_ARCHS = amd64 arm64v8 arm32v7
 REGISTRY ?= ayufan/proxmox-backup-server
 VERSION ?= $(shell ls versions | grep -E -v '.(tmp|debug)' | sort -V | tail -n 1)
 
 TAG ?= $(VERSION)
 
 .PHONY: dev-run dev-shell all-deb all-build all-push
+
+ifneq (,$(wildcard .env.mk))
+include .env.mk
+endif
 
 arm32v7-build: DOCKER_ARCH=arm32v7
 arm64v8-build: DOCKER_ARCH=arm64v8
@@ -38,13 +43,16 @@ amd64-client: DOCKERFILE=Dockerfile.client
 		-f $(DOCKERFILE) \
 		.
 
-	docker run --rm $(REGISTRY):$(TAG)-client-$* sh -c 'cat /proxmox-backup-client*.tgz' > proxmox-backup-client-$(VERSION)-$*.tgz
+	mkdir -p release/$(TAG)
+	docker run --rm $(REGISTRY):$(TAG)-client-$* sh -c 'cat /proxmox-backup-client*.tgz' > release/$(TAG)/proxmox-backup-client-$(VERSION)-$*.tgz
 
 %-push: %-build
 	docker push $(REGISTRY):$(TAG)-$*
 
 %-pull:
 	docker pull $(REGISTRY):$(TAG)-$*
+
+all-client: $(addsuffix -client, $(CLIENT_BUILD_ARCHS))
 
 all-build: $(addsuffix -build, $(BUILD_ARCHS))
 
@@ -78,13 +86,15 @@ dev-shell: dev-build
 	docker run --name=proxmox-backup -it --rm $(REGISTRY):$(TAG)-dev /bin/bash
 
 %-deb:
-	mkdir -p deb/$(TAG)
+	mkdir -p release/$(TAG)
 	-docker rm -f proxmox-backup-$(TAG)-$*
 	docker create --name=proxmox-backup-$(TAG)-$* $(REGISTRY):$(TAG)-$*
-	docker cp proxmox-backup-$(TAG)-$*:/src/ deb/$(TAG)
+	docker cp proxmox-backup-$(TAG)-$*:/src/ release/$(TAG)
 	-docker rm -f proxmox-backup-$(TAG)-$*
 
 all-deb: $(addsuffix -deb, $(BUILD_ARCHS))
+
+all-release: all-deb all-client
 
 fork-version:
 ifndef NEW_VERSION
