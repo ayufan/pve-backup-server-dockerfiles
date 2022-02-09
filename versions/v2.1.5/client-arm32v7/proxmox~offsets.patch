@@ -1,0 +1,102 @@
+diff --git a/proxmox-sys/src/linux/timer.rs b/proxmox-sys/src/linux/timer.rs
+index 40877a1..6c2dabb 100644
+--- a/proxmox-sys/src/linux/timer.rs
++++ b/proxmox-sys/src/linux/timer.rs
+@@ -106,8 +106,8 @@ fn opt_duration_to_timespec(v: Option<Duration>) -> libc::timespec {
+             tv_nsec: 0,
+         },
+         Some(value) => libc::timespec {
+-            tv_sec: value.as_secs() as i64,
+-            tv_nsec: value.subsec_nanos() as i64,
++            tv_sec: value.as_secs() as _,
++            tv_nsec: value.subsec_nanos() as _,
+         },
+     }
+ }
+diff --git a/proxmox-time/src/posix.rs b/proxmox-time/src/posix.rs
+index 31174bd..20bec7f 100644
+--- a/proxmox-time/src/posix.rs
++++ b/proxmox-time/src/posix.rs
+@@ -15,7 +15,7 @@ pub fn timelocal(t: &mut libc::tm) -> Result<i64, Error> {
+     if epoch == -1 {
+         bail!("libc::mktime failed for {:?}", t);
+     }
+-    Ok(epoch)
++    Ok(epoch as _)
+ }
+ 
+ /// Safe bindings to libc timegm
+@@ -29,7 +29,7 @@ pub fn timegm(t: &mut libc::tm) -> Result<i64, Error> {
+     if epoch == -1 {
+         bail!("libc::timegm failed for {:?}", t);
+     }
+-    Ok(epoch)
++    Ok(epoch as _)
+ }
+ 
+ fn new_libc_tm() -> libc::tm {
+@@ -53,7 +53,7 @@ pub fn localtime(epoch: i64) -> Result<libc::tm, Error> {
+     let mut result = new_libc_tm();
+ 
+     unsafe {
+-        if libc::localtime_r(&epoch, &mut result).is_null() {
++        let epocht = epoch as libc::time_t; if libc::localtime_r(&epocht, &mut result).is_null() {
+             bail!("libc::localtime failed for '{}'", epoch);
+         }
+     }
+@@ -66,7 +66,7 @@ pub fn gmtime(epoch: i64) -> Result<libc::tm, Error> {
+     let mut result = new_libc_tm();
+ 
+     unsafe {
+-        if libc::gmtime_r(&epoch, &mut result).is_null() {
++        let epocht = epoch as libc::time_t; if libc::gmtime_r(&epocht, &mut result).is_null() {
+             bail!("libc::gmtime failed for '{}'", epoch);
+         }
+     }
+diff --git a/proxmox-sys/src/process_locker.rs b/proxmox-sys/src/process_locker.rs
+index 6ab2e1c1..e2f09f18 100644
+--- a/proxmox-sys/src/process_locker.rs
++++ b/proxmox-sys/src/process_locker.rs
+@@ -149,7 +149,7 @@ impl ProcessLocker {
+ 
+         let now = unsafe { libc::time(std::ptr::null_mut()) };
+ 
+-        data.shared_guard_list.insert(guard.guard_id, now);
++        data.shared_guard_list.insert(guard.guard_id, now as _);
+ 
+         Ok(guard)
+     }
+diff --git a/proxmox-shared-memory/src/lib.rs b/proxmox-shared-memory/src/lib.rs
+index 7edfca6..6f3a9b8 100644
+--- a/proxmox-shared-memory/src/lib.rs
++++ b/proxmox-shared-memory/src/lib.rs
+@@ -5,6 +5,7 @@ use std::os::unix::ffi::OsStrExt;
+ use std::os::unix::io::AsRawFd;
+ use std::os::unix::io::FromRawFd;
+ use std::path::Path;
++use std::convert::TryInto;
+ 
+ use anyhow::{bail, format_err, Error};
+ use nix::errno::Errno;
+@@ -142,7 +143,7 @@ impl<T: Sized + Init> SharedMemory<T> {
+         let size = std::mem::size_of::<T>();
+         let size = up_to_page_size(size);
+ 
+-        nix::unistd::ftruncate(file.as_raw_fd(), size as i64)?;
++        nix::unistd::ftruncate(file.as_raw_fd(), (size as i64).try_into().unwrap())?;
+ 
+         // link the file into place:
+         let proc_path = format!("/proc/self/fd/{}\0", file.as_raw_fd());
+diff --git a/proxmox-sys/src/fs/mod.rs b/proxmox-sys/src/fs/mod.rs
+index ee4ef42..665d216 100644
+--- a/proxmox-sys/src/fs/mod.rs
++++ b/proxmox-sys/src/fs/mod.rs
+@@ -135,7 +135,7 @@ pub fn fs_info<P: ?Sized + nix::NixPath>(path: &P) -> nix::Result<FileSystemInfo
+         available: stat.f_bavail * bsize,
+         total_inodes: stat.f_files,
+         free_inodes: stat.f_ffree,
+-        fs_type: stat.f_type,
++        fs_type: stat.f_type as i64,
+         fs_id: stat.f_fsid,
+     })
+ }
