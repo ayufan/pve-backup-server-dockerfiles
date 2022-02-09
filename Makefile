@@ -94,7 +94,7 @@ endif
 
 	rm -rf "versions/v$(NEW_VERSION).tmp"
 	cp -rv "versions/$(VERSION)" "versions/v$(NEW_VERSION).tmp"
-	"versions/v$(NEW_VERSION).tmp/clone.bash" show-sha $(NEW_VERSION) > "versions/v$(NEW_VERSION).tmp/versions.tmp"
+	"versions/v$(NEW_VERSION).tmp/clone.bash" show-sha $(firstword $(NEW_SHA) $(NEW_VERSION)) > "versions/v$(NEW_VERSION).tmp/versions.tmp"
 	mv "versions/v$(NEW_VERSION).tmp/versions.tmp" "versions/v$(NEW_VERSION).tmp/versions"
 	mv "versions/v$(NEW_VERSION).tmp" "versions/v$(NEW_VERSION)"
 
