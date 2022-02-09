@@ -20,6 +20,8 @@ WORKDIR /src
 
 RUN /usr/bin/rustc --version
 RUN /root/.cargo/bin/rustc --version
+RUN git config --global user.email "docker@compile.dev" && \
+  git config --global user.name "Docker Compile"
 
 # Clone all sources
 ARG VERSION=master

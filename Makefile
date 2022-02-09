@@ -21,13 +21,13 @@ dev-build: DOCKER_ARCH=amd64
 		.
 
 arm32v7-client: DOCKER_ARCH=arm32v7
-arm32v7-client: DOCKERFILE=Dockerfile.client-buster
+arm32v7-client: DOCKERFILE=Dockerfile.client
 
 arm64v8-client: DOCKER_ARCH=arm64v8
-arm64v8-client: DOCKERFILE=Dockerfile.client-buster
+arm64v8-client: DOCKERFILE=Dockerfile.client
 
 amd64-client: DOCKER_ARCH=amd64
-amd64-client: DOCKERFILE=Dockerfile.client-buster
+amd64-client: DOCKERFILE=Dockerfile.client
 
 %-client:
 	docker build \
@@ -101,5 +101,5 @@ endif
 tmp-env:
 	mkdir -p "tmp/$(VERSION)"
 	cd "tmp/$(VERSION)" && ../../versions/$(VERSION)/clone.bash
-	cd "tmp/$(VERSION)" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch
+	cd "tmp/$(VERSION)" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch ../../versions/$(VERSION)/client*/*.patch
 	cd "tmp/$(VERSION)" && ../../scripts/strip-cargo.bash
