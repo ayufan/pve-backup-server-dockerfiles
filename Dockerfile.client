@@ -29,17 +29,6 @@ ARG DOCKER_ARCH
 RUN /scripts/apply-patches.bash /patches/server/*.patch /patches/client/*.patch /patches/client-${DOCKER_ARCH}/*.patch
 RUN /scripts/strip-cargo.bash
 
-# A first required dep
-RUN apt-get -y build-dep $PWD/pve-eslint
-RUN cd pve-eslint/ && make dinstall
-
-# Install dev dependencies of widget toolkit
-RUN apt-get -y build-dep $PWD/proxmox-widget-toolkit
-RUN cd proxmox-widget-toolkit/ && make deb && dpkg -i proxmox-widget-toolkit-dev*.deb && mv *.deb ../
-
-# Deps for all rest
-RUN apt-get -y build-dep $PWD/proxmox-backup
-
 # Build
 RUN \
   cargo build --manifest-path proxmox-backup/proxmox-backup-client/Cargo.toml --release && \
