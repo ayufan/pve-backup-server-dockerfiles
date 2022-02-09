@@ -32,10 +32,12 @@ After that change a password.
 
 There are some features missing, ex.:
 
-- ZFS (it is not installed in a container)
+- ZFS: it is not installed in a container
+- Shell: since the PVE (not PAM) authentication is being used, but shell access does not make sense in container environment
 
 ## Changelog
 
+- v2.1.5 - 10 Feb, 2022 - also fixes bug with missing ksm
 - v2.1.2 - 30 Nov, 2021 - this version requires `tmpfs` to be used for `/run`. Inspect `docker-compose.yml`
 - v2.0.7 - Jul 31, 2021
 - v2.0.4 - Jul 14, 2021
