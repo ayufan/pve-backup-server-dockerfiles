@@ -30,10 +30,11 @@ After that change a password.
 
 ## Features
 
-There are some features missing, ex.:
+The core features should work, but there are ones do not work due to container architecture:
 
 - ZFS: it is not installed in a container
-- Shell: since the PVE (not PAM) authentication is being used, but shell access does not make sense in container environment
+- Shell: since the PVE (not PAM) authentication is being used, and since the shell access does not make sense in an ephemeral container environment
+- PAM authentication: since containers are by definition ephemeral and no `/etc/` configs are being persisted
 
 ## Changelog
 
