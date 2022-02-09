@@ -12,5 +12,7 @@ for patch; do
   patch_dest=${patch_dest%%.*}
 
   echo "$patch => $patch_dest..."
-  patch -p1 -d $patch_dest < "$patch"
+  patch -p1 -d "$patch_dest" < "$patch"
+  git -C "$patch_dest" add .
+  git -C "$patch_dest" commit -m "$(basename $patch)"
 done

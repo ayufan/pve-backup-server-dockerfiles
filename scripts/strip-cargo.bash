@@ -12,4 +12,9 @@ for package in *; do
     echo "Stripping '$package/debian/control'..."
     sed -i 's/librust-.*-dev[^,]*/libstd-rust-dev/g' "$package/debian/control"
   fi
+
+  git -C "$package" add .
+  if ! git -C "$package" diff --cached --exit-code --quiet; then
+    git -C "$package" commit -m "strip-cargo.bash"
+  fi
 done
