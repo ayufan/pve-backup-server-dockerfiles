@@ -58,7 +58,7 @@ docker-compose exec server proxmox-backup-manager cert info | grep Fingerprint
 
 ### 2. Add a new directory to store data
 
-Create a new file: `docker-compose.override.yml`:
+Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
 version: '2.1'
@@ -83,7 +83,7 @@ Then, add a new datastore in a PBS: `https://<IP>:8007/`.
 
 If you are running in Docker it might be advised to configure timezone.
 
-Create a new file: `docker-compose.override.yml`:
+Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
 version: '2.1'
@@ -94,9 +94,28 @@ services:
       TZ: Europe/Warsaw
 ```
 
-### 4. Persist config, graphs, and logs (optional, but advised)
+### 4. Allow smartctl access
 
-Create a new file: `docker-compose.override.yml`:
+To be able to view SMART parameters via UI you need to expose drives and give container
+a special capability.
+
+Create a new file (or merge with existing): `docker-compose.override.yml`:
+
+```yaml
+version: '2.1'
+
+services:
+  pbs:
+    devices:
+      - /dev/sda
+      - /dev/sdb
+    cap_add:
+      - SYS_RAWIO
+```
+
+### 5. Persist config, graphs, and logs (optional, but advised)
+
+Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
 version: '2.1'
