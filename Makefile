@@ -5,7 +5,7 @@ VERSION ?= $(shell ls versions | grep -E -v '.(tmp|debug)' | sort -V | tail -n 1
 
 TAG ?= $(VERSION)
 
-.PHONY: dev-run dev-shell all-deb all-build all-push
+.PHONY: dev-run dev-shell all-deb all-build all-push all-client
 
 ifneq (,$(wildcard .env.mk))
 include .env.mk
@@ -113,3 +113,25 @@ tmp-env:
 	cd "tmp/$(VERSION)" && ../../versions/$(VERSION)/clone.bash
 	cd "tmp/$(VERSION)" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch ../../versions/$(VERSION)/client*/*.patch
 	cd "tmp/$(VERSION)" && ../../scripts/strip-cargo.bash
+
+# GitHub Releases
+
+export GITHUB_USER ?= ayufan
+export GITHUB_REPO ?= pve-backup-server-dockerfiles
+
+github-upload-all:
+	@set -e; for file in release/$(TAG)/*.tgz release/$(TAG)/*/*.deb; do \
+		echo "Uploading $$file..."; \
+		github-release upload -t $(TAG) -R -n $$(basename $$file) -f $$file; \
+	done
+
+github-pre-release: all-release all-push
+	go get github.com/github-release/github-release
+	git push
+	github-release info -t $(TAG) || github-release release -t $(TAG) --draft
+	make github-upload-all
+	github-release edit -t $(TAG) --pre-release
+
+github-latest-release:
+	github-release edit -t $(TAG)
+	make all-latest
