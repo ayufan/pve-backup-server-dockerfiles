@@ -5,18 +5,20 @@ VERSION ?= $(shell ls versions | grep -E -v '.(tmp|debug)' | sort -V | tail -n 1
 
 TAG ?= $(VERSION)
 
-.PHONY: dev-run dev-shell all-deb all-build all-push all-client
-
 ifneq (,$(wildcard .env.mk))
 include .env.mk
 endif
 
-arm32v7-build: DOCKER_ARCH=arm32v7
-arm64v8-build: DOCKER_ARCH=arm64v8
-amd64-build: DOCKER_ARCH=amd64
-dev-build: DOCKER_ARCH=amd64
+# Architectures
 
-%-build:
+arm32v7-%: DOCKER_ARCH=arm32v7
+arm64v8-%: DOCKER_ARCH=arm64v8
+amd64-%: DOCKER_ARCH=amd64
+dev-%: DOCKER_ARCH=amd64
+
+# Docker Images
+
+%-docker-build:
 	docker build \
 		--tag $(REGISTRY):$(TAG)-$* \
 		--build-arg ARCH=$(DOCKER_ARCH)/ \
@@ -25,14 +27,38 @@ dev-build: DOCKER_ARCH=amd64
 		-f Dockerfile \
 		.
 
-arm32v7-client: DOCKER_ARCH=arm32v7
-arm32v7-client: DOCKERFILE=Dockerfile.client
+docker-build: $(addsuffix -build, $(BUILD_ARCHS))
 
-arm64v8-client: DOCKER_ARCH=arm64v8
-arm64v8-client: DOCKERFILE=Dockerfile.client
+# Docker Hub Images
 
-amd64-client: DOCKER_ARCH=amd64
-amd64-client: DOCKERFILE=Dockerfile.client
+%-dockerhub: %-docker-build
+	docker push $(REGISTRY):$(TAG)-$*
+
+%-dockerhub-pull:
+	docker pull $(REGISTRY):$(TAG)-$*
+
+dockerhub-manifest: $(addsuffix -dockerhub-pull, $(BUILD_ARCHS))
+	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
+	-rm -rf ~/.docker/manifests
+	docker manifest create $(REGISTRY):$(TAG) \
+		$(addprefix $(REGISTRY):$(TAG)-, $(BUILD_ARCHS))
+	docker manifest push $(REGISTRY):$(TAG)
+
+dockerhub: $(addsuffix -dockerhub, $(BUILD_ARCHS))
+	make dockerhub-manifest
+
+%-dockerhub-latest-release: %-dockerhub-pull
+	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):latest-$*
+	docker push $(REGISTRY):latest-$*
+
+dockerhub-latest-release: $(addsuffix -dockerhub-latest-release, $(BUILD_ARCHS))
+	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
+	-rm -rf ~/.docker/manifests
+	docker manifest create $(REGISTRY):latest \
+		$(addprefix $(REGISTRY):$(TAG)-, $(BUILD_ARCHS))
+	docker manifest push $(REGISTRY):latest
+
+# Client Binaries
 
 %-client:
 	docker build \
@@ -40,61 +66,42 @@ amd64-client: DOCKERFILE=Dockerfile.client
 		--build-arg DOCKER_ARCH=$(DOCKER_ARCH) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
-		-f $(DOCKERFILE) \
+		-f Dockerfile.client \
 		.
 
 	mkdir -p release/$(TAG)
 	docker run --rm $(REGISTRY):$(TAG)-client-$* sh -c 'cat /proxmox-backup-client*.tgz' > release/$(TAG)/proxmox-backup-client-$(VERSION)-$*.tgz
 
-%-push: %-build
-	docker push $(REGISTRY):$(TAG)-$*
+client: $(addsuffix -client, $(CLIENT_BUILD_ARCHS))
 
-%-pull:
-	docker pull $(REGISTRY):$(TAG)-$*
+# Debian Packages
 
-all-client: $(addsuffix -client, $(CLIENT_BUILD_ARCHS))
-
-all-build: $(addsuffix -build, $(BUILD_ARCHS))
-
-all-push: $(addsuffix -push, $(BUILD_ARCHS))
-	make all-manifest
-
-all-manifest: $(addsuffix -pull, $(BUILD_ARCHS))
-	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
-	-rm -rf ~/.docker/manifests
-	docker manifest create $(REGISTRY):$(TAG) \
-		$(addprefix $(REGISTRY):$(TAG)-, $(BUILD_ARCHS))
-	docker manifest push $(REGISTRY):$(TAG)
-
-%-latest: %-pull
-	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):latest-$*
-	docker push $(REGISTRY):latest-$*
-
-all-latest: $(addsuffix -latest, $(BUILD_ARCHS))
-	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
-	-rm -rf ~/.docker/manifests
-	docker manifest create $(REGISTRY):latest \
-		$(addprefix $(REGISTRY):$(TAG)-, $(BUILD_ARCHS))
-	docker manifest push $(REGISTRY):latest
-
-dev-run: dev-build
-	-docker rm -f proxmox-backup
-	docker run --name=proxmox-backup --net=host --rm $(REGISTRY):$(TAG)-dev
-
-dev-shell: dev-build
-	-docker rm -f proxmox-backup
-	docker run --name=proxmox-backup -it --rm $(REGISTRY):$(TAG)-dev /bin/bash
-
-%-deb:
+%-deb: %-dockerhub-pull
 	mkdir -p release/$(TAG)
 	-docker rm -f proxmox-backup-$(TAG)-$*
 	docker create --name=proxmox-backup-$(TAG)-$* $(REGISTRY):$(TAG)-$*
 	docker cp proxmox-backup-$(TAG)-$*:/src/. release/$(TAG)/$*
 	-docker rm -f proxmox-backup-$(TAG)-$*
 
-all-deb: $(addsuffix -deb, $(BUILD_ARCHS))
+deb: $(addsuffix -deb, $(BUILD_ARCHS))
 
-all-release: all-deb all-client
+# Development Helpers
+
+tmp-env:
+	mkdir -p "tmp/$(VERSION)"
+	cd "tmp/$(VERSION)" && ../../versions/$(VERSION)/clone.bash
+	cd "tmp/$(VERSION)" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch ../../versions/$(VERSION)/client*/*.patch
+	cd "tmp/$(VERSION)" && ../../scripts/strip-cargo.bash
+
+dev-run: dev-docker-build
+	-docker rm -f proxmox-backup
+	docker run --name=proxmox-backup --net=host --rm $(REGISTRY):$(TAG)-dev
+
+dev-shell: dev-docker-build
+	-docker rm -f proxmox-backup
+	docker run --name=proxmox-backup -it --rm $(REGISTRY):$(TAG)-dev /bin/bash
+
+# Version management
 
 fork-version:
 ifndef NEW_VERSION
@@ -108,11 +115,7 @@ endif
 	mv "versions/v$(NEW_VERSION).tmp/versions.tmp" "versions/v$(NEW_VERSION).tmp/versions"
 	mv "versions/v$(NEW_VERSION).tmp" "versions/v$(NEW_VERSION)"
 
-tmp-env:
-	mkdir -p "tmp/$(VERSION)"
-	cd "tmp/$(VERSION)" && ../../versions/$(VERSION)/clone.bash
-	cd "tmp/$(VERSION)" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch ../../versions/$(VERSION)/client*/*.patch
-	cd "tmp/$(VERSION)" && ../../scripts/strip-cargo.bash
+release: dockerhub client deb
 
 # GitHub Releases
 
@@ -125,7 +128,7 @@ github-upload-all:
 		github-release upload -t $(TAG) -R -n $$(basename $$file) -f $$file; \
 	done
 
-github-pre-release: all-release all-push
+github-pre-release: release
 	go get github.com/github-release/github-release
 	git push
 	github-release info -t $(TAG) || github-release release -t $(TAG) --draft
@@ -134,4 +137,4 @@ github-pre-release: all-release all-push
 
 github-latest-release:
 	github-release edit -t $(TAG)
-	make all-latest
+	make dockerhub-latest-release
