@@ -54,6 +54,7 @@ RUN apt-get -y build-dep $PWD/proxmox-acme
 RUN . /root/.cargo/env && cd proxmox-backup/ && dpkg-buildpackage -us -uc -b
 RUN cd extjs/ && make deb && mv *.deb ../
 RUN cd proxmox-i18n/ && make deb && mv *.deb ../
+RUN ln -sf /bin/true /usr/share/cargo/bin/dh-cargo-built-using # license is fine (but due to how we compile it, help dpkg for xtermjs)
 RUN cd pve-xtermjs/ && dpkg-buildpackage -us -uc -b
 RUN cd proxmox-mini-journalreader/ && make deb && mv *.deb ../
 RUN cd libjs-qrcodejs/ && make deb && mv *.deb ../

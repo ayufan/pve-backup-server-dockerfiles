@@ -89,7 +89,7 @@ dev-shell: dev-build
 	mkdir -p release/$(TAG)
 	-docker rm -f proxmox-backup-$(TAG)-$*
 	docker create --name=proxmox-backup-$(TAG)-$* $(REGISTRY):$(TAG)-$*
-	docker cp proxmox-backup-$(TAG)-$*:/src/ release/$(TAG)
+	docker cp proxmox-backup-$(TAG)-$*:/src/. release/$(TAG)/$*
 	-docker rm -f proxmox-backup-$(TAG)-$*
 
 all-deb: $(addsuffix -deb, $(BUILD_ARCHS))
