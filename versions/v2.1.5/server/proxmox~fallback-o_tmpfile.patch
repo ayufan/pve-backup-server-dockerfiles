@@ -1,0 +1,63 @@
+--- a/proxmox-shared-memory/Cargo.toml
++++ b/proxmox-shared-memory/Cargo.toml
+@@ -12,5 +12,6 @@ exclude = [ "debian" ]
+ anyhow = "1.0"
+ libc = "0.2.107"
+ nix = "0.19.1"
++tempfile = "3.3.0"
+
+ proxmox-sys = { path = "../proxmox-sys", version = "0.2.0" }
+
+--- a/proxmox-shared-memory/src/lib.rs
++++ b/proxmox-shared-memory/src/lib.rs
+@@ -12,6 +12,8 @@ use nix::fcntl::OFlag;
+ use nix::sys::mman::{MapFlags, ProtFlags};
+ use nix::sys::stat::Mode;
+
++use tempfile::{NamedTempFile};
++
+ use proxmox_sys::error::SysError;
+ use proxmox_sys::fs::CreateOptions;
+ use proxmox_sys::mmap::Mmap;
+@@ -128,28 +130,34 @@ impl<T: Sized + Init> SharedMemory<T> {
+         }
+
+         // create temporary file using O_TMPFILE
+-        let mut file = match nix::fcntl::open(&dir_name, oflag | OFlag::O_TMPFILE, Mode::empty()) {
++        let (mut file, proc_path, mut _temp_path) = match nix::fcntl::open(&dir_name, oflag | OFlag::O_TMPFILE, Mode::empty()) {
+             Ok(fd) => {
+                 let mut file = unsafe { File::from_raw_fd(fd) };
+                 options.apply_to(&mut file, &dir_name)?;
+-                file
++
++                let proc_path = format!("/proc/self/fd/{}\0", file.as_raw_fd());
++
++                (file, proc_path, None)
+             }
+             Err(err) => {
+-                bail!("open tmpfile in {:?} failed - {}", dir_name, err);
++                eprintln!("open tmpfile in {:?} failed by O_TMPFILE: path={:?}, {}", dir_name, path, err);
++                let (mut file, temp_path) = NamedTempFile::new_in(&dir_name)?.into_parts();
++                options.apply_to(&mut file, &dir_name)?;
++
++                let proc_path = temp_path.to_string_lossy().to_string();
++
++                (file, proc_path, Some(temp_path))
+             }
+         };
+
+         let size = std::mem::size_of::<T>();
+         let size = up_to_page_size(size);
+-
+         nix::unistd::ftruncate(file.as_raw_fd(), size as i64)?;
+
+-        // link the file into place:
+-        let proc_path = format!("/proc/self/fd/{}\0", file.as_raw_fd());
+         let proc_path = unsafe { CStr::from_bytes_with_nul_unchecked(proc_path.as_bytes()) };
+-
+         let mmap = mmap_file(&mut file, true)?;
+
++        // link the file into place:
+         let res = {
+             let path = CString::new(path.as_os_str().as_bytes())?;
+             Errno::result(unsafe {
