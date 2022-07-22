@@ -27,7 +27,7 @@ dev-%: DOCKER_ARCH=amd64
 		-f Dockerfile \
 		.
 
-docker-build: $(addsuffix -build, $(BUILD_ARCHS))
+docker-build: $(addsuffix -docker-build, $(BUILD_ARCHS))
 
 # Docker Hub Images
 

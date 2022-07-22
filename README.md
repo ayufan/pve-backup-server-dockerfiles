@@ -8,6 +8,12 @@ to run it in a container for AMD64 and ARM64.
 Running in a container might result in some functions not working
 properly. Feel free to create an issue to debug those.
 
+## Common problems
+
+- Some people see authentication failure using `admin@pbs`: Ensure that `/run` is mounted to `tmpfs` which is requirement of `2.1.x`
+- Some Synology devices use a really old kernel (3.1), for such the https://github.com/ayufan/pve-backup-server-dockerfiles/pull/15
+  is needed, and image needs to be manually recompiled.
+
 ## Pre-built images
 
 For starting quickly all images are precompiled and hosted
