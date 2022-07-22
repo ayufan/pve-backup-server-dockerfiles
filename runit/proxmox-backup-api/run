@@ -23,12 +23,12 @@ if [[ ! -e /etc/proxmox-backup/csrf.key ]] && [[ ! -e /etc/proxmox-backup/.initi
 fi
 
 for mp in /etc/proxmox-backup /var/lib/proxmox-backup /var/log/proxmox-backup; do
-  if [[ ! mountpoint "$mp" ]]; then
+  if ! mountpoint "$mp"; then
     echo "WARNING: The '$mp' should be volume. PBS might not work correctly (data might be lost between runs)."
   fi
 done
 
-if [[ ! mountpoint /run ]]; then
+if ! mountpoint /run; then
   echo "WARNING: The '/run' should be 'tmpfs' mountpoint. PBS might not work correctly."
 fi
 
