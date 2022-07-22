@@ -14,12 +14,12 @@ RUN apt-get -y update && \
 
 RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
   chmod +x rustup-init.sh && \
-  ./rustup-init.sh -y --default-toolchain stable
+  ./rustup-init.sh -y --default-toolchain nightly
 
 WORKDIR /src
 
+RUN for tool in /root/.cargo/bin/*; do ln -vsf $tool /usr/bin/; done
 RUN /usr/bin/rustc --version
-RUN /root/.cargo/bin/rustc --version
 RUN git config --global user.email "docker@compile.dev" && \
   git config --global user.name "Docker Compile"
 
