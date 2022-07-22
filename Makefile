@@ -90,8 +90,14 @@ deb: $(addsuffix -deb, $(BUILD_ARCHS))
 tmp-env:
 	mkdir -p "tmp/$(VERSION)"
 	cd "tmp/$(VERSION)" && ../../versions/$(VERSION)/clone.bash
-	cd "tmp/$(VERSION)" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch ../../versions/$(VERSION)/client*/*.patch
+	cd "tmp/$(VERSION)" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch
 	cd "tmp/$(VERSION)" && ../../scripts/strip-cargo.bash
+
+tmp-env-client:
+	mkdir -p "tmp/$(VERSION)-client"
+	cd "tmp/$(VERSION)-client" && ../../versions/$(VERSION)/clone.bash
+	cd "tmp/$(VERSION)-client" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch ./../versions/$(VERSION)/client*/*.patch
+	cd "tmp/$(VERSION)-client" && ../../scripts/strip-cargo.bash
 
 dev-run: dev-docker-build
 	-docker rm -f proxmox-backup
@@ -128,7 +134,9 @@ github-upload-all:
 		github-release upload -t $(TAG) -R -n $$(basename $$file) -f $$file; \
 	done
 
-github-pre-release: release
+github-pre-release:
+	rm -rf release/$(TAG)
+	make release
 	go get github.com/github-release/github-release
 	git push
 	github-release info -t $(TAG) || github-release release -t $(TAG) --draft
