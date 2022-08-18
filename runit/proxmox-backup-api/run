@@ -4,6 +4,15 @@ if [[ -n "$TZ" ]]; then
   echo "$TZ" > /etc/timezone
 fi
 
+# use the enivronment override for the user id and group id, otherwise use the default backup id of 34
+BUID=${BUID:-34}
+BGID=${BUID:-34}
+
+# set the group id for backup
+groupmod -o -g "$BGID" backup
+# set the user id for backup
+usermod -o -u "$BUID" backup
+
 # ensure that etc is owned by backup (due to configs)
 chown backup:backup /etc/proxmox-backup
 chmod 700 /etc/proxmox-backup
