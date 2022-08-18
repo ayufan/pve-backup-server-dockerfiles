@@ -148,6 +148,22 @@ volumes:
       device: /srv/pbs/lib
 ```
 
+### 6. Configure backup user UID & GID (optional)
+
+To change the case you wish to change what user and group id the container runs at then set the following
+
+Create a new file (or merge with existing): `docker-compose.override.yml`:
+
+```yaml
+version: '2.1'
+
+services:
+  pbs:
+    environment:
+      BGID: 1000
+      BUID: 1001
+```
+
 ## Install on bare-metal host
 
 Docker is convienient, but in some cases it might be simply better to install natively.
