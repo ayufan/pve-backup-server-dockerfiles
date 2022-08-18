@@ -6,7 +6,7 @@ fi
 
 # use the enivronment override for the user id and group id, otherwise use the default backup id of 34
 BUID=${BUID:-34}
-BGID=${BUID:-34}
+BGID=${BGID:-34}
 
 # set the group id for backup
 groupmod -o -g "$BGID" backup
