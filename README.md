@@ -1,12 +1,20 @@
 # Proxmox Backup Server in a Container
 
-[![Docker Image Version (latest semver)](https://img.shields.io/docker/v/ayufan/proxmox-backup-server?sort=semver)](https://hub.docker.com/repository/docker/ayufan/proxmox-backup-server)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ayufan/pve-backup-server-dockerfiles?include_prereleases&label=GitHub%20STABLE)](https://github.com/ayufan/pve-backup-server-dockerfiles/releases/latest) [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ayufan/pve-backup-server-dockerfiles?color=red&label=GitHub%20BETA)](https://github.com/ayufan/pve-backup-server-dockerfiles/releases)
+
+[![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/ayufan/proxmox-backup-server/latest?label=Docker%20LATEST)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags) [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/ayufan/proxmox-backup-server?color=red&label=Docker%20BETA)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags)
 
 This is an unofficial compilation of Proxmox Backup Server
 to run it in a container for AMD64 and ARM64.
 
 Running in a container might result in some functions not working
 properly. Feel free to create an issue to debug those.
+
+## Buy me a Coffee
+
+<a href='https://ko-fi.com/ayufan' target='_blank'><img height='35' style='border:0px;height:50px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' alt='Buy Me a Coffee at ko-fi.com' /></a> <a href="https://www.paypal.com/donate/?hosted_button_id=DHNBE2YR9D5Y2" target='_blank'><img height='35' src="https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png" alt="Donate with PayPal" style='border:0px;height:55px;'/></a>
+
+If you found it useful :)
 
 ## Common problems
 
@@ -44,11 +52,7 @@ The core features should work, but there are ones do not work due to container a
 
 ## Changelog
 
-- v2.1.5 - 10 Feb, 2022 - also fixes bug with missing ksm
-- v2.1.2 - 30 Nov, 2021 - this version requires `tmpfs` to be used for `/run`. Inspect `docker-compose.yml`
-- v2.0.7 - Jul 31, 2021
-- v2.0.4 - Jul 14, 2021
-- v1.1.9 - Jun 14, 2021
+See [Releases](https://github.com/ayufan/pve-backup-server-dockerfiles/releases).
 
 ## Configure
 
@@ -212,5 +216,5 @@ and install on Debian Bullseye.
 
 ## Author
 
-This is just built by Kamil Trzciński, 2020-2021
+This is just built by Kamil Trzciński, 2020-2023
 from the sources found on http://git.proxmox.com/.
