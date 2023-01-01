@@ -16,6 +16,9 @@ chmod 700 /var/lib/proxmox-backup
 chown backup:backup /var/log/proxmox-backup
 chmod 700 /var/log/proxmox-backup
 
+# recycle lock files
+rm /etc/proxmox-backup/.*.lck /etc/proxmox-backup/*.lock
+
 if [[ ! -e /etc/proxmox-backup/csrf.key ]] && [[ ! -e /etc/proxmox-backup/.initialized ]]; then
   echo 'Copying defaults into `/etc/proxmox-backup/`'
   cp -rv /etc/proxmox-backup-default/. /etc/proxmox-backup/
