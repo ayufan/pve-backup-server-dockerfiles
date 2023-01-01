@@ -141,8 +141,8 @@ github-pre-release:
 	git push
 	github-release info -t $(TAG) || github-release release -t $(TAG) --draft --description "$$(cat RELEASE.md)"
 	make github-upload-all
-	github-release edit -t $(TAG) --pre-release
+	github-release edit -t $(TAG) --pre-release --description "$$(cat RELEASE.md)"
 
 github-latest-release:
-	github-release edit -t $(TAG)
+	github-release edit -t $(TAG) --description "$$(cat RELEASE.md)"
 	make dockerhub-latest-release

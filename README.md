@@ -2,7 +2,7 @@
 
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ayufan/pve-backup-server-dockerfiles?include_prereleases&label=GitHub%20STABLE)](https://github.com/ayufan/pve-backup-server-dockerfiles/releases/latest) [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ayufan/pve-backup-server-dockerfiles?color=red&label=GitHub%20BETA)](https://github.com/ayufan/pve-backup-server-dockerfiles/releases)
 
-[![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/ayufan/proxmox-backup-server/latest?label=Docker%20LATEST)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags) [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/ayufan/proxmox-backup-server?color=red&label=Docker%20BETA)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags)
+[![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/ayufan/proxmox-backup-server/latest?label=Docker%20LATEST)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags) [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/ayufan/proxmox-backup-server?sort=semver&color=red&label=Docker%20BETA)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags)
 
 This is an unofficial compilation of Proxmox Backup Server
 to run it in a container for AMD64 and ARM64.
@@ -12,7 +12,7 @@ properly. Feel free to create an issue to debug those.
 
 ## Buy me a Coffee
 
-<a href='https://ko-fi.com/ayufan' target='_blank'><img height='35' style='border:0px;height:50px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' alt='Buy Me a Coffee at ko-fi.com' /></a> <a href="https://www.paypal.com/donate/?hosted_button_id=DHNBE2YR9D5Y2" target='_blank'><img height='35' src="https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png" alt="Donate with PayPal" style='border:0px;height:55px;'/></a>
+<a href='https://ko-fi.com/ayufan' target='_blank'><img height='30' style='border:0px;height:40px;' src='https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 If you found it useful :)
 
