@@ -28,6 +28,7 @@ ADD /scripts/ /scripts/
 ARG DOCKER_ARCH
 RUN /scripts/apply-patches.bash /patches/server/*.patch /patches/client/*.patch /patches/client-${DOCKER_ARCH}/*.patch
 RUN /scripts/strip-cargo.bash
+RUN /scripts/experimental-cargo.bash
 
 # Build
 RUN \
