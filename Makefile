@@ -1,5 +1,5 @@
 BUILD_ARCHS = amd64 arm64v8
-CLIENT_BUILD_ARCHS = amd64 arm64v8 arm32v7
+CLIENT_BUILD_ARCHS = amd64 arm64v8
 REGISTRY ?= ayufan/proxmox-backup-server
 VERSION ?= $(shell ls versions | grep -E -v '.(tmp|debug)' | sort -V | tail -n 1)
 
