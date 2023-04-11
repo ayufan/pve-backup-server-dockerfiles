@@ -92,12 +92,14 @@ tmp-env:
 	cd "tmp/$(VERSION)" && ../../versions/$(VERSION)/clone.bash
 	cd "tmp/$(VERSION)" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch
 	cd "tmp/$(VERSION)" && ../../scripts/strip-cargo.bash
+	cd "tmp/$(VERSION)" && ../../scripts/resolve-dependencies.bash
 
 tmp-env-client:
 	mkdir -p "tmp/$(VERSION)-client"
 	cd "tmp/$(VERSION)-client" && ../../versions/$(VERSION)/clone.bash
 	cd "tmp/$(VERSION)-client" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch ./../versions/$(VERSION)/client*/*.patch
 	cd "tmp/$(VERSION)-client" && ../../scripts/strip-cargo.bash
+	cd "tmp/$(VERSION)-client" && ../../scripts/resolve-dependencies.bash
 
 tmp-docker-shell:
 	docker build \
