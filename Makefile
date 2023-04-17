@@ -14,14 +14,14 @@ endif
 arm32v7-%: DOCKER_ARCH=arm32v7
 arm64v8-%: DOCKER_ARCH=arm64v8
 amd64-%: DOCKER_ARCH=amd64
-dev-%: DOCKER_ARCH=amd64
+dev-%:
 
 # Docker Images
 
 %-docker-build:
 	docker build \
 		--tag $(REGISTRY):$(TAG)-$* \
-		--build-arg ARCH=$(DOCKER_ARCH)/ \
+		--build-arg ARCH=$(addsuffix /,$(DOCKER_ARCH)) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
 		-f Dockerfile \
@@ -99,13 +99,27 @@ tmp-env-client:
 	cd "tmp/$(VERSION)-client" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch ./../versions/$(VERSION)/client*/*.patch
 	cd "tmp/$(VERSION)-client" && ../../scripts/strip-cargo.bash
 
+tmp-docker-shell:
+	docker build \
+		--tag tmp-docker-shell \
+		--build-arg ARCH=$(addsuffix /,$(DOCKER_ARCH)) \
+		--build-arg TAG=$(TAG) \
+		--build-arg VERSION=$(VERSION) \
+		--target toolchain \
+		-f versions/$(VERSION)/Dockerfile \
+		.
+	docker run --name=tmp-docker-shell --net=host --rm -it \
+		-v "$(CURDIR):$(CURDIR)" \
+		-w "$(CURDIR)/tmp/$(VERSION)" \
+		tmp-docker-shell
+
 dev-run: dev-docker-build
 	-docker rm -f proxmox-backup
-	docker run --name=proxmox-backup --net=host --rm $(REGISTRY):$(TAG)-dev
+	docker run --name=proxmox-backup --net=host --tmpfs /run --rm $(REGISTRY):$(TAG)-dev
 
 dev-shell: dev-docker-build
 	-docker rm -f proxmox-backup
-	docker run --name=proxmox-backup -it --rm $(REGISTRY):$(TAG)-dev /bin/bash
+	docker run --name=proxmox-backup -it --tmpfs /run --rm $(REGISTRY):$(TAG)-dev /bin/bash
 
 # Version management
 
