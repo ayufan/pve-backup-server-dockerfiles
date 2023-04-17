@@ -1,2 +1,4 @@
 tmp/
 release/
+**/Dockerfile
+**/Dockerfile.client

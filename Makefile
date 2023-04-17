@@ -24,7 +24,7 @@ dev-%:
 		--build-arg ARCH=$(addsuffix /,$(DOCKER_ARCH)) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
-		-f Dockerfile \
+		-f versions/$(VERSION)/Dockerfile \
 		.
 
 docker-build: $(addsuffix -docker-build, $(BUILD_ARCHS))
@@ -66,7 +66,7 @@ dockerhub-latest-release: $(addsuffix -dockerhub-latest-release, $(BUILD_ARCHS))
 		--build-arg DOCKER_ARCH=$(DOCKER_ARCH) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
-		-f Dockerfile.client \
+		-f versions/$(VERSION)/Dockerfile.client \
 		.
 
 	mkdir -p release/$(TAG)

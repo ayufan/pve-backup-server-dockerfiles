@@ -60,15 +60,18 @@ RUN cd proxmox-mini-journalreader/ && make deb && mv *.deb ../
 RUN cd libjs-qrcodejs/ && make deb && mv *.deb ../
 RUN export DEB_BUILD_OPTIONS=nocheck && cd proxmox-acme/ && make deb && rm libproxmox-acme-perl* && mv *.deb ../
 
+RUN mkdir -p /deb && \
+  find /src/ -name '*.deb' -exec cp -av {} /deb/ \;
+
 #=================================
 
 FROM ${ARCH}debian:bullseye
-COPY --from=builder /src/*.deb /src/
+COPY --from=builder /deb/ /deb/
 
 # Install all packages
 RUN export DEBIAN_FRONTEND=noninteractive && \
   apt update -y && \
-  apt install -y runit /src/*.deb
+  apt install -y runit /deb/*.deb
 
 # Add default configs
 ADD /pbs/ /etc/proxmox-backup-default/
