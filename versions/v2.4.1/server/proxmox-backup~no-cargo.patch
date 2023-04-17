@@ -1,0 +1,19 @@
+commit 1b425b8fd31147524f81c549ccbf0318a75f1c9e
+Author: Kamil Trzciński <ayufan@ayufan.eu>
+Date:   Sat May 1 14:40:06 2021 +0200
+
+    Support local compile
+
+diff --git a/debian/rules b/debian/rules
+index 4fc6de8f..fcbf7e93 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -21,7 +22,7 @@ export DEB_CARGO_PACKAGE=proxmox-backup
+ 
+ override_dh_auto_configure:
+ 	@perl -ne 'if (/^version\s*=\s*"(\d+(?:\.\d+)+)"/) { my $$v_cargo = $$1; my $$v_deb = $$ENV{DEB_VERSION_UPSTREAM}; die "ERROR: d/changelog <-> Cargo.toml version mismatch: $$v_cargo != $$v_deb\n" if $$v_cargo ne $$v_deb; exit(0); }' Cargo.toml
+-	$(CARGO) prepare-debian $(CURDIR)/debian/cargo_registry --link-from-system
++	#$(CARGO) prepare-debian --help $(CURDIR)/debian/cargo_registry --link-from-system
+ 	dh_auto_configure
+ 
+ override_dh_auto_build:

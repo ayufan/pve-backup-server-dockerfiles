@@ -1,0 +1,12 @@
+diff --git a/Makefile b/Makefile
+index 0a0befb..d890882 100644
+--- a/Makefile
++++ b/Makefile
+@@ -36,7 +36,6 @@ pve pmg:
+ build:
+ 	rm -rf build
+ 	mkdir build
+-	echo system >build/rust-toolchain
+ 	cp -a ./Cargo.toml ./build
+ 	cp -a ./scripts ./build
+ 	cp -a ./common ./build
