@@ -80,7 +80,7 @@ client: $(addsuffix -client, $(CLIENT_BUILD_ARCHS))
 	mkdir -p release/$(TAG)
 	-docker rm -f proxmox-backup-$(TAG)-$*
 	docker create --name=proxmox-backup-$(TAG)-$* $(REGISTRY):$(TAG)-$*
-	docker cp proxmox-backup-$(TAG)-$*:/src/. release/$(TAG)/$*
+	docker cp proxmox-backup-$(TAG)-$*:/deb/. release/$(TAG)/$*
 	-docker rm -f proxmox-backup-$(TAG)-$*
 
 deb: $(addsuffix -deb, $(BUILD_ARCHS))

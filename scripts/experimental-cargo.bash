@@ -9,7 +9,7 @@ for package in *; do
   for cargo in $(find "$package/" -name Cargo.toml); do
     echo "Changing $cargo..."
     sed -i '1s/^/cargo-features = ["workspace-inheritance"]\n\n/' "$cargo"
-    git -C "$package" add "$cargo"
+    git -C "$package" add "$(realpath "$cargo")"
   done
 
   if ! git -C "$package" diff --cached --exit-code --quiet; then
