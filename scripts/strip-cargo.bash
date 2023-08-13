@@ -5,9 +5,15 @@ set -eo pipefail
 for package in *; do
   [[ ! -d "$package" ]] && continue
 
-  if [[ -f "$package/.cargo/config" ]]; then
-    git -C "$package" rm "$(realpath "$package/.cargo/config")" || rm -f ""$package/.cargo/config""
-  fi
+  while read cargo_config; do
+    echo -n > "$cargo_config"
+    git -C "$package" add "$(realpath "$cargo_config")"
+  done < <(find "$package" -wholename '*/.cargo/config')
+
+  while read cargo_config; do
+    echo -n > "$cargo_config"
+    git -C "$package" add "$(realpath "$cargo_config")"
+  done < <(find "$package" -wholename '*/debian/cargo_home/config')
 
   while read debian_control; do
     echo "Stripping '$debian_control'..."
@@ -25,10 +31,6 @@ for package in *; do
     sed -i 's/dh-cargo\s*(>=.*)/dh-cargo/g' "$debian_control"
     git -C "$package" add "$(realpath "$debian_control")" || true
   done < <(find "$package" -wholename '*/debian/control')
-
-  while read cargo_config; do
-    git -C "$package" rm -f "$(realpath "$cargo_config")" || rm -f "$cargo_config"
-  done < <(find "$package" -wholename '*/debian/cargo_home/config')
 
   if ! git -C "$package" diff --cached --exit-code --quiet; then
     git -C "$package" diff --cached | cat
