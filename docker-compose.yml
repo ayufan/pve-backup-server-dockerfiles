@@ -3,7 +3,8 @@ version: '2.1'
 services:
   pbs:
     image: ayufan/proxmox-backup-server:${TAG:-latest}
-    network_mode: host
+    ports:
+      - 8007:8007
     mem_limit: 2G
     volumes:
       - pbs_etc:/etc/proxmox-backup

@@ -120,8 +120,7 @@ dev-run: dev-docker-build
 	TAG=$(TAG)-dev docker-compose up
 
 dev-shell: dev-docker-build
-	-docker rm -f proxmox-backup
-	docker run --name=proxmox-backup -it --tmpfs /run --rm $(REGISTRY):$(TAG)-dev /bin/bash
+	TAG=$(TAG)-dev docker-compose run --rm pbs bash
 
 # Version management
 

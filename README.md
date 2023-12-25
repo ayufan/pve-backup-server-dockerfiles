@@ -169,50 +169,11 @@ apt install $PWD/src/*.deb
 
 ## Recompile latest version or master
 
-You can compile latest version or master with a set of commands
-and push them to the registry.
-
-```bash
-# build v1.0.5
-make all-build VERSION=v1.0.5
-
-# build master
-make all-build
-
-# build and push to registry v1.0.5
-make all-push VERSION=v1.0.5 REGISTRY=my.registry.com/pbs
-
-# build and push to registry v1.0.5
-make all-push REGISTRY=my.registry.com/pbs
-
-# make the given version latest
-make all-latest VERSION=v1.0.5
-```
+Refer to [PROCESS.md](PROCESS.md).
 
 ## Build on your own
 
-```bash
-make dev-build
-```
-
-It builds on any platform, which can be: `amd64`, `arm32v7`, `arm64v8`,
-etc. Wait a around 1-3h to compile.
-
-Then you can push to your registry:
-
-```bash
-make dev-push
-```
-
-Or run locally:
-
-```bash
-make dev-shell
-make dev-run
-```
-
-You might as well pull the `*.deb` from within the image
-and install on Debian Bullseye.
+Refer to [PROCESS.md](PROCESS.md).
 
 ## Author
 
