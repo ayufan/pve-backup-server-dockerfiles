@@ -1,13 +1,7 @@
-commit 1b425b8fd31147524f81c549ccbf0318a75f1c9e
-Author: Kamil Trzciński <ayufan@ayufan.eu>
-Date:   Sat May 1 14:40:06 2021 +0200
-
-    Support local compile
-
 diff --git a/debian/proxmox-backup-file-restore.install b/debian/proxmox-backup-file-restore.install
 old mode 100644
 new mode 100755
-index d952836e..e6888c5f
+index 409988a3..8b4034bd
 --- a/debian/proxmox-backup-file-restore.install
 +++ b/debian/proxmox-backup-file-restore.install
 @@ -1,4 +1,5 @@
@@ -20,17 +14,15 @@ index d952836e..e6888c5f
 diff --git a/debian/proxmox-backup-server.install b/debian/proxmox-backup-server.install
 old mode 100644
 new mode 100755
-index cebf84a3..fa96f93e
+index ee114ea3..dac6c7d3
 --- a/debian/proxmox-backup-server.install
 +++ b/debian/proxmox-backup-server.install
-@@ -1,17 +1,18 @@
+@@ -1,3 +1,4 @@
 +#! /usr/bin/dh-exec
  etc/pbs-enterprise.list /etc/apt/sources.list.d/
  etc/proxmox-backup-banner.service /lib/systemd/system/
  etc/proxmox-backup-daily-update.service /lib/systemd/system/
- etc/proxmox-backup-daily-update.timer /lib/systemd/system/
- etc/proxmox-backup-proxy.service /lib/systemd/system/
- etc/proxmox-backup.service /lib/systemd/system/
+@@ -7,11 +8,11 @@ etc/proxmox-backup.service /lib/systemd/system/
  usr/bin/pmt
  usr/bin/pmtx
  usr/bin/proxmox-tape
@@ -48,7 +40,7 @@ index cebf84a3..fa96f93e
  usr/sbin/proxmox-backup-debug
  usr/sbin/proxmox-backup-manager
 diff --git a/debian/rules b/debian/rules
-index 4fc6de8f..fcbf7e93 100755
+index 54a3c22b..553947f0 100755
 --- a/debian/rules
 +++ b/debian/rules
 @@ -2,6 +2,7 @@

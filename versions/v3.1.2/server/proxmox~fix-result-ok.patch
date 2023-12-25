@@ -1,17 +1,17 @@
 diff --git a/proxmox-router/src/cli/command.rs b/proxmox-router/src/cli/command.rs
-index 906ec0c..2a396e2 100644
+index 8ae889f..0f7556b 100644
 --- a/proxmox-router/src/cli/command.rs
 +++ b/proxmox-router/src/cli/command.rs
-@@ -2,6 +2,7 @@ use anyhow::*;
+@@ -2,6 +2,7 @@ use anyhow::{format_err, Error};
  use serde_json::Value;
  use std::cell::RefCell;
  use std::sync::Arc;
 +use std::result::Result::Ok;
  
- use proxmox_schema::*;
  use proxmox_schema::format::DocumentationFormat;
+ use proxmox_schema::*;
 diff --git a/proxmox-sys/src/linux/procfs/mod.rs b/proxmox-sys/src/linux/procfs/mod.rs
-index 5784e0e..e503b5f 100644
+index 06ad620..dd840cc 100644
 --- a/proxmox-sys/src/linux/procfs/mod.rs
 +++ b/proxmox-sys/src/linux/procfs/mod.rs
 @@ -1,3 +1,4 @@
@@ -19,12 +19,12 @@ index 5784e0e..e503b5f 100644
  use std::collections::HashSet;
  use std::convert::TryFrom;
  use std::fmt;
-diff --git a/proxmox/src/sys/linux/tty.rs b/proxmox-sys/src/sys/linux/tty.rs
-index 0b4a3c1..e7a7847 100644
+diff --git a/proxmox-sys/src/linux/tty.rs b/proxmox-sys/src/linux/tty.rs
+index fdea162..64e79b5 100644
 --- a/proxmox-sys/src/linux/tty.rs
 +++ b/proxmox-sys/src/linux/tty.rs
 @@ -1,3 +1,4 @@
 +use std::result::Result::Ok;
  use std::io::{self, Read, Write};
  use std::mem::MaybeUninit;
- use std::os::unix::io::AsRawFd;
+ use std::os::unix::io::{AsRawFd, OwnedFd};

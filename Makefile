@@ -116,8 +116,8 @@ tmp-docker-shell:
 		tmp-docker-shell
 
 dev-run: dev-docker-build
-	-docker rm -f proxmox-backup
-	docker run --name=proxmox-backup --net=host --tmpfs /run --rm $(REGISTRY):$(TAG)-dev
+	-docker-compose rm -s -f -v
+	TAG=$(TAG)-dev docker-compose up
 
 dev-shell: dev-docker-build
 	-docker rm -f proxmox-backup

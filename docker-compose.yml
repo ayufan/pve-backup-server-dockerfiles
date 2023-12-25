@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   pbs:
-    image: ayufan/proxmox-backup-server:latest
+    image: ayufan/proxmox-backup-server:${TAG:-latest}
     network_mode: host
     mem_limit: 2G
     volumes:

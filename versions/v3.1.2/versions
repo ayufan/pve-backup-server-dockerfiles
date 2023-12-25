@@ -17,3 +17,4 @@ pve-common 17c45baaa4cbab9419c0a8efa76831d3a55e2959 # Tue Nov 21 13:04:26 2023 +
 proxmox-perl-rs 4c54abcea84e22418b396c57ced6621effb36e0f # Fri Nov 17 13:42:07 2023 +0100
 perlmod 24b9a0c268c6233d2c1a5c5b6ce47757e3bf3dbb # Fri Nov 3 13:29:37 2023 +0100
 proxmox-resource-scheduling 09c43554fa4e211504319107997b8c5eaba270ec # Mon May 8 14:59:20 2023 +0200
+pathpatterns 281894a5b66099e919d167cd5f0644fff6aca234 # Thu, 19 Oct 2023 10:11:25 +0100

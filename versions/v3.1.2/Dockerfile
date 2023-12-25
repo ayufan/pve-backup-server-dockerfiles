@@ -63,14 +63,16 @@ RUN apt-get -y build-dep $PWD/proxmox-backup
 RUN apt-get -y build-dep $PWD/proxmox-mini-journalreader
 RUN apt-get -y build-dep $PWD/extjs
 RUN apt-get -y build-dep $PWD/proxmox-i18n
-RUN apt-get -y build-dep $PWD/pve-xtermjs
+RUN apt-get -y build-dep $PWD/pve-xtermjs/termproxy
+RUN apt-get -y build-dep $PWD/pve-xtermjs/xterm.js
 RUN apt-get -y build-dep $PWD/libjs-qrcodejs
 
 # Compile ALL
 RUN cd proxmox-backup/ && make deb
 RUN cd extjs/ && make deb
 RUN cd proxmox-i18n/ && make deb
-RUN cd pve-xtermjs/ && make deb
+RUN cd pve-xtermjs/termproxy/ && make deb
+RUN cd pve-xtermjs/xterm.js/ && make deb
 RUN cd proxmox-mini-journalreader/ && make deb
 RUN cd libjs-qrcodejs/ && make deb
 RUN cd proxmox-acme/ && make deb
