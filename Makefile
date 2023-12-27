@@ -152,7 +152,7 @@ github-upload-all:
 github-pre-release:
 	rm -rf release/$(TAG)
 	make release
-	github-release --version || go get github.com/github-release/github-release
+	github-release --version || go install github.com/github-release/github-release@latest
 	git push
 	github-release info -t $(TAG) || github-release release -t $(TAG) --draft --description "$$(cat RELEASE.md)"
 	make github-upload-all
