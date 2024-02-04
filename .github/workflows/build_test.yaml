@@ -1,0 +1,52 @@
+on:
+  push:
+    branches:
+      - '*'
+    paths-ignore:
+      - '*.md'
+      - .github/workflows/*.yaml
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      VERSION:
+        description: 'Version to build'
+        required: false
+        type: string
+
+env:
+  VERSION: ${{ inputs.VERSION }}
+
+jobs:
+  docker-build:
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      matrix:
+        include:
+          - runs_on: [self-hosted, Linux, ARM64]
+            docker_arch: arm64v8
+          - runs_on: ubuntu-latest
+            docker_arch: amd64
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Run docker-build for ${{matrix.docker_arch}}
+      run: make ${{matrix.docker_arch}}-docker-build
+
+  client-build:
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      matrix:
+        include:
+          - runs_on: [self-hosted, Linux, ARM64]
+            docker_arch: arm64v8
+          - runs_on: ubuntu-latest
+            docker_arch: amd64
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Run client for ${{matrix.docker_arch}}
+      run: make ${{matrix.docker_arch}}-client

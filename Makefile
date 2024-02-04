@@ -1,9 +1,15 @@
 BUILD_ARCHS = amd64 arm64v8
 CLIENT_BUILD_ARCHS = amd64 arm64v8
 REGISTRY ?= ayufan/proxmox-backup-server
-VERSION ?= $(shell ls versions | grep -E -v '.(tmp|debug)' | sort -V | tail -n 1)
+SHELL = /usr/bin/env bash
 
-TAG ?= $(VERSION)
+ifeq (,$(VERSION))
+VERSION := $(shell ls versions | grep -E -v '.(tmp|debug)' | sort -V | tail -n 1)
+endif
+
+ifeq (,$(TAG))
+TAG := $(VERSION)
+endif
 
 ifneq (,$(wildcard .env.mk))
 include .env.mk
@@ -142,22 +148,28 @@ release: dockerhub client deb
 
 export GITHUB_USER ?= ayufan
 export GITHUB_REPO ?= pve-backup-server-dockerfiles
+GITHUB_RELEASE_BIN ?= go run github.com/github-release/github-release@latest
+
+github-create-draft:
+	$(GITHUB_RELEASE_BIN) info -t $(TAG) || $(GITHUB_RELEASE_BIN) release -t $(TAG) --draft --description "$$(cat RELEASE.md)"
 
 github-upload-all:
-	@set -e; for file in release/$(TAG)/*.tgz release/$(TAG)/*/*.deb; do \
+	@set -e; shopt -s nullglob; for file in release/$(TAG)/*.tgz release/$(TAG)/*/*.deb; do \
 		echo "Uploading $$file..."; \
-		github-release upload -t $(TAG) -R -n $$(basename $$file) -f $$file; \
+		$(GITHUB_RELEASE_BIN) upload -t $(TAG) -R -n $$(basename $$file) -f $$file; \
 	done
+
+github-create-pre-release:
+	$(GITHUB_RELEASE_BIN) edit -t $(TAG) --pre-release --description "$$(cat RELEASE.md)"
 
 github-pre-release:
 	rm -rf release/$(TAG)
 	make release
-	github-release --version || go install github.com/github-release/github-release@latest
 	git push
-	github-release info -t $(TAG) || github-release release -t $(TAG) --draft --description "$$(cat RELEASE.md)"
+	make github-create-draft
 	make github-upload-all
-	github-release edit -t $(TAG) --pre-release --description "$$(cat RELEASE.md)"
+	make github-create-pre-release
 
 github-latest-release:
-	github-release edit -t $(TAG) --description "$$(cat RELEASE.md)"
 	make dockerhub-latest-release
+	$(GITHUB_RELEASE_BIN) edit -t $(TAG) --description "$$(cat RELEASE.md)"
