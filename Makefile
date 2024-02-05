@@ -11,9 +11,19 @@ ifeq (,$(TAG))
 TAG := $(VERSION)
 endif
 
+LATEST_TAGS := $(basename $(TAG)) latest
+LATEST_TAGS += $(basename $(LATEST_TAGS))
+LATEST_TAGS += $(basename $(LATEST_TAGS))
+LATEST_TAGS := $(sort $(LATEST_TAGS))
+
 ifneq (,$(wildcard .env.mk))
 include .env.mk
 endif
+
+define newline
+
+
+endef
 
 # Architectures
 
@@ -54,15 +64,19 @@ dockerhub: $(addsuffix -dockerhub, $(BUILD_ARCHS))
 	make dockerhub-manifest
 
 %-dockerhub-latest-release: %-dockerhub-pull
-	docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):latest-$*
-	docker push $(REGISTRY):latest-$*
+	$(foreach latest_tag,$(LATEST_TAGS), \
+		docker tag $(REGISTRY):$(TAG)-$* $(REGISTRY):$(latest_tag)-$* $(newline) \
+		docker push $(REGISTRY):$(latest_tag)-$* $(newline) \
+	)
 
 dockerhub-latest-release: $(addsuffix -dockerhub-latest-release, $(BUILD_ARCHS))
 	# This requires `echo '{"experimental":"enabled"}' > ~/.docker/config.json`
 	-rm -rf ~/.docker/manifests
-	docker manifest create $(REGISTRY):latest \
-		$(addprefix $(REGISTRY):$(TAG)-, $(BUILD_ARCHS))
-	docker manifest push $(REGISTRY):latest
+	$(foreach latest_tag,$(LATEST_TAGS), \
+		docker manifest create $(REGISTRY):$(latest_tag) \
+			$(addprefix $(REGISTRY):$(TAG)-, $(BUILD_ARCHS)) $(newline) \
+		docker manifest push $(REGISTRY):$(latest_tag) $(newline) \
+	)
 
 # Client Binaries
 
