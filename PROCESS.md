@@ -4,7 +4,7 @@
 
 ```bash
 # Fork the build
-make fork-version NEW_VERSION=2.3.2 NEW_SHA=e6120a8f6ff36f627a4da3a1a51a1e47231f5cc8
+make fork-version NEW_VERSION=3.2.7 NEW_SHA=cb3d41e838dec0e1002aaf5ee4c0e6cd28284c74
 
 # Try to naively apply patches
 # Fix patches until it succeeds
@@ -12,7 +12,7 @@ make tmp-env
 make tmp-env-client
 
 # Try to naively compile first
-cd tmp/v2.3.2/proxmox-backup
+cd tmp/v3.2.7/proxmox-backup
 cargo build
 
 # Try to run dev build first
@@ -31,7 +31,7 @@ make github-latest-release
 
 ## Build on your own
 
-Refer to [PROESS.md](PROCESS.md).
+Refer to [PROCESS.md](PROCESS.md).
 
 ```bash
 make dev-build
@@ -54,4 +54,4 @@ make dev-run
 ```
 
 You might as well pull the `*.deb` from within the image
-and install on Debian Bullseye.
+and install on Debian Bookworm.

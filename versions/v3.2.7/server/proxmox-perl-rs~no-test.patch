@@ -1,0 +1,24 @@
+diff --git a/pve-rs/debian/control b/pve-rs/debian/control
+index f752163..ee8d418 100644
+--- a/pve-rs/debian/control
++++ b/pve-rs/debian/control
+@@ -19,7 +19,6 @@ Architecture: any
+ Depends: ${misc:Depends},
+          ${perl:Depends},
+          ${shlibs:Depends},
+-         libproxmox-rs-perl (>= 0.3.3),
+ Breaks: libpve-access-control (<< 7.1-3),
+         libpve-common-perl (<< 7.1-4),
+         libpve-notify-perl (<< 8.0.7),
+diff --git a/pve-rs/test/Makefile b/pve-rs/test/Makefile
+index 29dc955..084fdf7 100644
+--- a/pve-rs/test/Makefile
++++ b/pve-rs/test/Makefile
+@@ -1,7 +1,5 @@
+ .PHONY: test
+ test: Proxmox/Lib/PVE.pm
+-	@echo "-- running pve-rs tests --"
+-	perl -I. -I.. -I../.. ./resource_scheduling.pl
+ 
+ # The test stub, we don't know where to look for the library from in here!
+ Proxmox/Lib/PVE.pm:

@@ -8,12 +8,12 @@ for package in *; do
   while read cargo_config; do
     echo -n > "$cargo_config"
     git -C "$package" add "$(realpath "$cargo_config")"
-  done < <(find "$package" -wholename '*/.cargo/config')
+  done < <(find "$package" -wholename '*/.cargo/config' -o -wholename '*/.cargo/config.toml')
 
   while read cargo_config; do
     echo -n > "$cargo_config"
     git -C "$package" add "$(realpath "$cargo_config")"
-  done < <(find "$package" -wholename '*/debian/cargo_home/config')
+  done < <(find "$package" -wholename '*/debian/cargo_home/config' -o -wholename '*/debian/cargo_home/config.toml')
 
   while read debian_control; do
     echo "Stripping '$debian_control'..."

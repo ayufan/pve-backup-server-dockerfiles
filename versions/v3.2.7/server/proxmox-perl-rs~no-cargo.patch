@@ -1,0 +1,11 @@
+diff --git a/pve-rs/debian/rules b/pve-rs/debian/rules
+index bddb889..4e15f38 100755
+--- a/pve-rs/debian/rules
++++ b/pve-rs/debian/rules
+@@ -21,5 +21,5 @@ export DEB_CARGO_PACKAGE=pve-rs
+ override_dh_auto_configure:
+ 	@perl -ne 'if (/^version\s*=\s*"(\d+(?:\.\d+)+)"/) { my $$v_cargo = $$1; my $$v_deb = "$(DEB_VERSION_UPSTREAM)"; \
+ 	    die "ERROR: d/changelog <-> Cargo.toml version mismatch: $$v_cargo != $$v_deb\n" if $$v_cargo ne $$v_deb; exit(0); }' Cargo.toml
+-	$(CARGO) prepare-debian $(CURDIR)/debian/cargo_registry --link-from-system
++	#$(CARGO) prepare-debian $(CURDIR)/debian/cargo_registry --link-from-system
+ 	dh_auto_configure
