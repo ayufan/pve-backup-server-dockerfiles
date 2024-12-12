@@ -1,0 +1,13 @@
+diff --git a/proxmox-daemon/src/command_socket.rs b/proxmox-daemon/src/command_socket.rs
+index b268bded..c7a6bb27 100644
+--- a/proxmox-daemon/src/command_socket.rs
++++ b/proxmox-daemon/src/command_socket.rs
+@@ -22,7 +22,7 @@ use tokio::sync::watch;
+ pub fn path_from_pid(pid: i32) -> String {
+     // Note: The control socket always uses @/run/proxmox-backup/ as prefix
+     // for historc reason.
+-    format!("\0{}/control-{}.sock", "/run/proxmox-backup", pid)
++    format!("{}/control-{}.sock", "/run/proxmox-backup", pid)
+ }
+ 
+ /// Returns the control socket path for this server.

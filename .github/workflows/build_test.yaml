@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - '*'
+      - master
     paths-ignore:
       - '*.md'
       - .github/workflows/*.yaml
