@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index dfbaacab..d7620d73 100644
+index dfbaacab..d233d4e2 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -42,6 +42,7 @@ COMPILEDIR := target/$(DEB_HOST_RUST_TYPE)/release
@@ -11,10 +11,10 @@ index dfbaacab..d7620d73 100644
  ifeq ($(valgrind), yes)
  CARGO_BUILD_ARGS += --features valgrind
 diff --git a/debian/rules b/debian/rules
-index fa94743d..675fd445 100755
+index a82c3e12..d9606b6d 100755
 --- a/debian/rules
 +++ b/debian/rules
-@@ -9,7 +9,7 @@ include /usr/share/rustc/architecture.mk
+@@ -8,7 +8,7 @@ include /usr/share/rustc/architecture.mk
  
  export BUILD_MODE=release
  

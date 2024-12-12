@@ -1,8 +1,8 @@
 diff --git a/pve-rs/debian/control b/pve-rs/debian/control
-index f752163..ee8d418 100644
+index b4a3485..ac1bbb9 100644
 --- a/pve-rs/debian/control
 +++ b/pve-rs/debian/control
-@@ -19,7 +19,6 @@ Architecture: any
+@@ -49,7 +49,6 @@ Architecture: any
  Depends: ${misc:Depends},
           ${perl:Depends},
           ${shlibs:Depends},

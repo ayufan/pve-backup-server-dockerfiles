@@ -40,7 +40,7 @@ index ef1e9ba1..29b6b234
  usr/sbin/proxmox-backup-debug
  usr/sbin/proxmox-backup-manager
 diff --git a/debian/rules b/debian/rules
-index a82c3e12..92fd6e90 100755
+index d9606b6d..8f524579 100755
 --- a/debian/rules
 +++ b/debian/rules
 @@ -2,6 +2,7 @@
