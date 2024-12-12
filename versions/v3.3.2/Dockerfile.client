@@ -1,0 +1,50 @@
+ARG DOCKER_ARCH
+FROM ${DOCKER_ARCH}/debian:bookworm AS builder
+
+RUN apt-get -y update && \
+  apt-get -y install \
+    build-essential git-core \
+    lintian pkg-config quilt patch cargo \
+    nodejs node-colors node-commander \
+    libudev-dev libapt-pkg-dev \
+    libacl1-dev libpam0g-dev libfuse3-dev \
+    libsystemd-dev uuid-dev libssl-dev \
+    libclang-dev libjson-perl libcurl4-openssl-dev \
+    dh-exec wget
+
+WORKDIR /src
+
+RUN /usr/bin/rustc --version
+RUN git config --global user.email "docker@compile.dev" && \
+  git config --global user.name "Docker Compile"
+
+# Clone all sources
+ARG VERSION=master
+ADD /versions/${VERSION}/ /patches/
+RUN /patches/clone.bash
+
+# Install valid rust toolchain
+ARG DOCKER_ARCH
+RUN \
+  if [ "${DOCKER_ARCH}" != "arm32v7" ]; then \
+    wget https://static.rust-lang.org/rustup/rustup-init.sh && \
+    chmod +x rustup-init.sh && \
+    ./rustup-init.sh -y --default-toolchain nightly && \
+    for tool in /root/.cargo/bin/*; do ln -vsf $tool /usr/bin/; done; \
+  fi
+
+# Apply all patches
+ADD /scripts/ /scripts/
+RUN /scripts/apply-patches.bash /patches/server/*.patch /patches/client/*.patch /patches/client-${DOCKER_ARCH}/*.patch
+RUN /scripts/strip-cargo.bash
+RUN /scripts/experimental-cargo.bash
+RUN /scripts/resolve-dependencies.bash
+
+# Build
+RUN \
+  . /root/.cargo/env; \
+  cargo build --manifest-path proxmox-backup/proxmox-backup-client/Cargo.toml --release && \
+  cargo build --manifest-path proxmox-backup/pxar-bin/Cargo.toml --release
+
+# Bundle client
+RUN /scripts/bundle-client.bash
