@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo 'Received SIGINT...'
+kill 1

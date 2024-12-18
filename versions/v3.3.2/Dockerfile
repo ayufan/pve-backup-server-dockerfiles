@@ -88,7 +88,7 @@ COPY --from=builder /deb/ /deb/
 # Install all packages
 RUN export DEBIAN_FRONTEND=noninteractive && \
   apt-get -y update && \
-  apt install -y runit ssmtp /deb/*.deb
+  apt install -y runit ssmtp cron /deb/*.deb
 
 # Add default configs
 ADD /pbs/ /etc/proxmox-backup-default/
