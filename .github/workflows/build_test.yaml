@@ -31,8 +31,28 @@ jobs:
       uses: actions/checkout@v3
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
+    - name: Set repository name
+      if: vars.DOCKERHUB_TEST_REGISTRY
+      run:
+        echo "REGISTRY=${{ vars.DOCKERHUB_TEST_REGISTRY }}" >> $GITHUB_ENV;
+        if [[ -n "${{ github.event.pull_request.number }}" ]]; then
+          echo "TAG=github-pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV;
+        else
+          echo "TAG=ref-${{ github.ref_name }}" >> $GITHUB_ENV;
+        fi
     - name: Run docker-build for ${{matrix.docker_arch}}
       run: make ${{matrix.docker_arch}}-docker-build
+
+    # Push to DockerHub
+    - name: Login to Docker Hub
+      if: vars.DOCKERHUB_TEST_REGISTRY
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_TEST_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TEST_TOKEN }}
+    - name: Run dockerhub for ${{matrix.docker_arch}}
+      if: vars.DOCKERHUB_TEST_REGISTRY
+      run: make ${{matrix.docker_arch}}-dockerhub
 
   client-build:
     runs-on: ${{ matrix.runs_on }}
