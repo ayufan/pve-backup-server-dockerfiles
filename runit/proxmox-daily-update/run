@@ -1,0 +1,6 @@
+#!/bin/bash
+
+ln -sf /usr/lib/*/proxmox-backup/proxmox-daily-update /etc/cron.daily/
+
+echo "CRON: Starting..."
+exec cron -f
