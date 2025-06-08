@@ -2,10 +2,7 @@ BUILD_ARCHS = amd64 arm64v8
 CLIENT_BUILD_ARCHS = amd64 arm64v8
 REGISTRY ?= ayufan/proxmox-backup-server
 SHELL = /usr/bin/env bash
-
-ifeq (,$(VERSION))
-VERSION := $(shell ls versions | grep -E -v '.(tmp|debug)' | sort -V | tail -n 1)
-endif
+include repos/version.mk
 
 ifeq (,$(TAG))
 TAG := $(VERSION)
@@ -40,7 +37,7 @@ dev-%:
 		--build-arg ARCH=$(addsuffix /,$(DOCKER_ARCH)) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
-		-f versions/$(VERSION)/Dockerfile \
+		-f dockerfiles/Dockerfile \
 		.
 
 docker-build: $(addsuffix -docker-build, $(BUILD_ARCHS))
@@ -86,7 +83,7 @@ dockerhub-latest-release: $(addsuffix -dockerhub-latest-release, $(BUILD_ARCHS))
 		--build-arg DOCKER_ARCH=$(DOCKER_ARCH) \
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
-		-f versions/$(VERSION)/Dockerfile.client \
+		-f dockerfiles/Dockerfile.client \
 		.
 
 	mkdir -p release/$(TAG)
@@ -108,18 +105,14 @@ deb: $(addsuffix -deb, $(BUILD_ARCHS))
 # Development Helpers
 
 tmp-env:
-	mkdir -p "tmp/$(VERSION)"
-	cd "tmp/$(VERSION)" && ../../versions/$(VERSION)/clone.bash
-	cd "tmp/$(VERSION)" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch
-	cd "tmp/$(VERSION)" && ../../scripts/strip-cargo.bash
-	cd "tmp/$(VERSION)" && ../../scripts/resolve-dependencies.bash
+	mkdir -p build
+	cd build && ../../scripts/git-clone.bash ../../repos/versions
+	cd build && ../../scripts/apply-patches.bash ../../repos/patches/
+	cd build && ../../scripts/strip-cargo.bash
+	cd build && ../../scripts/resolve-dependencies.bash
 
-tmp-env-client:
-	mkdir -p "tmp/$(VERSION)-client"
-	cd "tmp/$(VERSION)-client" && ../../versions/$(VERSION)/clone.bash
-	cd "tmp/$(VERSION)-client" && ../../scripts/apply-patches.bash ../../versions/$(VERSION)/server/*.patch ./../versions/$(VERSION)/client*/*.patch
-	cd "tmp/$(VERSION)-client" && ../../scripts/strip-cargo.bash
-	cd "tmp/$(VERSION)-client" && ../../scripts/resolve-dependencies.bash
+tmp-env-client: tmp-env
+	cd build && ../../scripts/apply-patches.bash ../../repos/patches-client*/
 
 tmp-docker-shell:
 	docker build \
@@ -128,11 +121,11 @@ tmp-docker-shell:
 		--build-arg TAG=$(TAG) \
 		--build-arg VERSION=$(VERSION) \
 		--target toolchain \
-		-f versions/$(VERSION)/Dockerfile \
+		-f dockerfiles/Dockerfile \
 		.
 	docker run --name=tmp-docker-shell --net=host --rm -it \
 		-v "$(CURDIR):$(CURDIR)" \
-		-w "$(CURDIR)/tmp/$(VERSION)" \
+		-w "$(CURDIR)/build" \
 		tmp-docker-shell
 
 dev-run: dev-docker-build
@@ -142,19 +135,7 @@ dev-run: dev-docker-build
 dev-shell: dev-docker-build
 	TAG=$(TAG)-dev docker-compose run --rm pbs bash
 
-# Version management
-
-fork-version:
-ifndef NEW_VERSION
-	@echo "Missing 'make fork-version NEW_VERSION=...'"
-	@exit 1
-endif
-
-	rm -rf "versions/v$(NEW_VERSION).tmp"
-	cp -rv "versions/$(VERSION)" "versions/v$(NEW_VERSION).tmp"
-	"versions/v$(NEW_VERSION).tmp/clone.bash" show-sha $(firstword $(NEW_SHA) $(NEW_VERSION)) > "versions/v$(NEW_VERSION).tmp/versions.tmp"
-	mv "versions/v$(NEW_VERSION).tmp/versions.tmp" "versions/v$(NEW_VERSION).tmp/versions"
-	mv "versions/v$(NEW_VERSION).tmp" "versions/v$(NEW_VERSION)"
+# Release Helpers
 
 release: dockerhub client deb
 

@@ -1,0 +1,13 @@
+diff --git a/debian/rules b/debian/rules
+index c8d814af..51bc30cc 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -28,7 +28,7 @@ endif
+ override_dh_auto_configure:
+ 	@perl -ne 'if (/^version\s*=\s*"(\d+(?:\.\d+)+)"/) { my $$v_cargo = $$1; my $$v_deb = "$(DEB_VERSION_UPSTREAM)"; \
+ 	    die "ERROR: d/changelog <-> Cargo.toml version mismatch: $$v_cargo != $$v_deb\n" if $$v_cargo ne $$v_deb; exit(0); }' Cargo.toml
+-	$(CARGO) prepare-debian $(CURDIR)/debian/cargo_registry --link-from-system
++	#$(CARGO) prepare-debian --help $(CURDIR)/debian/cargo_registry --link-from-system
+ 	# `cargo build` and `cargo install` have different config precedence, symlink
+ 	# the wrapper config into a place where `build` picks it up as well..
+ 	# https://doc.rust-lang.org/cargo/commands/cargo-install.html#configuration-discovery

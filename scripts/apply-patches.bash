@@ -2,22 +2,19 @@
 
 set -eo pipefail
 
-for patch; do
-  if [[ ! -e $patch ]]; then
-    continue
-  fi
+for dir; do
+  for patch in $dir/*/*.patch; do
+    [[ ! -e $dir ]] && continue
 
-  patch_dest=$(basename "$patch". patch)
-  patch_dest=${patch_dest%%~*}
-  patch_dest=${patch_dest%%.*}
-
-  echo "$patch => $patch_dest..."
-  if ! git -C "$patch_dest" apply --index "$(realpath "$patch")"; then
-    patch -p1 -d "$patch_dest" < "$patch"
-    find "$patch_dest" -name '*.orig' -delete
-    find "$patch_dest" -name '*.rej' -delete
-    git -C "$patch_dest" add .
-  fi
-  git -C "$patch_dest" diff --cached > "$patch"
-  git -C "$patch_dest" commit -m "$(basename $patch)"
+    repo_name=$(basename $(dirname "$patch"))
+    echo "$patch => $repo_name..."
+    if ! git -C "$repo_name" apply --index "$(realpath "$patch")"; then
+      patch -p1 -d "$repo_name" < "$patch"
+      find "$repo_name" -name '*.orig' -delete
+      find "$repo_name" -name '*.rej' -delete
+      git -C "$repo_name" add .
+    fi
+    git -C "$repo_name" diff --cached > "$patch"
+    git -C "$repo_name" commit -m "$(basename $patch)"
+  done
 done

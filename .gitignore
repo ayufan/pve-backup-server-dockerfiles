@@ -1,5 +1,6 @@
 docker-compose.override.yml
-tmp/
 proxmox-backup-client*.tgz
 /.env.mk
+/tmp/
+/build/
 /release/
