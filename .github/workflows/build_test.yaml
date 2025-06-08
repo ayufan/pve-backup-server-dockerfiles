@@ -20,11 +20,12 @@ jobs:
   docker-build:
     runs-on: ${{ matrix.runs_on }}
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - runs_on: [self-hosted, Linux, ARM64]
+          - runs_on: ubuntu-24.04-arm
             docker_arch: arm64v8
-          - runs_on: ubuntu-latest
+          - runs_on: ubuntu-24.04
             docker_arch: amd64
     steps:
     - name: Checkout
@@ -57,11 +58,12 @@ jobs:
   client-build:
     runs-on: ${{ matrix.runs_on }}
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - runs_on: [self-hosted, Linux, ARM64]
+          - runs_on: ubuntu-24.04-arm
             docker_arch: arm64v8
-          - runs_on: ubuntu-latest
+          - runs_on: ubuntu-24.04
             docker_arch: amd64
     steps:
     - name: Checkout
