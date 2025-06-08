@@ -1,4 +1,0 @@
-#!/bin/bash
-
-sudo find tmp/backups/data -path '*/vm/*' -delete
-sudo find tmp/backups/data -type f -path '*/.chunks/*' -delete
