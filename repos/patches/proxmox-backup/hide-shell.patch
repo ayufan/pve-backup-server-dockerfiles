@@ -1,0 +1,17 @@
+diff --git a/www/NavigationTree.js b/www/NavigationTree.js
+index f10b0cd6..67ea1141 100644
+--- a/www/NavigationTree.js
++++ b/www/NavigationTree.js
+@@ -89,12 +89,6 @@ Ext.define('PBS.store.NavigationStore', {
+ 		expanded: true,
+ 		leaf: false,
+ 		children: [
+-		    {
+-			text: gettext('Shell'),
+-			iconCls: 'fa fa-terminal',
+-			path: 'pbsXtermJsConsole',
+-			leaf: true,
+-		    },
+ 		    {
+ 			text: gettext('Storage / Disks'),
+ 			iconCls: 'fa fa-hdd-o',

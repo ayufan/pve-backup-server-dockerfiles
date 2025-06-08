@@ -1,0 +1,13 @@
+diff --git a/www/panel/NodeInfo.js b/www/panel/NodeInfo.js
+index 9d741e45..5196f64b 100644
+--- a/www/panel/NodeInfo.js
++++ b/www/panel/NodeInfo.js
+@@ -150,7 +150,7 @@ Ext.define('PBS.NodeInfoPanel', {
+ 		    return data.kversion;
+ 		}
+ 		let kernel = data['current-kernel'];
+-		let buildDate = kernel.version.match(/\((.+)\)\s*$/)?.[1] ?? 'unknown';
++		let buildDate = kernel.version;
+ 		return `${kernel.sysname} ${kernel.release} (${buildDate})`;
+ 	    },
+ 	    value: '',

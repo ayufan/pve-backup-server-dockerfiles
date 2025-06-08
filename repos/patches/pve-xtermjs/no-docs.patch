@@ -1,0 +1,7 @@
+diff --git a/termproxy/debian/docs b/termproxy/debian/docs
+deleted file mode 100644
+index 8696672..0000000
+--- a/termproxy/debian/docs
++++ /dev/null
+@@ -1 +0,0 @@
+-debian/SOURCE

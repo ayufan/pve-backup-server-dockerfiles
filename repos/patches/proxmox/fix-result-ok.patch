@@ -1,0 +1,18 @@
+diff --git a/proxmox-sys/src/linux/procfs/mod.rs b/proxmox-sys/src/linux/procfs/mod.rs
+index 3bade312..766b6e02 100644
+--- a/proxmox-sys/src/linux/procfs/mod.rs
++++ b/proxmox-sys/src/linux/procfs/mod.rs
+@@ -1,3 +1,4 @@
++use std::result::Result::Ok;
+ use std::collections::HashSet;
+ use std::convert::TryFrom;
+ use std::fmt;
+diff --git a/proxmox-sys/src/linux/tty.rs b/proxmox-sys/src/linux/tty.rs
+index d08ae81f..a573d585 100644
+--- a/proxmox-sys/src/linux/tty.rs
++++ b/proxmox-sys/src/linux/tty.rs
+@@ -1,3 +1,4 @@
++use std::result::Result::Ok;
+ use std::io::{self, IsTerminal, Read, Write};
+ use std::mem::MaybeUninit;
+ use std::os::unix::io::{AsRawFd, OwnedFd};
