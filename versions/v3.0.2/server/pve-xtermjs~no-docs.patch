@@ -1,7 +1,0 @@
-diff --git a/debian/docs b/debian/docs
-deleted file mode 100644
-index 8696672..0000000
---- a/debian/docs
-+++ /dev/null
-@@ -1 +0,0 @@
--debian/SOURCE
