@@ -106,13 +106,13 @@ deb: $(addsuffix -deb, $(BUILD_ARCHS))
 
 tmp-env:
 	mkdir -p build
-	cd build && ../../scripts/git-clone.bash ../../repos/versions
-	cd build && ../../scripts/apply-patches.bash ../../repos/patches/
-	cd build && ../../scripts/strip-cargo.bash
-	cd build && ../../scripts/resolve-dependencies.bash
+	cd build && ../scripts/git-clone.bash ../repos/versions
+	cd build && ../scripts/apply-patches.bash ../repos/patches/
+	cd build && ../scripts/strip-cargo.bash
+	cd build && ../scripts/resolve-dependencies.bash
 
 tmp-env-client: tmp-env
-	cd build && ../../scripts/apply-patches.bash ../../repos/patches-client*/
+	cd build && ../scripts/apply-patches.bash ../repos/patches-client*/
 
 tmp-docker-shell:
 	docker build \
