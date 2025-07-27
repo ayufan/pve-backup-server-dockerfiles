@@ -1,0 +1,87 @@
+ARG IMAGE_PREFIX=
+FROM ${IMAGE_PREFIX}debian:bookworm AS toolchain
+
+RUN apt-get -y update && \
+  apt-get -y install \
+    build-essential git-core \
+    lintian pkg-config quilt patch cargo \
+    nodejs node-colors node-commander \
+    libudev-dev libapt-pkg-dev \
+    libacl1-dev libpam0g-dev libfuse3-dev \
+    libsystemd-dev uuid-dev libssl-dev \
+    libclang-dev libjson-perl libcurl4-openssl-dev \
+    dh-exec dh-nodejs wget rsync
+
+ENV CARGO_HOME=/cargo \
+  RUSTUP_HOME=/rustup \
+  PATH="/cargo/bin:$PATH"
+RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
+  chmod +x rustup-init.sh && \
+  ./rustup-init.sh -y && \
+  cargo install debcargo && \
+  rustc --version
+
+# Specify default rust toolchain
+ENV RUSTUP_TOOLCHAIN=1.85
+
+# Link /cargo/bin to /usr/local/bin
+RUN ln -s /cargo/bin/* /usr/local/bin/
+ADD /scripts/toolchain/ /usr/local/bin/
+
+WORKDIR /src
+RUN git config --system user.email "docker@compile.dev" && \
+  git config --system user.name "Docker Compile"
+
+FROM toolchain as builder
+
+ADD /scripts/build /src/scripts/build
+ADD /repos /src/repos
+
+RUN ./scripts/build/make.bash pve-eslint make_dinstall
+RUN ./scripts/build/make.bash proxmox-widget-toolkit make_dinstall
+RUN ./scripts/build/make.bash perlmod "dpkg_build perlmod-bin" "dpkg_install"
+RUN ./scripts/build/make.bash proxmox-perl-rs "make_deb common/pkg" "make_deb pve-rs" dpkg_install
+RUN ./scripts/build/make.bash pve-common make_dinstall
+RUN ./scripts/build/make.bash extjs make_deb
+RUN ./scripts/build/make.bash proxmox-i18n make_deb
+RUN ./scripts/build/make.bash proxmox-mini-journalreader make_deb
+RUN ./scripts/build/make.bash libjs-qrcodejs make_deb
+RUN ./scripts/build/make.bash proxmox-acme make_deb
+RUN ./scripts/build/make.bash pve-xtermjs "make_deb termproxy" "make_deb xterm.js"
+RUN ./scripts/build/make.bash proxmox-backup make_deb
+
+#=================================
+
+FROM ${IMAGE_PREFIX}debian:bookworm AS deb_env
+
+# Generate release package
+COPY --from=builder /src/release/ /release/
+
+# Bundle server
+ARG VERSION
+ADD /scripts/release /src/scripts/release
+RUN /src/scripts/release/apt-install.bash --gen /release/install /release proxmox-backup-server
+RUN /src/scripts/release/bundle-tgz.bash /proxmox-backup-server-${VERSION}-${DOCKER_ARCH:-dev}.tgz /release/.
+
+#=================================
+
+FROM ${IMAGE_PREFIX}debian:bookworm AS release_env
+
+# Copy packages
+COPY --from=deb_env /release/ /release/
+
+# Install base packages
+RUN export DEBIAN_FRONTEND=noninteractive && \
+  apt-get -y update && \
+  apt install -y runit ssmtp cron && \
+  /release/install
+
+# Add default configs
+ADD /dockerfiles/pbs/ /etc/proxmox-backup-default/
+
+VOLUME /etc/proxmox-backup
+VOLUME /var/log/proxmox-backup
+VOLUME /var/lib/proxmox-backup
+
+ADD /dockerfiles/runit/ /runit/
+CMD ["runsvdir", "/runit"]
