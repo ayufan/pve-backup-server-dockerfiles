@@ -1,80 +1,115 @@
 on:
   workflow_dispatch:
     inputs:
-      VERSION:
-        description: 'Version to build'
-        required: false
-        type: string
       TAG:
         description: 'Tag name to use'
         required: false
         type: string
 
 env:
-  VERSION: ${{ inputs.VERSION }}
+  REGISTRY: ${{ vars.DOCKERHUB_REGISTRY }}
   TAG: ${{ inputs.TAG }}
 
 jobs:
+
   draft:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Run github-create-draft
-      run: make github-create-draft
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create draft release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.TAG }}
+        name: ${{ env.TAG }}
+        bodyFile: RELEASE.md
+        draft: true
+        generateReleaseNotes: true
+        removeArtifacts: true
 
   docker-build:
     needs: [draft]
     runs-on: ${{ matrix.runs_on }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - runs_on: ubuntu-24.04-arm
-            docker_arch: arm64v8
+            arch: arm64
           - runs_on: ubuntu-24.04
-            docker_arch: amd64
+            arch: arm64
+    env:
+      ARCH: ${{ matrix.arch }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
+
+    # Compile and release
+    - name: Compile and release for ${{matrix.arch}}
+      run:
+        ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" build-tgz build-image
+
+    # Push to DockerHub
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Run dockerhub for ${{matrix.docker_arch}}
-      run: make ${{matrix.docker_arch}}-dockerhub
-    - name: Run deb for ${{matrix.docker_arch}}
-      run: make ${{matrix.docker_arch}}-deb
-    - name: Upload deb files
-      run: make github-upload-all
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run docker push for ${{matrix.arch}}
+      run:
+        ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" push-image
+
+    # Upload files to draft release
+    - name: Upload files to draft release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.TAG }}
+        artifacts: release/*.tgz
+        allowUpdates: true
+        updateOnlyUnreleased: true
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true
+        omitDraftDuringUpdate: true
 
   client-build:
     needs: [draft]
     runs-on: ${{ matrix.runs_on }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - runs_on: ubuntu-24.04-arm
-            docker_arch: arm64v8
+            arch: arm64
           - runs_on: ubuntu-24.04
-            docker_arch: amd64
+            arch: amd64
+          - runs_on: ubuntu-24.04-arm
+            arch: arm32
+            continue-on-error: true
+    env:
+      ARCH: ${{ matrix.arch }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
-    - name: Run client for ${{matrix.docker_arch}}
-      run: make ${{matrix.docker_arch}}-client
-    - name: Upload artifacts
-      run: make github-upload-all
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Compile the client
+    - name: Run client for ${{matrix.arch}}
+      run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" client-tgz
+
+    # Upload files to draft release
+    - name: Upload files to draft release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.TAG }}
+        artifacts: release/*.tgz
+        allowUpdates: true
+        updateOnlyUnreleased: true
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true
+        omitDraftDuringUpdate: true
 
   prerelease:
     runs-on: ubuntu-latest
@@ -82,14 +117,24 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+
+    # Update docker manifest
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Run dockerhub-manifest
-      run: make dockerhub-manifest
-    - name: Run github-create-pre-release
-      run: make github-create-pre-release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create manifest
+      run:
+        ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" manifest
+
+    # Create pre-release
+    - name: Make release as pre-release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.TAG }}
+        prerelease: true
+        allowUpdates: true
+        updateOnlyUnreleased: true
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true

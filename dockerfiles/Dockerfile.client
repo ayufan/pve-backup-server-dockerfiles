@@ -1,5 +1,5 @@
-ARG DOCKER_ARCH
-FROM ${DOCKER_ARCH}/debian:bookworm AS builder
+ARG IMAGE_PREFIX=
+FROM ${IMAGE_PREFIX}debian:bookworm AS builder
 
 RUN apt-get -y update && \
   apt-get -y install \
@@ -18,29 +18,30 @@ RUN /usr/bin/rustc --version
 RUN git config --global user.email "docker@compile.dev" && \
   git config --global user.name "Docker Compile"
 
-# Clone all sources
-ADD /scripts/ /scripts/
-ADD /repos/versions /repos/
-RUN /scripts/git-clone.bash /repos/versions
-
 # Install valid rust toolchain
-ARG DOCKER_ARCH
-RUN \
-  if [ "${DOCKER_ARCH}" != "arm32v7" ]; then \
-    wget https://static.rust-lang.org/rustup/rustup-init.sh && \
+RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
     chmod +x rustup-init.sh && \
-    ./rustup-init.sh -y --default-toolchain nightly && \
-    for tool in /root/.cargo/bin/*; do ln -vsf $tool /usr/bin/; done; \
-  fi
+    ./rustup-init.sh -y && \
+    for tool in /root/.cargo/bin/*; do ln -vsf $tool /usr/bin/; done;
+
+# Specify default rust toolchain
+ENV RUSTUP_TOOLCHAIN=1.85
 
 # Apply all patches
-ADD /repos/patches/ /repos/patches/
-RUN /scripts/apply-patches.bash /repos/patches/
-RUN /scripts/strip-cargo.bash
-RUN /scripts/resolve-dependencies.bash
+ADD /scripts/build /src/scripts/build
+ADD /repos /src/repos
 
 # Build
-RUN make -C proxmox-backup proxmox-backup-client-static BUILD_MODE=release COMPILEDIR=target/static/release
+ARG CROSS_ARCH=
+RUN ./scripts/build/cross-compile.bash "$CROSS_ARCH"
+RUN ./scripts/build/make.bash --keep proxmox-backup "make . ignore proxmox-backup-client-static BUILD_MODE=release COMPILEDIR=target/static/release CARGO_STATIC_CONFIG="
 
 # Bundle client
-RUN /scripts/bundle-client.bash
+ARG VERSION
+ARG ARCH=
+ADD /dockerfiles/client/ /dockerfiles/client/
+ADD /scripts/release /src/scripts/release
+RUN /src/scripts/release/bundle-tgz.bash /proxmox-backup-client-${VERSION}-${CROSS_ARCH:-${ARCH:-dev}}.tgz \
+  /dockerfiles/client/. \
+  /src/build/proxmox-backup/target/static-build/*/release/pxar \
+  /src/build/proxmox-backup/target/static-build/*/release/proxmox-backup-client

@@ -7,6 +7,7 @@ on:
         type: string
 
 env:
+  REGISTRY: ${{ vars.DOCKERHUB_REGISTRY }}
   TAG: ${{ inputs.TAG }}
 
 jobs:
@@ -20,7 +21,17 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Run dockerhub-latest-release
-      run: make github-latest-release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Update the dockerhub tags
+    - name: Create semver manifest
+      run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" manifest-latest
+
+    # Create release
+    - name: Make it latest
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.TAG }}
+        allowUpdates: true
+        updateOnlyUnreleased: true
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true

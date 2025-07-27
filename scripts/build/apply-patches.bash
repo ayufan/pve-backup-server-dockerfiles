@@ -3,10 +3,10 @@
 set -eo pipefail
 
 for dir; do
-  for patch in $dir/*/*.patch; do
-    [[ ! -e $dir ]] && continue
-
+  while read patch; do
     repo_name=$(basename $(dirname "$patch"))
+    [[ ! -d "$repo_name" ]] && continue
+
     echo "$patch => $repo_name..."
     if ! git -C "$repo_name" apply --index "$(realpath "$patch")"; then
       patch -p1 -d "$repo_name" < "$patch"
@@ -14,7 +14,13 @@ for dir; do
       find "$repo_name" -name '*.rej' -delete
       git -C "$repo_name" add .
     fi
+
+    if [[ -z "$(git -C "$repo_name" diff --cached)" ]]; then
+      echo "Patch applied, but is in a submodule?"
+      continue
+    fi
+
     git -C "$repo_name" diff --cached > "$patch"
     git -C "$repo_name" commit -m "$(basename $patch)"
-  done
+  done < <(find "$dir" -name "*.patch" | sort)
 done

@@ -7,14 +7,6 @@ on:
       - .github/workflows/*.yaml
   pull_request:
   workflow_dispatch:
-    inputs:
-      VERSION:
-        description: 'Version to build'
-        required: false
-        type: string
-
-env:
-  VERSION: ${{ inputs.VERSION }}
 
 jobs:
   docker-build:
@@ -24,9 +16,11 @@ jobs:
       matrix:
         include:
           - runs_on: ubuntu-24.04-arm
-            docker_arch: arm64v8
+            arch: arm64
           - runs_on: ubuntu-24.04
-            docker_arch: amd64
+            arch: amd64
+    env:
+      ARCH: ${{ matrix.arch }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -41,8 +35,16 @@ jobs:
         else
           echo "TAG=ref-${{ github.ref_name }}" >> $GITHUB_ENV;
         fi
-    - name: Run docker-build for ${{matrix.docker_arch}}
-      run: make ${{matrix.docker_arch}}-docker-build
+    - name: Run docker for ${{matrix.arch}}
+      env:
+        TAG: ${{ env.TAG }}
+      run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" build-image build-deb
+
+    # Push Artifacts to GitHub
+    - uses: actions/upload-artifact@v4
+      with:
+        name: server-${{ matrix.arch }}
+        path: release/
 
     # Push to DockerHub
     - name: Login to Docker Hub
@@ -51,9 +53,9 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_TEST_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TEST_TOKEN }}
-    - name: Run dockerhub for ${{matrix.docker_arch}}
+    - name: Run dockerhub for ${{matrix.arch}}
       if: vars.DOCKERHUB_TEST_REGISTRY
-      run: make ${{matrix.docker_arch}}-dockerhub
+      run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" push-image
 
   client-build:
     runs-on: ${{ matrix.runs_on }}
@@ -62,13 +64,71 @@ jobs:
       matrix:
         include:
           - runs_on: ubuntu-24.04-arm
-            docker_arch: arm64v8
+            arch: arm64
           - runs_on: ubuntu-24.04
-            docker_arch: amd64
+            arch: amd64
+    env:
+      ARCH: ${{ matrix.arch }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
-    - name: Run client for ${{matrix.docker_arch}}
-      run: make ${{matrix.docker_arch}}-client
+    - name: Set repository name
+      if: vars.DOCKERHUB_TEST_REGISTRY
+      run:
+        echo "REGISTRY=${{ vars.DOCKERHUB_TEST_REGISTRY }}" >> $GITHUB_ENV;
+        if [[ -n "${{ github.event.pull_request.number }}" ]]; then
+          echo "TAG=github-pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV;
+        else
+          echo "TAG=ref-${{ github.ref_name }}" >> $GITHUB_ENV;
+        fi
+    # Compile the client
+    - name: Run client for ${{matrix.arch}}
+      run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" client-tgz
+    # Push Artifacts to GitHub
+    - uses: actions/upload-artifact@v4
+      with:
+        name: client-${{ matrix.arch }}
+        path: release/
+
+  manifest:
+    runs-on: ubuntu-latest
+    needs: [client-build, docker-build]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Set repository name
+      if: vars.DOCKERHUB_TEST_REGISTRY
+      run:
+        echo "REGISTRY=${{ vars.DOCKERHUB_TEST_REGISTRY }}" >> $GITHUB_ENV;
+        if [[ -n "${{ github.event.pull_request.number }}" ]]; then
+          echo "TAG=github-pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV;
+        else
+          echo "TAG=ref-${{ github.ref_name }}" >> $GITHUB_ENV;
+        fi
+    - name: Login to Docker Hub
+      if: vars.DOCKERHUB_TEST_REGISTRY
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_TEST_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TEST_TOKEN }}
+    - name: Run dockerhub-manifest
+      run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" manifest
+    - name: Comment image name on PR
+      if: github.event_name == 'pull_request'
+      env:
+        REGISTRY: ${{ env.REGISTRY }}
+        TAG: ${{ env.TAG }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const imageName = `${{ env.REGISTRY }}:${{ env.TAG }}`;
+          const body = `✅ Docker image pushed: \`${imageName}\``;
+
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: body
+          });
