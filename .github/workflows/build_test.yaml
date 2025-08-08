@@ -67,6 +67,9 @@ jobs:
             arch: arm64
           - runs_on: ubuntu-24.04
             arch: amd64
+          - runs_on: ubuntu-24.04-arm
+            arch: arm32
+            continue-on-error: true
     env:
       ARCH: ${{ matrix.arch }}
     steps:

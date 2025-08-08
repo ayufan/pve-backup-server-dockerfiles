@@ -1,9 +1,9 @@
 diff --git a/src/Makefile b/src/Makefile
-index 449004f..eeee305 100644
+index 6807b67..e64e066 100644
 --- a/src/Makefile
 +++ b/src/Makefile
-@@ -5,7 +5,7 @@ BIN_DIR ?= $(DESTDIR)/usr/bin
- MAN1_DIR ?= $(DESTDIR)/usr/share/man/man1
+@@ -6,7 +6,7 @@ MAN1_DIR ?= $(DESTDIR)/usr/share/man/man1
+ MANPAGE ?= $(PROGRAM).1
  
  LIBS := libsystemd
 -CFLAGS += -Werror -Wall -Wextra -Wl,-z,relro -g -O2 --std=gnu11

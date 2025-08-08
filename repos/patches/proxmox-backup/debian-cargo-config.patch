@@ -1,13 +1,16 @@
 diff --git a/debian/rules b/debian/rules
-index c8d814af..51bc30cc 100755
+index aa4571ff..0fbb29e7 100755
 --- a/debian/rules
 +++ b/debian/rules
-@@ -28,7 +28,7 @@ endif
+@@ -38,9 +38,9 @@ endif
  override_dh_auto_configure:
  	@perl -ne 'if (/^version\s*=\s*"(\d+(?:\.\d+)+)"/) { my $$v_cargo = $$1; my $$v_deb = "$(DEB_VERSION_UPSTREAM)"; \
  	    die "ERROR: d/changelog <-> Cargo.toml version mismatch: $$v_cargo != $$v_deb\n" if $$v_cargo ne $$v_deb; exit(0); }' Cargo.toml
 -	$(CARGO) prepare-debian $(CURDIR)/debian/cargo_registry --link-from-system
 +	#$(CARGO) prepare-debian --help $(CURDIR)/debian/cargo_registry --link-from-system
+ 	# add a new config for static building, sync with Makefile!
+-	cp debian/cargo_home/config.toml debian/cargo_home/config.static.toml
++	mkdir -p $(CARGO_HOME); touch $(CARGO_HOME)/config.toml; cp $(CARGO_HOME)/config.toml debian/cargo_home/config.static.toml
+ 	sed -ri -e 's!^(rustflags = .*)\]$$!\1, "-C", "target-feature=+crt-static", "-L", "$(STATIC_COMPILEDIR)/deps-stubs/"\]!' debian/cargo_home/config.static.toml
  	# `cargo build` and `cargo install` have different config precedence, symlink
  	# the wrapper config into a place where `build` picks it up as well..
- 	# https://doc.rust-lang.org/cargo/commands/cargo-install.html#configuration-discovery
