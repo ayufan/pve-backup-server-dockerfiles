@@ -12,6 +12,11 @@ KEEP=
 
 while [[ -n "$1" ]]; do
   case "$1" in
+    --rust)
+      export RUSTUP_TOOLCHAIN="$2"
+      shift
+      ;;
+
     --nightly)
       export RUSTUP_TOOLCHAIN=nightly
       ;;
