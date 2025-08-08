@@ -1,0 +1,12 @@
+diff --git a/pve-rs/debian/control b/pve-rs/debian/control
+index bca3c1e..eedce80 100644
+--- a/pve-rs/debian/control
++++ b/pve-rs/debian/control
+@@ -4,7 +4,6 @@ Priority: optional
+ Build-Depends: cargo:native <!nocheck>,
+                debhelper-compat (= 13),
+                dh-cargo,
+-               libproxmox-rs-perl (>= 0.3.5),
+                libstd-rust-dev <!nocheck>,
+                perlmod-bin (>= 0.2.1-1),
+                rustc:native <!nocheck>,

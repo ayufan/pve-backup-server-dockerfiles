@@ -1,0 +1,15 @@
+diff --git a/Makefile b/Makefile
+index 18e5ce27..7caf87b0 100644
+--- a/Makefile
++++ b/Makefile
+@@ -39,8 +39,8 @@ $(BUILDDIR):
+ 	cp -a Makefile $@.tmp/
+ 	cp -a debian/ $@.tmp/debian
+ 	cp -a src/ $@.tmp/src
+-	printf '\n[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' \
+-	  >> $@.tmp/.cargo/config.toml
++	#printf '\n[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' \
++	#  >> $@.tmp/.cargo/config.toml
+ 	mv $@.tmp $@
+ 
+ deb: $(DEB)

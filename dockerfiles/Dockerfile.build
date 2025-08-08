@@ -1,5 +1,5 @@
 ARG IMAGE_PREFIX=
-FROM ${IMAGE_PREFIX}debian:bookworm AS toolchain
+FROM ${IMAGE_PREFIX}debian:trixie AS toolchain
 
 RUN apt-get -y update && \
   apt-get -y install \
@@ -38,6 +38,7 @@ ADD /scripts/build /src/scripts/build
 ADD /repos /src/repos
 
 RUN ./scripts/build/make.bash pve-eslint make_dinstall
+RUN ./scripts/build/make.bash proxmox-biome make_dinstall
 RUN ./scripts/build/make.bash proxmox-widget-toolkit make_dinstall
 RUN ./scripts/build/make.bash perlmod "dpkg_build perlmod-bin" "dpkg_install"
 RUN ./scripts/build/make.bash proxmox-perl-rs "make_deb common/pkg" "make_deb pve-rs" dpkg_install
@@ -52,7 +53,7 @@ RUN ./scripts/build/make.bash --rust 1.85 proxmox-backup make_deb
 
 #=================================
 
-FROM ${IMAGE_PREFIX}debian:bookworm AS deb_env
+FROM ${IMAGE_PREFIX}debian:trixie AS deb_env
 
 # Generate release package
 COPY --from=builder /src/release/ /release/
@@ -65,7 +66,7 @@ RUN /src/scripts/release/bundle-tgz.bash /proxmox-backup-server-${VERSION}-${DOC
 
 #=================================
 
-FROM ${IMAGE_PREFIX}debian:bookworm AS release_env
+FROM ${IMAGE_PREFIX}debian:trixie AS release_env
 
 # Copy packages
 COPY --from=deb_env /release/ /release/

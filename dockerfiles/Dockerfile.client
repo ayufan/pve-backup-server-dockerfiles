@@ -1,5 +1,5 @@
 ARG IMAGE_PREFIX=
-FROM ${IMAGE_PREFIX}debian:bookworm AS builder
+FROM ${IMAGE_PREFIX}debian:trixie AS builder
 
 RUN apt-get -y update && \
   apt-get -y install \

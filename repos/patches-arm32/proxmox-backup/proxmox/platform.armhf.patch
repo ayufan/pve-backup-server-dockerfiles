@@ -1,0 +1,175 @@
+From 06fa463a208338ad397e9581759bb3c26f7f2ee2 Mon Sep 17 00:00:00 2001
+From: Kamil Trzcinski <ayufan@ayufan.eu>
+Date: Fri, 25 Jul 2025 22:04:16 +0200
+Subject: [PATCH] arm32
+
+---
+ proxmox-access-control/src/acl.rs  | 7 +++----
+ proxmox-access-control/src/user.rs | 8 +++++---
+ proxmox-shared-memory/src/lib.rs   | 2 +-
+ proxmox-sys/src/crypt.rs           | 2 +-
+ proxmox-sys/src/fs/mod.rs          | 2 +-
+ proxmox-sys/src/linux/timer.rs     | 4 ++--
+ proxmox-sys/src/process_locker.rs  | 2 +-
+ proxmox-time/src/posix.rs          | 6 ++++--
+ 8 files changed, 18 insertions(+), 15 deletions(-)
+
+diff --git a/proxmox-access-control/src/acl.rs b/proxmox-access-control/src/acl.rs
+index b8041688..f6b4f456 100644
+--- a/proxmox-access-control/src/acl.rs
++++ b/proxmox-access-control/src/acl.rs
+@@ -596,8 +596,7 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
+         let cache = cached_conf.read().unwrap();
+         if let Some(ref config) = cache.data {
+             if let Some(stat) = stat {
+-                if stat.st_mtime == cache.last_mtime && stat.st_mtime_nsec == cache.last_mtime_nsec
+-                {
++                if stat.st_mtime == (cache.last_mtime as _) && stat.st_mtime_nsec == (cache.last_mtime_nsec as _) {
+                     return Ok(config.clone());
+                 }
+             } else if cache.last_mtime == 0 && cache.last_mtime_nsec == 0 {
+@@ -611,8 +610,8 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
+ 
+     let mut cache = cached_conf.write().unwrap();
+     if let Some(stat) = stat {
+-        cache.last_mtime = stat.st_mtime;
+-        cache.last_mtime_nsec = stat.st_mtime_nsec;
++        cache.last_mtime = stat.st_mtime as _;
++        cache.last_mtime_nsec = stat.st_mtime_nsec as _;
+     }
+     cache.data = Some(config.clone());
+ 
+diff --git a/proxmox-access-control/src/user.rs b/proxmox-access-control/src/user.rs
+index 95b70f25..bf0bb255 100644
+--- a/proxmox-access-control/src/user.rs
++++ b/proxmox-access-control/src/user.rs
+@@ -83,7 +83,9 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
+         let cache = cached_config.read().unwrap();
+         if let Some(ref config) = cache.data {
+             if let Some(stat) = stat {
+-                if stat.st_mtime == cache.last_mtime && stat.st_mtime_nsec == cache.last_mtime_nsec
++                if stat.st_mtime == (cache.last_mtime as _) && stat.st_mtime_nsec == (cache.last_mtime_nsec as _) {
++                    return Ok(config.clone());
++                }
+                 {
+                     return Ok(config.clone());
+                 }
+@@ -98,8 +100,8 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
+ 
+     let mut cache = cached_config.write().unwrap();
+     if let Some(stat) = stat {
+-        cache.last_mtime = stat.st_mtime;
+-        cache.last_mtime_nsec = stat.st_mtime_nsec;
++        cache.last_mtime = stat.st_mtime as _;
++        cache.last_mtime_nsec = stat.st_mtime_nsec as _;
+     }
+     cache.data = Some(config.clone());
+ 
+diff --git a/proxmox-shared-memory/src/lib.rs b/proxmox-shared-memory/src/lib.rs
+index b067d1b9..e8a994a8 100644
+--- a/proxmox-shared-memory/src/lib.rs
++++ b/proxmox-shared-memory/src/lib.rs
+@@ -145,7 +145,7 @@ impl<T: Sized + Init> SharedMemory<T> {
+         let size = std::mem::size_of::<T>();
+         let size = up_to_page_size(size);
+ 
+-        nix::unistd::ftruncate(&file, size as i64)?;
++        nix::unistd::ftruncate(&file, size as i32)?;
+ 
+         // link the file into place:
+         let proc_path = format!("/proc/self/fd/{}\0", file.as_raw_fd());
+diff --git a/proxmox-sys/src/crypt.rs b/proxmox-sys/src/crypt.rs
+index 508b9c15..3b7ee7eb 100644
+--- a/proxmox-sys/src/crypt.rs
++++ b/proxmox-sys/src/crypt.rs
+@@ -112,7 +112,7 @@ pub fn crypt_gensalt(prefix: &str, count: u64, rbytes: &[u8]) -> Result<String,
+     let status = unsafe {
+         __crypt_gensalt_rn(
+             prefix.as_ptr(),
+-            count,
++            count as libc::c_ulong,
+             rbytes.as_ptr(),
+             rbytes.len().try_into()?,
+             output.as_mut_ptr(),
+diff --git a/proxmox-sys/src/fs/mod.rs b/proxmox-sys/src/fs/mod.rs
+index 752b75d2..4556eac0 100644
+--- a/proxmox-sys/src/fs/mod.rs
++++ b/proxmox-sys/src/fs/mod.rs
+@@ -170,7 +170,7 @@ pub fn fs_info<P: ?Sized + nix::NixPath>(path: &P) -> nix::Result<FileSystemInfo
+         available: stat.f_bavail * block_size,
+         total_inodes: stat.f_files,
+         free_inodes: stat.f_ffree,
+-        fs_type: stat.f_type,
++        fs_type: stat.f_type.into(),
+         fs_id: stat.f_fsid,
+     })
+ }
+diff --git a/proxmox-sys/src/linux/timer.rs b/proxmox-sys/src/linux/timer.rs
+index bb01dc81..0b0eccd1 100644
+--- a/proxmox-sys/src/linux/timer.rs
++++ b/proxmox-sys/src/linux/timer.rs
+@@ -106,8 +106,8 @@ fn opt_duration_to_timespec(v: Option<Duration>) -> libc::timespec {
+             tv_nsec: 0,
+         },
+         Some(value) => libc::timespec {
+-            tv_sec: value.as_secs() as i64,
+-            tv_nsec: value.subsec_nanos() as i64,
++            tv_sec: value.as_secs() as libc::time_t,
++            tv_nsec: value.subsec_nanos() as libc::suseconds_t,
+         },
+     }
+ }
+diff --git a/proxmox-sys/src/process_locker.rs b/proxmox-sys/src/process_locker.rs
+index 65d2793a..d5a32ddb 100644
+--- a/proxmox-sys/src/process_locker.rs
++++ b/proxmox-sys/src/process_locker.rs
+@@ -160,7 +160,7 @@ impl ProcessLocker {
+ 
+         let now = unsafe { libc::time(std::ptr::null_mut()) };
+ 
+-        data.shared_guard_list.insert(guard.guard_id, now);
++        data.shared_guard_list.insert(guard.guard_id, now.into());
+ 
+         Ok(guard)
+     }
+diff --git a/proxmox-time/src/posix.rs b/proxmox-time/src/posix.rs
+index c2146c47..e89876ea 100644
+--- a/proxmox-time/src/posix.rs
++++ b/proxmox-time/src/posix.rs
+@@ -15,7 +15,7 @@ pub fn timelocal(t: &mut libc::tm) -> Result<i64, Error> {
+     if epoch == -1 {
+         bail!("libc::mktime failed for {t:?}");
+     }
+-    Ok(epoch)
++    Ok(epoch.into())
+ }
+ 
+ /// Safe bindings to libc timegm
+@@ -29,7 +29,7 @@ pub fn timegm(t: &mut libc::tm) -> Result<i64, Error> {
+     if epoch == -1 {
+         bail!("libc::timegm failed for {t:?}");
+     }
+-    Ok(epoch)
++    Ok(epoch.into())
+ }
+ 
+ fn new_libc_tm() -> libc::tm {
+@@ -53,6 +53,7 @@ pub fn localtime(epoch: i64) -> Result<libc::tm, Error> {
+     let mut result = new_libc_tm();
+ 
+     unsafe {
++        let epoch = epoch as libc::time_t;
+         if libc::localtime_r(&epoch, &mut result).is_null() {
+             bail!("libc::localtime failed for '{epoch}'");
+         }
+@@ -66,6 +67,7 @@ pub fn gmtime(epoch: i64) -> Result<libc::tm, Error> {
+     let mut result = new_libc_tm();
+ 
+     unsafe {
++        let epoch = epoch as libc::time_t;
+         if libc::gmtime_r(&epoch, &mut result).is_null() {
+             bail!("libc::gmtime failed for '{epoch}'");
+         }
+-- 
+2.39.2
+

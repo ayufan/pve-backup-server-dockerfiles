@@ -1,0 +1,270 @@
+From 08e19e66fab8280161495c81f688a330fc80e4f5 Mon Sep 17 00:00:00 2001
+From: Kamil Trzcinski <ayufan@ayufan.eu>
+Date: Fri, 25 Jul 2025 22:04:22 +0200
+Subject: [PATCH] arm32
+
+---
+ pbs-client/src/pxar/create.rs    | 10 +++++-----
+ pbs-client/src/pxar/extract.rs   |  4 ++--
+ pbs-client/src/pxar/metadata.rs  |  4 ++--
+ pbs-config/src/acl.rs            |  7 +++----
+ pbs-config/src/user.rs           |  7 +++----
+ pbs-datastore/src/chunk_store.rs |  4 ++--
+ pbs-datastore/src/fixed_index.rs |  6 +++---
+ pbs-fuse-loop/src/fuse_loop.rs   |  4 ++--
+ pbs-pxar-fuse/src/lib.rs         | 12 ++++++------
+ 9 files changed, 28 insertions(+), 30 deletions(-)
+
+diff --git a/pbs-client/src/pxar/create.rs b/pbs-client/src/pxar/create.rs
+index 7f605a61..4a1a16be 100644
+--- a/pbs-client/src/pxar/create.rs
++++ b/pbs-client/src/pxar/create.rs
+@@ -79,7 +79,7 @@ fn detect_fs_type(fd: RawFd) -> Result<i64, Errno> {
+     Errno::result(res)?;
+     let fs_stat = unsafe { fs_stat.assume_init() };
+ 
+-    Ok(fs_stat.f_type)
++    Ok(fs_stat.f_type as _)
+ }
+ 
+ fn strip_ascii_whitespace(line: &[u8]) -> &[u8] {
+@@ -783,7 +783,7 @@ impl Archiver {
+             if stat.st_nlink > 1 {
+                 let link_info = HardLinkInfo {
+                     st_dev: stat.st_dev,
+-                    st_ino: stat.st_ino,
++                    st_ino: stat.st_ino as u64,
+                 };
+                 if self.cache.contains_hardlink(&link_info) {
+                     // This hardlink has been seen by the lookahead cache already, put it on the cache
+@@ -893,7 +893,7 @@ impl Archiver {
+             mode::IFREG => {
+                 let link_info = HardLinkInfo {
+                     st_dev: stat.st_dev,
+-                    st_ino: stat.st_ino,
++                    st_ino: stat.st_ino as u64,
+                 };
+ 
+                 if stat.st_nlink > 1 {
+@@ -913,7 +913,7 @@ impl Archiver {
+                     catalog
+                         .lock()
+                         .unwrap()
+-                        .add_file(c_file_name, file_size, stat.st_mtime)?;
++                        .add_file(c_file_name, file_size, stat.st_mtime as i64)?;
+                 }
+ 
+                 if let Some(sender) = self.suggested_boundaries.as_mut() {
+@@ -1426,7 +1426,7 @@ fn get_metadata(
+             flags: 0,
+             uid: stat.st_uid,
+             gid: stat.st_gid,
+-            mtime: pxar::format::StatxTimestamp::new(stat.st_mtime, stat.st_mtime_nsec as u32),
++            mtime: pxar::format::StatxTimestamp::new(stat.st_mtime as _, stat.st_mtime_nsec as u32),
+         },
+         ..Default::default()
+     };
+diff --git a/pbs-client/src/pxar/extract.rs b/pbs-client/src/pxar/extract.rs
+index c4d0085c..dad3cd2f 100644
+--- a/pbs-client/src/pxar/extract.rs
++++ b/pbs-client/src/pxar/extract.rs
+@@ -727,7 +727,7 @@ impl Extractor {
+         }
+ 
+         if result.seeked_last {
+-            while match nix::unistd::ftruncate(&file, size as i64) {
++            while match nix::unistd::ftruncate(&file, size as i32) {
+                 Ok(_) => false,
+                 Err(nix::errno::Errno::EINTR) => true,
+                 Err(err) => return Err(err).context("error setting file size"),
+@@ -794,7 +794,7 @@ impl Extractor {
+         }
+ 
+         if result.seeked_last {
+-            while match nix::unistd::ftruncate(&file, size as i64) {
++            while match nix::unistd::ftruncate(&file, size as i32) {
+                 Ok(_) => false,
+                 Err(nix::errno::Errno::EINTR) => true,
+                 Err(err) => return Err(err).context("error setting file size"),
+diff --git a/pbs-client/src/pxar/metadata.rs b/pbs-client/src/pxar/metadata.rs
+index d03cf7e2..bf71679f 100644
+--- a/pbs-client/src/pxar/metadata.rs
++++ b/pbs-client/src/pxar/metadata.rs
+@@ -45,10 +45,10 @@ fn timestamp_to_update_timespec(mtime: &pxar::format::StatxTimestamp) -> [libc::
+     [
+         libc::timespec {
+             tv_sec: 0,
+-            tv_nsec: UTIME_OMIT,
++            tv_nsec: UTIME_OMIT as _,
+         },
+         libc::timespec {
+-            tv_sec: mtime.secs,
++            tv_sec: mtime.secs as _,
+             tv_nsec: mtime.nanos as _,
+         },
+     ]
+diff --git a/pbs-config/src/acl.rs b/pbs-config/src/acl.rs
+index aca1f68f..671ca44c 100644
+--- a/pbs-config/src/acl.rs
++++ b/pbs-config/src/acl.rs
+@@ -731,8 +731,7 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
+         let cache = CACHED_CONFIG.read().unwrap();
+         if let Some(ref config) = cache.data {
+             if let Some(stat) = stat {
+-                if stat.st_mtime == cache.last_mtime && stat.st_mtime_nsec == cache.last_mtime_nsec
+-                {
++                if stat.st_mtime == (cache.last_mtime as i32) && stat.st_mtime_nsec == (cache.last_mtime_nsec as i32) {
+                     return Ok(config.clone());
+                 }
+             } else if cache.last_mtime == 0 && cache.last_mtime_nsec == 0 {
+@@ -746,8 +745,8 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
+ 
+     let mut cache = CACHED_CONFIG.write().unwrap();
+     if let Some(stat) = stat {
+-        cache.last_mtime = stat.st_mtime;
+-        cache.last_mtime_nsec = stat.st_mtime_nsec;
++        cache.last_mtime = stat.st_mtime as _;
++        cache.last_mtime_nsec = stat.st_mtime_nsec as _;
+     }
+     cache.data = Some(config.clone());
+ 
+diff --git a/pbs-config/src/user.rs b/pbs-config/src/user.rs
+index 08d141e6..1bff3c4f 100644
+--- a/pbs-config/src/user.rs
++++ b/pbs-config/src/user.rs
+@@ -96,8 +96,7 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
+         let cache = CACHED_CONFIG.read().unwrap();
+         if let Some(ref config) = cache.data {
+             if let Some(stat) = stat {
+-                if stat.st_mtime == cache.last_mtime && stat.st_mtime_nsec == cache.last_mtime_nsec
+-                {
++                if stat.st_mtime == (cache.last_mtime as i32) && stat.st_mtime_nsec == (cache.last_mtime_nsec as i32) {
+                     return Ok(config.clone());
+                 }
+             } else if cache.last_mtime == 0 && cache.last_mtime_nsec == 0 {
+@@ -111,8 +110,8 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
+ 
+     let mut cache = CACHED_CONFIG.write().unwrap();
+     if let Some(stat) = stat {
+-        cache.last_mtime = stat.st_mtime;
+-        cache.last_mtime_nsec = stat.st_mtime_nsec;
++        cache.last_mtime = stat.st_mtime as _;
++        cache.last_mtime_nsec = stat.st_mtime_nsec as _;
+     }
+     cache.data = Some(config.clone());
+ 
+diff --git a/pbs-datastore/src/chunk_store.rs b/pbs-datastore/src/chunk_store.rs
+index 3c59612b..0340d7f1 100644
+--- a/pbs-datastore/src/chunk_store.rs
++++ b/pbs-datastore/src/chunk_store.rs
+@@ -408,7 +408,7 @@ impl ChunkStore {
+ 
+                 chunk_count += 1;
+ 
+-                if stat.st_atime < min_atime {
++                if stat.st_atime < (min_atime as i32) {
+                     //let age = now - stat.st_atime;
+                     //println!("UNLINK {}  {:?}", age/(3600*24), filename);
+                     if let Err(err) = unlinkat(Some(dirfd), filename, UnlinkatFlags::NoRemoveDir) {
+@@ -426,7 +426,7 @@ impl ChunkStore {
+                         status.removed_chunks += 1;
+                     }
+                     status.removed_bytes += stat.st_size as u64;
+-                } else if stat.st_atime < oldest_writer {
++                } else if stat.st_atime < (oldest_writer as i32) {
+                     if bad {
+                         status.still_bad += 1;
+                     } else {
+diff --git a/pbs-datastore/src/fixed_index.rs b/pbs-datastore/src/fixed_index.rs
+index 8d9173e8..ae79c045 100644
+--- a/pbs-datastore/src/fixed_index.rs
++++ b/pbs-datastore/src/fixed_index.rs
+@@ -111,7 +111,7 @@ impl FixedIndexReader {
+                 nix::sys::mman::ProtFlags::PROT_READ,
+                 nix::sys::mman::MapFlags::MAP_PRIVATE,
+                 &file,
+-                header_size as i64,
++                (header_size as i64).try_into().unwrap(),
+             )
+         }?
+         .as_ptr()
+@@ -288,7 +288,7 @@ impl FixedIndexWriter {
+ 
+         let index_length = size.div_ceil(chunk_size);
+         let index_size = index_length * 32;
+-        nix::unistd::ftruncate(&file, (header_size + index_size) as i64)?;
++        nix::unistd::ftruncate(&file, ((header_size + index_size) as i64).try_into().unwrap())?;
+ 
+         let data = unsafe {
+             nix::sys::mman::mmap(
+@@ -298,7 +298,7 @@ impl FixedIndexWriter {
+                 nix::sys::mman::ProtFlags::PROT_READ | nix::sys::mman::ProtFlags::PROT_WRITE,
+                 nix::sys::mman::MapFlags::MAP_SHARED,
+                 &file,
+-                header_size as i64,
++                (header_size as i64).try_into().unwrap(),
+             )
+         }?
+         .as_ptr()
+diff --git a/pbs-fuse-loop/src/fuse_loop.rs b/pbs-fuse-loop/src/fuse_loop.rs
+index d55be3b0..711354bc 100644
+--- a/pbs-fuse-loop/src/fuse_loop.rs
++++ b/pbs-fuse-loop/src/fuse_loop.rs
+@@ -177,7 +177,7 @@ impl<R: AsyncRead + AsyncSeek + Unpin> FuseLoopSession<R> {
+                     let res = match req? {
+                         Some(Request::Lookup(req)) => {
+                             let stat = self.stat;
+-                            let entry = EntryParam::simple(stat.st_ino, stat);
++                            let entry = EntryParam::simple(stat.st_ino.into(), stat);
+                             req.reply(&entry)
+                         },
+                         Some(Request::Getattr(req)) => {
+@@ -425,6 +425,6 @@ fn minimal_stat(size: i64) -> libc::stat {
+     stat.st_mode = libc::S_IFREG;
+     stat.st_ino = 1;
+     stat.st_nlink = 1;
+-    stat.st_size = size;
++    stat.st_size = size.try_into().unwrap();
+     stat
+ }
+diff --git a/pbs-pxar-fuse/src/lib.rs b/pbs-pxar-fuse/src/lib.rs
+index 4322c06e..ccb0c17d 100644
+--- a/pbs-pxar-fuse/src/lib.rs
++++ b/pbs-pxar-fuse/src/lib.rs
+@@ -546,7 +546,7 @@ impl SessionImpl {
+             {
+                 return Ok(lookups);
+             }
+-            lookups.push(self.make_lookup(request.inode, stat.st_ino, &file)?);
++            lookups.push(self.make_lookup(request.inode, stat.st_ino.into(), &file)?);
+         }
+ 
+         if next == entry_count {
+@@ -685,19 +685,19 @@ fn to_stat(inode: u64, entry: &pxar::Entry) -> Result<libc::stat, Error> {
+     let metadata = entry.metadata();
+ 
+     let mut stat: libc::stat = unsafe { mem::zeroed() };
+-    stat.st_ino = inode;
++    stat.st_ino = inode as libc::ino_t;
+     stat.st_nlink = nlink;
+     stat.st_mode = u32::try_from(metadata.stat.mode)
+         .map_err(|err| format_err!("mode does not fit into st_mode field: {}", err))?;
+-    stat.st_size = i64::try_from(entry.file_size().unwrap_or(0))
++    stat.st_size = i32::try_from(entry.file_size().unwrap_or(0))
+         .map_err(|err| format_err!("size does not fit into st_size field: {}", err))?;
+     stat.st_uid = metadata.stat.uid;
+     stat.st_gid = metadata.stat.gid;
+-    stat.st_atime = metadata.stat.mtime.secs;
++    stat.st_atime = metadata.stat.mtime.secs as _;
+     stat.st_atime_nsec = metadata.stat.mtime.nanos as _;
+-    stat.st_mtime = metadata.stat.mtime.secs;
++    stat.st_mtime = metadata.stat.mtime.secs as _;
+     stat.st_mtime_nsec = metadata.stat.mtime.nanos as _;
+-    stat.st_ctime = metadata.stat.mtime.secs;
++    stat.st_ctime = metadata.stat.mtime.secs as _;
+     stat.st_ctime_nsec = metadata.stat.mtime.nanos as _;
+     Ok(stat)
+ }
+-- 
+2.39.2
+

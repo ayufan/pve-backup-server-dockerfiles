@@ -1,10 +1,10 @@
 diff --git a/debian/rules b/debian/rules
-index 70cec475..2fead34f 100755
+index ab48cce1..0a540d4f 100755
 --- a/debian/rules
 +++ b/debian/rules
-@@ -8,7 +8,7 @@ include /usr/share/rustc/architecture.mk
- 
- export BUILD_MODE=release
+@@ -18,7 +18,7 @@ STATIC_COMPILEDIR := $(STATIC_TARGET_DIR)/$(DEB_HOST_RUST_TYPE)/debug
+ endif
+ # end sync with Makefile!
  
 -export CARGO=/usr/share/cargo/bin/cargo
 +export CARGO=/usr/bin/cargo

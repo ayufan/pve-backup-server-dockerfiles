@@ -1,0 +1,75 @@
+From a3cfcb6489bd2bb8e991ede9fd7a935a4ce9f995 Mon Sep 17 00:00:00 2001
+From: Kamil Trzcinski <ayufan@ayufan.eu>
+Date: Fri, 25 Jul 2025 22:04:36 +0200
+Subject: [PATCH] arm32
+
+---
+ src/requests.rs | 8 ++++----
+ src/session.rs  | 4 ++--
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/src/requests.rs b/src/requests.rs
+index 9bdab30..15fe804 100644
+--- a/src/requests.rs
++++ b/src/requests.rs
+@@ -362,7 +362,7 @@ impl ReaddirPlus {
+         })?;
+ 
+         let entry = sys::EntryParam {
+-            inode: stat.st_ino,
++            inode: stat.st_ino as u64,
+             generation,
+             attr: *stat,
+             attr_timeout,
+@@ -603,7 +603,7 @@ impl Setattr {
+     /// `Some` if the atime field should be modified.
+     pub fn atime(&self) -> Option<SetTime> {
+         if (self.to_set & sys::setattr::ATIME) != 0 {
+-            Some(SetTime::from_c(self.stat.st_atime, self.stat.st_atime_nsec))
++            Some(SetTime::from_c(self.stat.st_atime, self.stat.st_atime_nsec.into()))
+         } else if (self.to_set & sys::setattr::ATIME_NOW) != 0 {
+             Some(SetTime::Now)
+         } else {
+@@ -614,7 +614,7 @@ impl Setattr {
+     /// `Some` if the mtime field should be modified.
+     pub fn mtime(&self) -> Option<SetTime> {
+         if (self.to_set & sys::setattr::MTIME) != 0 {
+-            Some(SetTime::from_c(self.stat.st_mtime, self.stat.st_mtime_nsec))
++            Some(SetTime::from_c(self.stat.st_mtime, self.stat.st_mtime_nsec.into()))
+         } else if (self.to_set & sys::setattr::MTIME_NOW) != 0 {
+             Some(SetTime::Now)
+         } else {
+@@ -625,7 +625,7 @@ impl Setattr {
+     /// `Some` if the ctime field should be modified.
+     pub fn ctime(&self) -> Option<Duration> {
+         if (self.to_set & sys::setattr::CTIME) != 0 {
+-            Some(c_duration(self.stat.st_ctime, self.stat.st_ctime_nsec))
++            Some(c_duration(self.stat.st_ctime, self.stat.st_ctime_nsec.into()))
+         } else {
+             None
+         }
+diff --git a/src/session.rs b/src/session.rs
+index 427ce46..02048c0 100644
+--- a/src/session.rs
++++ b/src/session.rs
+@@ -109,7 +109,7 @@ impl FuseData {
+                 RequestGuard::from_raw(request),
+                 inode,
+                 size,
+-                offset,
++                offset.into(),
+             )));
+     }
+ 
+@@ -128,7 +128,7 @@ impl FuseData {
+                 RequestGuard::from_raw(request),
+                 inode,
+                 size,
+-                offset,
++                offset.into(),
+             )));
+     }
+ 
+-- 
+2.39.2
+
