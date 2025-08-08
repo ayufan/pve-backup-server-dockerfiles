@@ -22,7 +22,7 @@ RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
   rustc --version
 
 # Specify default rust toolchain
-ENV RUSTUP_TOOLCHAIN=1.85
+ENV RUSTUP_TOOLCHAIN=1.87
 
 # Link /cargo/bin to /usr/local/bin
 RUN ln -s /cargo/bin/* /usr/local/bin/
@@ -48,7 +48,7 @@ RUN ./scripts/build/make.bash proxmox-mini-journalreader make_deb
 RUN ./scripts/build/make.bash libjs-qrcodejs make_deb
 RUN ./scripts/build/make.bash proxmox-acme make_deb
 RUN ./scripts/build/make.bash pve-xtermjs "make_deb termproxy" "make_deb xterm.js"
-RUN ./scripts/build/make.bash proxmox-backup make_deb
+RUN ./scripts/build/make.bash --rust 1.85 proxmox-backup make_deb
 
 #=================================
 
