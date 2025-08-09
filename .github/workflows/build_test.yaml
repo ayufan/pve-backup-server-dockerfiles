@@ -59,6 +59,7 @@ jobs:
 
   client-build:
     runs-on: ${{ matrix.runs_on }}
+    continue-on-error: ${{ matrix.continue-on-error || false }}
     strategy:
       fail-fast: false
       matrix:
@@ -86,9 +87,12 @@ jobs:
         else
           echo "TAG=ref-${{ github.ref_name }}" >> $GITHUB_ENV;
         fi
+
     # Compile the client
     - name: Run client for ${{matrix.arch}}
+      continue-on-error: ${{ matrix.continue-on-error || false }}
       run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" client-tgz
+
     # Push Artifacts to GitHub
     - uses: actions/upload-artifact@v4
       with:
