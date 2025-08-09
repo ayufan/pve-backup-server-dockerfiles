@@ -1,0 +1,22 @@
+[package]
+name = "xtr"
+version = "0.1.11"
+edition = "2021"
+authors = ["Kamil Trzciński <ayufan@ayufan.eu>"]
+description = "deb for xtr binary"
+build = "build.rs"
+
+[package.metadata.deb]
+maintainer = "Kamil Trzciński <ayufan@ayufan.eu>"
+depends = "$auto"
+section = "utils"
+priority = "optional"
+assets = [
+    ["target/deps/bin/xtr", "usr/bin/", "755"]
+]
+
+[lib]
+path = "src/lib.rs"  # Can be empty or minimal
+
+[build-dependencies]
+toml = "0.7"
