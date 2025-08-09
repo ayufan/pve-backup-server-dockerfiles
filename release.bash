@@ -8,7 +8,7 @@ fi
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR/"
 
-TAG="$1"
+IMAGE_TAG="$1"
 shift
 
 set -xeo pipefail
@@ -46,16 +46,17 @@ case "$ARCH" in
     ;;
 esac
 
-RELEASE_TAG="$TAG-${CROSS_ARCH:-$ARCH}"
-BUILD_TAG="$TAG-build-${CROSS_ARCH:-$ARCH}"
-DEB_TAG="$TAG-deb-${CROSS_ARCH:-$ARCH}"
-CLIENT_TAG="$TAG-client-${CROSS_ARCH:-$ARCH}"
+RELEASE_IMAGE_TAG="$IMAGE_TAG-${CROSS_ARCH:-$ARCH}"
+BUILD_IMAGE_TAG="$IMAGE_TAG-build-${CROSS_ARCH:-$ARCH}"
+DEB_IMAGE_TAG="$IMAGE_TAG-deb-${CROSS_ARCH:-$ARCH}"
+CLIENT_IMAGE_TAG="$IMAGE_TAG-client-${CROSS_ARCH:-$ARCH}"
 
 docker_build() {
   docker build \
     --build-arg=ARCH="$ARCH" \
     --build-arg=CROSS_ARCH="$CROSS_ARCH" \
     --build-arg=VERSION="$VERSION" \
+    --build-arg=TAG="$TAG" \
     --build-arg=IMAGE_PREFIX="$IMAGE_PREFIX" \
     --platform="$TARGET_PLATFORM" \
     "$@"
@@ -64,37 +65,37 @@ docker_build() {
 for i; do
   case "$i" in
     build-deb)
-      docker_build --file=dockerfiles/Dockerfile.build --target="deb_env" --tag="$DEB_TAG" "."
-      docker run --rm -v "$PWD":/dest "$DEB_TAG" sh -c 'cp -rv /release /dest'
+      docker_build --file=dockerfiles/Dockerfile.build --target="deb_env" --tag="$DEB_IMAGE_TAG" "."
+      docker run --rm -v "$PWD":/dest "$DEB_IMAGE_TAG" sh -c 'cp -rv /release /dest'
       ;;
 
     build-tgz)
-      docker_build --file=dockerfiles/Dockerfile.build --target="deb_env" --tag="$DEB_TAG" "."
+      docker_build --file=dockerfiles/Dockerfile.build --target="deb_env" --tag="$DEB_IMAGE_TAG" "."
       mkdir -p release/
-      docker run --rm -v "$PWD":/dest "$DEB_TAG" sh -c 'cp -rv /*.tgz /dest/release/'
+      docker run --rm -v "$PWD":/dest "$DEB_IMAGE_TAG" sh -c 'cp -rv /*.tgz /dest/release/'
       ;;
 
     build-image)
-      docker_build --file=dockerfiles/Dockerfile.build --target="release_env" --tag="$RELEASE_TAG" "."
+      docker_build --file=dockerfiles/Dockerfile.build --target="release_env" --tag="$RELEASE_IMAGE_TAG" "."
       ;;
 
     client-tgz)
-      docker_build --file=dockerfiles/Dockerfile.client --tag="$CLIENT_TAG" "."
+      docker_build --file=dockerfiles/Dockerfile.client --tag="$CLIENT_IMAGE_TAG" "."
       mkdir -p release/
-      docker run --rm -v "$PWD":/dest "$CLIENT_TAG" sh -c 'cp -rv /*.tgz /dest/release/'
+      docker run --rm -v "$PWD":/dest "$CLIENT_IMAGE_TAG" sh -c 'cp -rv /*.tgz /dest/release/'
       ;;
 
     push-image)
-      docker push "$RELEASE_TAG"
+      docker push "$RELEASE_IMAGE_TAG"
       ;;
 
     manifest)
       MANIFEST_ARCHS=""
       for i in $ARCHS; do
-        if docker manifest inspect "$TAG-$i" &>/dev/null; then
-          MANIFEST_ARCHS="$MANIFEST_ARCHS $TAG-$i"
+        if docker manifest inspect "$IMAGE_TAG-$i" &>/dev/null; then
+          MANIFEST_ARCHS="$MANIFEST_ARCHS $IMAGE_TAG-$i"
         else
-          echo "Manifest for $TAG-$i does not exist, skipping."
+          echo "Manifest for $IMAGE_TAG-$i does not exist, skipping."
         fi
       done
 
@@ -119,7 +120,7 @@ for i; do
 
       shift
 
-      for i in $(manifest_names "$TAG" "$@"); do
+      for i in $(manifest_names "$IMAGE_TAG" "$@"); do
         docker manifest create "$i" $MANIFEST_ARCHS
         docker manifest push "$i"
       done
