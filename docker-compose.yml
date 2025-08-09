@@ -12,11 +12,11 @@ services:
       - pbs_lib:/var/lib/proxmox-backup
     tmpfs:
       - /run
-    cap_add: # smartctl support
-      - SYS_RAWIO
-    devices:
-      - /dev/sda
-      - /dev/sdb
+    cap_add:
+      - SYS_RAWIO # smartctl support
+    #devices: # smartctl support
+    #  - /dev/sda
+    #  - /dev/sdb
     restart: unless-stopped
     stop_signal: SIGHUP
 
