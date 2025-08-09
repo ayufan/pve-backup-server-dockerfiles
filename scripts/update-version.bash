@@ -2,8 +2,8 @@
 
 set -eo pipefail
 
-if [[ $# -ne 2 ]]; then
-  echo "usage: $0 [version-file|version] [sha]"
+if [[ $# -ne 1 ]] && [[ $# -ne 2 ]]; then
+  echo "usage: $0 [version-file|version] [sticky-rev]"
   exit 1
 fi
 
@@ -23,7 +23,7 @@ fi
 
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_ROOT=$(realpath "$0")
-ROOT_SHA="${2:-master}"
+ROOT_REV="$2"
 ROOT_TS=""
 
 tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
@@ -31,17 +31,13 @@ trap 'cd ; rm -rf $tmp_dir' EXIT
 
 perform() {
   git clone "git://git.proxmox.com/git/$1.git" 2>/dev/null
-  if [[ -z "$ROOT_TS" ]]; then
-    if [[ "$ROOT_SHA" == "last" ]]; then
-      ROOT_SHA="$2"
-    fi
-    REPO_REV=$(git -C "$1" rev-parse "$ROOT_SHA")
-    ROOT_TS=$(git -C "$1" log -1 --format=%ct "$ROOT_SHA")
+
+  if [[ -z "$ROOT_REV" ]] || [[ -z "$ROOT_TS" ]]; then
+    REPO_REV=$(git -C "$1" rev-parse "${ROOT_REV:-HEAD}")
+    ROOT_TS=$(git -C "$1" log -1 --format=%ct "$REPO_REV")
   else
     while read REPO_TS REPO_REV; do
-      if [[ $REPO_TS -le $ROOT_TS ]]; then
-        break
-      fi
+      [[ $REPO_TS -le $ROOT_TS ]] && break
     done < <(git -C "$1" log --format="%ct %H")
   fi
 
