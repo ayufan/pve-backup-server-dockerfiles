@@ -64,9 +64,10 @@ COPY --from=builder /src/release/ /release/
 # Bundle server
 ARG VERSION
 ARG ARCH=
+ARG TAG=
 ADD /scripts/release /src/scripts/release
 RUN /src/scripts/release/apt-install.bash --gen /release/install /release proxmox-backup-server
-RUN /src/scripts/release/bundle-tgz.bash /proxmox-backup-server-${VERSION}-${ARCH:-dev}.tgz /release/.
+RUN /src/scripts/release/bundle-tgz.bash /proxmox-backup-server-${TAG:-$VERSION}-${ARCH:-dev}.tgz /release/.
 
 #=================================
 

@@ -39,9 +39,10 @@ RUN ./scripts/build/make.bash --keep proxmox-backup "make . ignore proxmox-backu
 # Bundle client
 ARG VERSION
 ARG ARCH=
+ARG TAG=
 ADD /dockerfiles/client/ /dockerfiles/client/
 ADD /scripts/release /src/scripts/release
-RUN /src/scripts/release/bundle-tgz.bash /proxmox-backup-client-${VERSION}-${CROSS_ARCH:-${ARCH:-dev}}.tgz \
+RUN /src/scripts/release/bundle-tgz.bash /proxmox-backup-client-${TAG:-${VERSION}}-${CROSS_ARCH:-${ARCH:-dev}}.tgz \
   /dockerfiles/client/. \
   /src/build/proxmox-backup/target/static-build/*/release/pxar \
   /src/build/proxmox-backup/target/static-build/*/release/proxmox-backup-client
