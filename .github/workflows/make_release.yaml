@@ -24,7 +24,7 @@ jobs:
 
     # Update the dockerhub tags
     - name: Create semver manifest
-      run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" manifest-latest
+      run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" manifest semver beta latest
 
     # Create release
     - name: Make it latest

@@ -97,35 +97,35 @@ for i; do
           echo "Manifest for $TAG-$i does not exist, skipping."
         fi
       done
-      docker manifest create "$TAG" $MANIFEST_ARCHS
-      docker manifest push "$TAG"
-      ;;
 
-    manifest-latest)
-      semver_names() {
+      manifest_names() {
         local repo="${1%%:*}"
         local version="${1##*:}"
-        while [[ "$version" == *.* ]]; do
-          echo "$repo:$version"
-          version="${version%.*}"
-        done
+        shift
+
         echo "$repo:$version"
-        echo "$repo:latest"
+  
+        for tag; do
+          if [[ "$tag" == "semver" ]]; then
+            while [[ "$version" == *[.-]* ]]; do
+              version="${version%[.-]*}"
+              echo "$repo:$version"
+            done
+          else
+            echo "$repo:$tag"
+          fi
+        done
       }
 
-      MANIFEST_ARCHS=""
-      for i in $ARCHS; do
-        if docker manifest inspect "$TAG-$i" &>/dev/null; then
-          MANIFEST_ARCHS="$MANIFEST_ARCHS $TAG-$i"
-        else
-          echo "Manifest for $TAG-$i does not exist, skipping."
-        fi
-      done
+      shift
 
-      for i in $(semver_names "$TAG"); do
+      for i in $(manifest_names "$TAG" "$@"); do
         docker manifest create "$i" $MANIFEST_ARCHS
         docker manifest push "$i"
       done
+
+      # This is last command, as it consumes all arguments
+      break
       ;;
 
     *)

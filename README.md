@@ -1,8 +1,7 @@
 # Proxmox Backup Server in a Container
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/ayufan/pve-backup-server-dockerfiles?label=GitHub%20STABLE)](https://github.com/ayufan/pve-backup-server-dockerfiles/releases) [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ayufan/pve-backup-server-dockerfiles?include_prereleases&color=red&label=GitHub%20BETA)](https://github.com/ayufan/pve-backup-server-dockerfiles/releases/latest)
-
-[![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/ayufan/proxmox-backup-server/latest?label=Docker%20LATEST)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags) [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/ayufan/proxmox-backup-server?sort=semver&color=red&label=Docker%20BETA)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags)
+- [![GitHub release (latest by date)](https://img.shields.io/github/v/release/ayufan/pve-backup-server-dockerfiles?label=GitHub%20Release)](https://github.com/ayufan/pve-backup-server-dockerfiles/releases) [![Docker Image Version (latest stable (amd64))](https://img.shields.io/docker/v/ayufan/proxmox-backup-server/latest?arch=amd64&label=Docker:%20latest)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags) [![Docker Image Version (latest stable (arm64))](https://img.shields.io/docker/v/ayufan/proxmox-backup-server/latest?arch=arm64&label=Docker:%20latest)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags)
+- [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ayufan/pve-backup-server-dockerfiles?include_prereleases&color=red&label=GitHub%20Pre-Release)](https://github.com/ayufan/pve-backup-server-dockerfiles/releases/latest) [![Docker Image Version (latest stable (amd64))](https://img.shields.io/docker/v/ayufan/proxmox-backup-server/beta?arch=amd64&color=red&label=Docker:%20beta)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags) [![Docker Image Version (latest stable (arm64))](https://img.shields.io/docker/v/ayufan/proxmox-backup-server/beta?arch=amd64&color=red&label=Docker:%20beta)](https://hub.docker.com/r/ayufan/proxmox-backup-server/tags)
 
 This is an unofficial compilation of Proxmox Backup Server
 to run it in a container for AMD64 and ARM64.
@@ -30,17 +29,31 @@ at https://hub.docker.com/r/ayufan/proxmox-backup-server.
 Or:
 
 ```bash
+# Latest stable / release tag
 docker pull ayufan/proxmox-backup-server:latest
+
+# Latest pre-release / beta tag
+docker pull ayufan/proxmox-backup-server:beta
 ```
 
 ## Run
 
 ```bash
+wget https://raw.githubusercontent.com/ayufan/pve-backup-server-dockerfiles/refs/heads/master/docker-compose.yml
 docker-compose up -d
+```
+
+**Run beta variant:**
+
+```bash
+wget https://raw.githubusercontent.com/ayufan/pve-backup-server-dockerfiles/refs/heads/master/docker-compose.yml
+TAG=beta docker-compose up -d
 ```
 
 Then login to `https://<ip>:8007/` with `admin / pbspbs`.
 After that change a password.
+
+See the example [docker-compose.yml](./docker-compose.yml).
 
 ## Features
 

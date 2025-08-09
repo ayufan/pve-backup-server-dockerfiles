@@ -130,7 +130,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Create manifest
       run:
-        ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" manifest
+        ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" manifest beta
 
     # Create pre-release
     - name: Make release as pre-release
