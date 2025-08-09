@@ -15,13 +15,12 @@ diff --git a/src/PVE/Tools.pm b/src/PVE/Tools.pm
 index fe9616e..e9b7578 100644
 --- a/src/PVE/Tools.pm
 +++ b/src/PVE/Tools.pm
-@@ -1817,7 +1817,8 @@ sub mkdirat($$$) {
+@@ -1817,7 +1817,7 @@ sub mkdirat($$$) {
  
  sub mknod($$$) {
      my ($filename, $mode, $dev) = @_;
 -    return syscall(PVE::Syscall::mknod, $filename, int($mode), int($dev)) == 0;
-+    # AT_FDCWD = -100
-+    return syscall(PVE::Syscall::mknodat, -100, $filename, int($mode), int($dev)) == 0;
++    return syscall(PVE::Syscall::mknodat, AT_FDCWD, $filename, int($mode), int($dev)) == 0;
  }
  
  sub fchownat($$$$$) {
