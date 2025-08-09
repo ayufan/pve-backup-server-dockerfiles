@@ -36,6 +36,11 @@ docker pull ayufan/proxmox-backup-server:latest
 docker pull ayufan/proxmox-backup-server:beta
 ```
 
+Each [GitHub Releases](https://github.com/ayufan/pve-backup-server-dockerfiles/releases) includes the following binary assets:
+
+- `proxmox-backup-server-*.tgz` - contains all archived debian installation files with the `./install` script
+- `proxmox-backup-client-*.tgz` - contains a statically linked proxmox backup client
+
 ## Run
 
 ```bash
@@ -165,30 +170,35 @@ volumes:
       device: /srv/pbs/lib
 ```
 
-## Install on bare-metal host
+## Install server on bare-metal or virtualized host
 
 Docker is convienient, but in some cases it might be simply better to install natively.
-Since the packages are built against `Debian Buster` your system needs to run soon
-to be stable distribution.
 
-You can copy compiled `*.deb` (it will automatically pick `amd64` or `arm64v8` based on your distribution)
-from the container and install:
+You can pull compiled `*.deb` files from [GitHub Releases](https://github.com/ayufan/pve-backup-server-dockerfiles/releases).
+
+Replace the `v4.0.12` with the latest version.
 
 ```bash
-cd /tmp
-docker run --rm ayufan/proxmox-backup-server:latest tar c /src/ | tar x
-apt install $PWD/src/*.deb
+wget https://github.com/ayufan/pve-backup-server-dockerfiles/releases/download/v4.0.12/proxmox-backup-server-v4.0.12-$(dpkg --print-architecture).tgz
+tar zxf proxmox-backup-server-*.tgz
+proxmox-backup-server-*/install
 ```
 
-## Recompile latest version or master
+## Use static client binary
 
-Refer to [PROCESS.md](PROCESS.md).
+Similar to server, the client binary is available for various architectures. The `arm32` is considered unstable, and should only be able to backup, but likely cannot be used to restore data.
 
-## Build on your own
+```bash
+wget https://github.com/ayufan/pve-backup-server-dockerfiles/releases/download/v4.0.12/proxmox-backup-client-v4.0.12-$(dpkg --print-architecture).tgz
+tar zxf proxmox-backup-client-*.tgz
+proxmox-backup-client-*/proxmox-backup-client.sh
+```
+
+## Build on your own / Recompile latest version or master
 
 Refer to [PROCESS.md](PROCESS.md).
 
 ## Author
 
-This is just built by Kamil Trzciński, 2020-2023
+This is just built by Kamil Trzciński, 2020-2025
 from the sources found on http://git.proxmox.com/.
