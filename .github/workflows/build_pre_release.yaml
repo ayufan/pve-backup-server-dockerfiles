@@ -11,7 +11,6 @@ env:
   TAG: ${{ inputs.TAG }}
 
 jobs:
-
   draft:
     runs-on: ubuntu-latest
     steps:
@@ -80,6 +79,7 @@ jobs:
   client-build:
     needs: [draft]
     runs-on: ${{ matrix.runs_on }}
+    continue-on-error: ${{ matrix.continue-on-error || false }}
     strategy:
       fail-fast: false
       matrix:
@@ -101,6 +101,7 @@ jobs:
 
     # Compile the client
     - name: Run client for ${{matrix.arch}}
+      continue-on-error: ${{ matrix.continue_on_error || false }}
       run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" client-tgz
 
     # Upload files to draft release
