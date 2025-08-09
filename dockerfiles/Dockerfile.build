@@ -18,8 +18,12 @@ ENV CARGO_HOME=/cargo \
 RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
   chmod +x rustup-init.sh && \
   ./rustup-init.sh -y && \
-  cargo install debcargo && \
+  cargo install debcargo cargo-deb && \
   rustc --version
+
+# Install extra packages
+ADD packages/ /src/packages/
+RUN cargo deb --manifest-path /src/packages/xtr/Cargo.toml --install
 
 # Specify default rust toolchain
 ENV RUSTUP_TOOLCHAIN=1.87
@@ -29,8 +33,7 @@ RUN ln -s /cargo/bin/* /usr/local/bin/
 ADD /scripts/toolchain/ /usr/local/bin/
 
 WORKDIR /src
-RUN git config --system user.email "docker@compile.dev" && \
-  git config --system user.name "Docker Compile"
+ADD dockerfiles/gitconfig /etc/gitconfig
 
 FROM toolchain as builder
 

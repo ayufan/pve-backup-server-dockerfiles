@@ -1,0 +1,12 @@
+[user]
+    email = docker@compile.dev
+    name = Docker Compile
+
+[url "git://git.proxmox.com/git/ui/proxmox-yew-widget-toolkit-assets.git"]
+    insteadOf = gitolite3@proxdev.maurer-it.com:yew/proxmox-yew-widget-toolkit-assets
+
+[url "git://git.proxmox.com/git/proxmox-api-types.git"]
+    insteadOf = gitolite3@proxdev.maurer-it.com:/rust/proxmox-api-types
+
+[url "git://git.proxmox.com/git/ui/proxmox-yew-widget-toolkit-assets.git"]
+    insteadOf = gitolite3@proxdev.maurer-it.com:yew/proxmox-yew-widget-toolkit-assets
