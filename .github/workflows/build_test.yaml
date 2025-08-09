@@ -123,7 +123,7 @@ jobs:
     - name: Run dockerhub-manifest
       run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" manifest
     - name: Comment image name on PR
-      if: github.event_name == 'pull_request'
+      if: vars.DOCKERHUB_TEST_REGISTRY && github.event_name == 'pull_request'
       env:
         REGISTRY: ${{ env.REGISTRY }}
         TAG: ${{ env.TAG }}
