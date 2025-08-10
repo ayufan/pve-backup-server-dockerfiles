@@ -18,6 +18,9 @@ perform() {
   git -C "$1" submodule update --init --recursive
   git -C "$1" submodule foreach git reset --hard
   git -C "$1" submodule foreach git clean -ffdx
+
+  # set the same timestamps for all files, required by some Makefiles
+  ( cd "$1"; git ls-files -z | xargs -0 touch -h )
 }
 
 while read REPO COMMIT_SHA REST; do
