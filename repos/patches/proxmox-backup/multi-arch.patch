@@ -1,7 +1,6 @@
 diff --git a/debian/proxmox-backup-file-restore.install b/debian/proxmox-backup-file-restore.install
 old mode 100644
 new mode 100755
-index 409988a3..8b4034bd
 --- a/debian/proxmox-backup-file-restore.install
 +++ b/debian/proxmox-backup-file-restore.install
 @@ -1,4 +1,5 @@
@@ -14,15 +13,14 @@ index 409988a3..8b4034bd
 diff --git a/debian/proxmox-backup-server.install b/debian/proxmox-backup-server.install
 old mode 100644
 new mode 100755
-index 40d8459f..466bd621
 --- a/debian/proxmox-backup-server.install
 +++ b/debian/proxmox-backup-server.install
 @@ -1,3 +1,4 @@
 +#! /usr/bin/dh-exec
  etc/pbs-enterprise.sources /etc/apt/sources.list.d/
+ etc/pbs-network-config-commit.service /usr/lib/systemd/system/
  etc/proxmox-backup-banner.service /usr/lib/systemd/system/
- etc/proxmox-backup-daily-update.service /usr/lib/systemd/system/
-@@ -8,11 +9,11 @@ etc/removable-device-attach@.service /usr/lib/systemd/system/
+@@ -9,11 +10,11 @@ etc/removable-device-attach@.service /usr/lib/systemd/system/
  usr/bin/pmt
  usr/bin/pmtx
  usr/bin/proxmox-tape
@@ -40,7 +38,6 @@ index 40d8459f..466bd621
  usr/sbin/proxmox-backup-debug
  usr/sbin/proxmox-backup-manager
 diff --git a/debian/rules b/debian/rules
-index 0a540d4f..aa4571ff 100755
 --- a/debian/rules
 +++ b/debian/rules
 @@ -2,6 +2,7 @@

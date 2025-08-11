@@ -1,8 +1,7 @@
 diff --git a/Cargo.toml b/Cargo.toml
-index ea413328..b2980c73 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
-@@ -160,7 +160,7 @@ udev = "0.9"
+@@ -162,7 +162,7 @@ udev = "0.9"
  url = "2.1"
  walkdir = "2"
  xdg = "2.2"

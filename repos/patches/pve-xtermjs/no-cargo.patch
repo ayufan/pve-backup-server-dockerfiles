@@ -1,5 +1,4 @@
 diff --git a/termproxy/debian/rules b/termproxy/debian/rules
-index add090b..f25093f 100755
 --- a/termproxy/debian/rules
 +++ b/termproxy/debian/rules
 @@ -23,7 +23,7 @@ export DEB_CARGO_PACKAGE=proxmox-termproxy

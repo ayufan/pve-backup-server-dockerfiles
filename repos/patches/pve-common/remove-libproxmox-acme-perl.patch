@@ -1,5 +1,4 @@
 diff --git a/debian/control b/debian/control
-index ac4cd66..136839b 100644
 --- a/debian/control
 +++ b/debian/control
 @@ -35,7 +35,6 @@ Depends: libanyevent-perl,

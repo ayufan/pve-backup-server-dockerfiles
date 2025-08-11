@@ -1,5 +1,4 @@
 diff --git a/pve-rs/debian/control b/pve-rs/debian/control
-index bca3c1e..eedce80 100644
 --- a/pve-rs/debian/control
 +++ b/pve-rs/debian/control
 @@ -4,7 +4,6 @@ Priority: optional

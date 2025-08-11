@@ -1,5 +1,4 @@
 diff --git a/www/panel/NodeInfo.js b/www/panel/NodeInfo.js
-index a8673f6b..1ead89bd 100644
 --- a/www/panel/NodeInfo.js
 +++ b/www/panel/NodeInfo.js
 @@ -150,7 +150,7 @@ Ext.define('PBS.NodeInfoPanel', {

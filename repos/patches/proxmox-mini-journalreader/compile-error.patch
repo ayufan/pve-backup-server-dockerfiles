@@ -1,5 +1,4 @@
 diff --git a/src/Makefile b/src/Makefile
-index 6807b67..e64e066 100644
 --- a/src/Makefile
 +++ b/src/Makefile
 @@ -6,7 +6,7 @@ MAN1_DIR ?= $(DESTDIR)/usr/share/man/man1

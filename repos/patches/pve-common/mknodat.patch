@@ -1,5 +1,4 @@
 diff --git a/src/PVE/Syscall.pm b/src/PVE/Syscall.pm
-index 68e16fe..503d3fe 100644
 --- a/src/PVE/Syscall.pm
 +++ b/src/PVE/Syscall.pm
 @@ -17,7 +17,7 @@ BEGIN {
@@ -12,7 +11,6 @@ index 68e16fe..503d3fe 100644
          setresuid => &SYS_setresuid,
          fallocate => &SYS_fallocate,
 diff --git a/src/PVE/Tools.pm b/src/PVE/Tools.pm
-index fe9616e..e9b7578 100644
 --- a/src/PVE/Tools.pm
 +++ b/src/PVE/Tools.pm
 @@ -1817,7 +1817,7 @@ sub mkdirat($$$) {

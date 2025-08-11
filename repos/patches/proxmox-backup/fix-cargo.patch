@@ -1,5 +1,4 @@
 diff --git a/debian/rules b/debian/rules
-index ab48cce1..0a540d4f 100755
 --- a/debian/rules
 +++ b/debian/rules
 @@ -18,7 +18,7 @@ STATIC_COMPILEDIR := $(STATIC_TARGET_DIR)/$(DEB_HOST_RUST_TYPE)/debug
