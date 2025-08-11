@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   pbs:
-    image: ayufan/proxmox-backup-server:${TAG:-latest}
+    image: ${IMAGE:-ayufan/proxmox-ve:${TAG:-latest}}
     ports:
       - 8007:8007
     mem_limit: 2G
