@@ -90,7 +90,7 @@ jobs:
   client-build:
     needs: [draft]
     runs-on: ${{ matrix.runs_on }}
-    continue-on-error: ${{ matrix.continue-on-error || false }}
+    continue-on-error: ${{ matrix.continue_on_error || false }}
     strategy:
       fail-fast: false
       matrix:
@@ -101,7 +101,7 @@ jobs:
             arch: amd64
           - runs_on: ubuntu-24.04-arm
             arch: arm32
-            continue-on-error: true
+            continue_on_error: true
     env:
       ARCH: ${{ matrix.arch }}
     steps:
@@ -115,7 +115,6 @@ jobs:
 
     # Compile the client
     - name: Run client for ${{matrix.arch}}
-      continue-on-error: ${{ matrix.continue_on_error || false }}
       run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" client-tgz
 
     # Upload files to draft release
