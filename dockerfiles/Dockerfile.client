@@ -34,7 +34,7 @@ ADD /repos /src/repos
 # Build
 ARG CROSS_ARCH=
 RUN ./scripts/build/cross-compile.bash "$CROSS_ARCH"
-RUN ./scripts/build/make.bash --keep proxmox-backup "make . ignore proxmox-backup-client-static BUILD_MODE=release COMPILEDIR=target/static/release CARGO_STATIC_CONFIG="
+RUN ./scripts/build/make.bash proxmox-backup --keep "make . ignore proxmox-backup-client-static BUILD_MODE=release COMPILEDIR=target/static/release CARGO_STATIC_CONFIG="
 
 # Bundle client
 ARG VERSION
