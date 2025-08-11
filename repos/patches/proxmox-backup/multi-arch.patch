@@ -10,6 +10,27 @@ new mode 100755
 +usr/lib/${DEB_HOST_MULTIARCH}/proxmox-backup/file-restore/proxmox-restore-daemon
  usr/share/man/man1/proxmox-file-restore.1
  usr/share/zsh/vendor-completions/_proxmox-file-restore
+diff --git a/debian/proxmox-backup-file-restore.postinst b/debian/proxmox-backup-file-restore.postinst
+--- a/debian/proxmox-backup-file-restore.postinst
++++ b/debian/proxmox-backup-file-restore.postinst
+@@ -3,8 +3,16 @@
+ set -e
+ 
+ update_initramfs() {
++    case "$(dpkg --print-architecture)" in
++        amd64) INST_PATH="/usr/lib/x86_64-linux-gnu/proxmox-backup/file-restore" ;;
++        arm64) INST_PATH="/usr/lib/aarch64-linux-gnu/proxmox-backup/file-restore" ;;
++        *)
++            echo "proxmox-backup-file-restore: architecture not supported, skipping update." >&2
++            exit 0
++            ;;
++    esac
++
+     # regenerate initramfs for single file restore VM
+-    INST_PATH="/usr/lib/x86_64-linux-gnu/proxmox-backup/file-restore"
+     CACHE_PATH="/var/cache/proxmox-backup/file-restore-initramfs.img"
+     CACHE_PATH_DBG="/var/cache/proxmox-backup/file-restore-initramfs-debug.img"
+ 
 diff --git a/debian/proxmox-backup-server.install b/debian/proxmox-backup-server.install
 old mode 100644
 new mode 100755
@@ -48,3 +69,48 @@ diff --git a/debian/rules b/debian/rules
  
  include /usr/share/dpkg/pkg-info.mk
  include /usr/share/rustc/architecture.mk
+diff --git a/pbs-buildcfg/src/lib.rs b/pbs-buildcfg/src/lib.rs
+--- a/pbs-buildcfg/src/lib.rs
++++ b/pbs-buildcfg/src/lib.rs
+@@ -52,12 +52,21 @@ macro_rules! PROXMOX_BACKUP_CACHE_DIR_M {
+ }
+ 
+ #[macro_export]
++#[cfg(target_arch = "x86_64")]
+ macro_rules! PROXMOX_BACKUP_FILE_RESTORE_BIN_DIR_M {
+     () => {
+         "/usr/lib/x86_64-linux-gnu/proxmox-backup/file-restore"
+     };
+ }
+ 
++#[macro_export]
++#[cfg(target_arch = "aarch64")]
++macro_rules! PROXMOX_BACKUP_FILE_RESTORE_BIN_DIR_M {
++    () => {
++        "/usr/lib/aarch64-linux-gnu/proxmox-backup/file-restore"
++    };
++}
++
+ /// namespaced directory for in-memory (tmpfs) run state
+ pub const PROXMOX_BACKUP_RUN_DIR: &str = PROXMOX_BACKUP_RUN_DIR_M!();
+ 
+diff --git a/src/tape/drive/lto/mod.rs b/src/tape/drive/lto/mod.rs
+--- a/src/tape/drive/lto/mod.rs
++++ b/src/tape/drive/lto/mod.rs
+@@ -284,9 +284,14 @@ impl TapeDriver for LtoTapeHandle {
+     }
+ }
+ 
++#[cfg(target_arch = "x86_64")]
++const SG_TAPE_PATH: &str = "/usr/lib/x86_64-linux-gnu/proxmox-backup/sg-tape-cmd";
++
++#[cfg(target_arch = "aarch64")]
++const SG_TAPE_PATH: &str = "/usr/lib/aarch64-linux-gnu/proxmox-backup/sg-tape-cmd";
++
+ fn run_sg_tape_cmd(subcmd: &str, args: &[&str], fd: RawFd) -> Result<String, Error> {
+-    let mut command =
+-        std::process::Command::new("/usr/lib/x86_64-linux-gnu/proxmox-backup/sg-tape-cmd");
++    let mut command = std::process::Command::new(SG_TAPE_PATH);
+     command.args([subcmd]);
+     command.args(["--stdin"]);
+     command.args(args);
