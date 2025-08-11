@@ -58,6 +58,14 @@ case "$CROSS_ARCH" in
     export ARCH=arm32
     ;;
 
+  arm64)
+    export ARCH=arm64
+    ;;
+
+  amd64)
+    export ARCH=amd64
+    ;;
+
   *)
     ;;
 esac
@@ -72,7 +80,6 @@ if [[ -z "$DEBUG" ]]; then
   ../scripts/build/strip-cargo.bash "$REPO"
   ../scripts/build/apply-patches.bash "../repos/patches/$REPO" "../repos/patches-$ARCH/$REPO"
   ../scripts/build/resolve-dependencies.bash "$REPO"
-  ../scripts/build/experimental-cargo.bash "$REPO"
 fi
 
 do_dpkg_build_dep() {

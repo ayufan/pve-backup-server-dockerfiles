@@ -9,7 +9,7 @@ fi
 
 perform() {
   if [[ ! -d "$1" ]]; then
-    git clone "git://git.proxmox.com/git/$1.git"
+    git clone "git://git.proxmox.com/git/${3:-$1}.git" "$1"
   else
     git -C "$1" fetch
   fi
@@ -26,5 +26,6 @@ perform() {
 while read REPO COMMIT_SHA REST; do
   [[ -n "$2" ]] && [[ "$REPO" != "$2" ]] && continue
   echo "$REPO $COMMIT_SHA..." 1>&2
-  ( perform "$REPO" "$COMMIT_SHA" )
+  REPO_URL=${REST%%#*}
+  ( perform "$REPO" "$COMMIT_SHA" $REPO_URL )
 done < "$1"
