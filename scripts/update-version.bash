@@ -26,11 +26,14 @@ SCRIPT_ROOT=$(realpath "$0")
 ROOT_REV="$2"
 ROOT_TS=""
 
-tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
-trap 'cd ; rm -rf $tmp_dir' EXIT
+if [[ -z "$TMP_DIR" ]]; then
+  export TMP_DIR=$(mktemp -d -t ci-XXXXXXXXXX)
+  trap 'cd ; rm -rf $TMP_DIR' EXIT
+  cd "$TMP_DIR/"
+fi
 
 perform() {
-  git clone "git://git.proxmox.com/git/$1.git" 2>/dev/null
+  [[ -d "$1" ]] || git clone "git://git.proxmox.com/git/${3:-$1}.git" "$1" 2>/dev/null
 
   if [[ -z "$ROOT_REV" ]] || [[ -z "$ROOT_TS" ]]; then
     REPO_REV=$(git -C "$1" rev-parse "${ROOT_REV:-HEAD}")
@@ -43,16 +46,19 @@ perform() {
 
   CHANGE_TIME=$(git -C "$1" log -1 --format="%cd" $REPO_REV)
 
-  echo "$1 $REPO_REV # $CHANGE_TIME"
+  if [[ -n "$3" ]]; then
+    echo "$1 $REPO_REV $3 # $CHANGE_TIME"
+  else
+    echo "$1 $REPO_REV # $CHANGE_TIME"
+  fi
 }
-
-cd "$tmp_dir/"
 
 while read REPO COMMIT_SHA REST; do
   echo "$REPO $COMMIT_SHA..." 1>&2
   REPO_TS=
   REPO_REV=
-  perform "$REPO" "$COMMIT_SHA"
+  REPO_URL=${REST%%#*}
+  perform "$REPO" "$COMMIT_SHA" $REPO_URL
 
   REPO_DEPS_FILE="$(dirname "$DEPS_FILE")/$REPO.deps"
 

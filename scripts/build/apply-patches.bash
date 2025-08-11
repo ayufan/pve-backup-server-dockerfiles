@@ -20,7 +20,7 @@ for dir; do
       continue
     fi
 
-    git -C "$repo_name" diff --cached > "$patch"
+    git -C "$repo_name" diff --cached | grep -v "^index " > "$patch"
     git -C "$repo_name" commit -m "$(basename $patch)"
   done < <(find "$dir" -name "*.patch" | sort)
 done
