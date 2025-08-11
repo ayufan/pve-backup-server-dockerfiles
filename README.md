@@ -44,14 +44,14 @@ Each [GitHub Releases](https://github.com/ayufan/pve-backup-server-dockerfiles/r
 ## Run
 
 ```bash
-wget https://raw.githubusercontent.com/ayufan/pve-backup-server-dockerfiles/refs/heads/master/docker-compose.yml
+wget https://raw.githubusercontent.com/ayufan/pve-backup-server-dockerfiles/refs/heads/main/docker-compose.yml
 docker-compose up -d
 ```
 
 **Run beta variant:**
 
 ```bash
-wget https://raw.githubusercontent.com/ayufan/pve-backup-server-dockerfiles/refs/heads/master/docker-compose.yml
+wget https://raw.githubusercontent.com/ayufan/pve-backup-server-dockerfiles/refs/heads/main/docker-compose.yml
 TAG=beta docker-compose up -d
 ```
 
@@ -194,7 +194,7 @@ tar zxf proxmox-backup-client-*.tgz
 proxmox-backup-client-*/proxmox-backup-client.sh
 ```
 
-## Build on your own / Recompile latest version or master
+## Build on your own / Recompile latest version or main
 
 Refer to [PROCESS.md](PROCESS.md).
 

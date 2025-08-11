@@ -15,7 +15,7 @@ docker pull ayufan/proxmox-backup-server:#{GIT_TAG_NAME}
 ## Run as a docker container
 
 ```bash
-wget https://raw.githubusercontent.com/ayufan/pve-backup-server-dockerfiles/refs/heads/master/docker-compose.yml
+wget https://raw.githubusercontent.com/ayufan/pve-backup-server-dockerfiles/refs/heads/main/docker-compose.yml
 TAG=#{GIT_TAG_NAME} docker-compose up -d
 ```
 
