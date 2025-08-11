@@ -1,5 +1,4 @@
 diff --git a/Makefile b/Makefile
-index 18e5ce27..7caf87b0 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -39,8 +39,8 @@ $(BUILDDIR):

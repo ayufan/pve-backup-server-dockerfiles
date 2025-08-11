@@ -1,8 +1,7 @@
 diff --git a/debian/rules b/debian/rules
-index aa4571ff..0fbb29e7 100755
 --- a/debian/rules
 +++ b/debian/rules
-@@ -38,9 +38,9 @@ endif
+@@ -37,9 +37,9 @@ endif
  override_dh_auto_configure:
  	@perl -ne 'if (/^version\s*=\s*"(\d+(?:\.\d+)+)"/) { my $$v_cargo = $$1; my $$v_deb = "$(DEB_VERSION_UPSTREAM)"; \
  	    die "ERROR: d/changelog <-> Cargo.toml version mismatch: $$v_cargo != $$v_deb\n" if $$v_cargo ne $$v_deb; exit(0); }' Cargo.toml

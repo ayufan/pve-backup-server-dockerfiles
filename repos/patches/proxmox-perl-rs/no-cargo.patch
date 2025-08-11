@@ -1,5 +1,4 @@
 diff --git a/pve-rs/debian/rules b/pve-rs/debian/rules
-index bddb889..4e15f38 100755
 --- a/pve-rs/debian/rules
 +++ b/pve-rs/debian/rules
 @@ -21,5 +21,5 @@ export DEB_CARGO_PACKAGE=pve-rs

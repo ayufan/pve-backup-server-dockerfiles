@@ -1,22 +1,4 @@
-From 08e19e66fab8280161495c81f688a330fc80e4f5 Mon Sep 17 00:00:00 2001
-From: Kamil Trzcinski <ayufan@ayufan.eu>
-Date: Fri, 25 Jul 2025 22:04:22 +0200
-Subject: [PATCH] arm32
-
----
- pbs-client/src/pxar/create.rs    | 10 +++++-----
- pbs-client/src/pxar/extract.rs   |  4 ++--
- pbs-client/src/pxar/metadata.rs  |  4 ++--
- pbs-config/src/acl.rs            |  7 +++----
- pbs-config/src/user.rs           |  7 +++----
- pbs-datastore/src/chunk_store.rs |  4 ++--
- pbs-datastore/src/fixed_index.rs |  6 +++---
- pbs-fuse-loop/src/fuse_loop.rs   |  4 ++--
- pbs-pxar-fuse/src/lib.rs         | 12 ++++++------
- 9 files changed, 28 insertions(+), 30 deletions(-)
-
 diff --git a/pbs-client/src/pxar/create.rs b/pbs-client/src/pxar/create.rs
-index 7f605a61..4a1a16be 100644
 --- a/pbs-client/src/pxar/create.rs
 +++ b/pbs-client/src/pxar/create.rs
 @@ -79,7 +79,7 @@ fn detect_fs_type(fd: RawFd) -> Result<i64, Errno> {
@@ -65,7 +47,6 @@ index 7f605a61..4a1a16be 100644
          ..Default::default()
      };
 diff --git a/pbs-client/src/pxar/extract.rs b/pbs-client/src/pxar/extract.rs
-index c4d0085c..dad3cd2f 100644
 --- a/pbs-client/src/pxar/extract.rs
 +++ b/pbs-client/src/pxar/extract.rs
 @@ -727,7 +727,7 @@ impl Extractor {
@@ -87,7 +68,6 @@ index c4d0085c..dad3cd2f 100644
                  Err(nix::errno::Errno::EINTR) => true,
                  Err(err) => return Err(err).context("error setting file size"),
 diff --git a/pbs-client/src/pxar/metadata.rs b/pbs-client/src/pxar/metadata.rs
-index d03cf7e2..bf71679f 100644
 --- a/pbs-client/src/pxar/metadata.rs
 +++ b/pbs-client/src/pxar/metadata.rs
 @@ -45,10 +45,10 @@ fn timestamp_to_update_timespec(mtime: &pxar::format::StatxTimestamp) -> [libc::
@@ -104,10 +84,9 @@ index d03cf7e2..bf71679f 100644
          },
      ]
 diff --git a/pbs-config/src/acl.rs b/pbs-config/src/acl.rs
-index aca1f68f..671ca44c 100644
 --- a/pbs-config/src/acl.rs
 +++ b/pbs-config/src/acl.rs
-@@ -731,8 +731,7 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
+@@ -737,8 +737,7 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
          let cache = CACHED_CONFIG.read().unwrap();
          if let Some(ref config) = cache.data {
              if let Some(stat) = stat {
@@ -117,7 +96,7 @@ index aca1f68f..671ca44c 100644
                      return Ok(config.clone());
                  }
              } else if cache.last_mtime == 0 && cache.last_mtime_nsec == 0 {
-@@ -746,8 +745,8 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
+@@ -752,8 +751,8 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
  
      let mut cache = CACHED_CONFIG.write().unwrap();
      if let Some(stat) = stat {
@@ -129,7 +108,6 @@ index aca1f68f..671ca44c 100644
      cache.data = Some(config.clone());
  
 diff --git a/pbs-config/src/user.rs b/pbs-config/src/user.rs
-index 08d141e6..1bff3c4f 100644
 --- a/pbs-config/src/user.rs
 +++ b/pbs-config/src/user.rs
 @@ -96,8 +96,7 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
@@ -154,7 +132,6 @@ index 08d141e6..1bff3c4f 100644
      cache.data = Some(config.clone());
  
 diff --git a/pbs-datastore/src/chunk_store.rs b/pbs-datastore/src/chunk_store.rs
-index 3c59612b..0340d7f1 100644
 --- a/pbs-datastore/src/chunk_store.rs
 +++ b/pbs-datastore/src/chunk_store.rs
 @@ -408,7 +408,7 @@ impl ChunkStore {
@@ -176,7 +153,6 @@ index 3c59612b..0340d7f1 100644
                          status.still_bad += 1;
                      } else {
 diff --git a/pbs-datastore/src/fixed_index.rs b/pbs-datastore/src/fixed_index.rs
-index 8d9173e8..ae79c045 100644
 --- a/pbs-datastore/src/fixed_index.rs
 +++ b/pbs-datastore/src/fixed_index.rs
 @@ -111,7 +111,7 @@ impl FixedIndexReader {
@@ -207,7 +183,6 @@ index 8d9173e8..ae79c045 100644
          }?
          .as_ptr()
 diff --git a/pbs-fuse-loop/src/fuse_loop.rs b/pbs-fuse-loop/src/fuse_loop.rs
-index d55be3b0..711354bc 100644
 --- a/pbs-fuse-loop/src/fuse_loop.rs
 +++ b/pbs-fuse-loop/src/fuse_loop.rs
 @@ -177,7 +177,7 @@ impl<R: AsyncRead + AsyncSeek + Unpin> FuseLoopSession<R> {
@@ -228,7 +203,6 @@ index d55be3b0..711354bc 100644
      stat
  }
 diff --git a/pbs-pxar-fuse/src/lib.rs b/pbs-pxar-fuse/src/lib.rs
-index 4322c06e..ccb0c17d 100644
 --- a/pbs-pxar-fuse/src/lib.rs
 +++ b/pbs-pxar-fuse/src/lib.rs
 @@ -546,7 +546,7 @@ impl SessionImpl {
@@ -265,6 +239,3 @@ index 4322c06e..ccb0c17d 100644
      stat.st_ctime_nsec = metadata.stat.mtime.nanos as _;
      Ok(stat)
  }
--- 
-2.39.2
-

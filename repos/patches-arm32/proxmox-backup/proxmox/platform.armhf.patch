@@ -1,21 +1,4 @@
-From 06fa463a208338ad397e9581759bb3c26f7f2ee2 Mon Sep 17 00:00:00 2001
-From: Kamil Trzcinski <ayufan@ayufan.eu>
-Date: Fri, 25 Jul 2025 22:04:16 +0200
-Subject: [PATCH] arm32
-
----
- proxmox-access-control/src/acl.rs  | 7 +++----
- proxmox-access-control/src/user.rs | 8 +++++---
- proxmox-shared-memory/src/lib.rs   | 2 +-
- proxmox-sys/src/crypt.rs           | 2 +-
- proxmox-sys/src/fs/mod.rs          | 2 +-
- proxmox-sys/src/linux/timer.rs     | 4 ++--
- proxmox-sys/src/process_locker.rs  | 2 +-
- proxmox-time/src/posix.rs          | 6 ++++--
- 8 files changed, 18 insertions(+), 15 deletions(-)
-
 diff --git a/proxmox-access-control/src/acl.rs b/proxmox-access-control/src/acl.rs
-index b8041688..f6b4f456 100644
 --- a/proxmox-access-control/src/acl.rs
 +++ b/proxmox-access-control/src/acl.rs
 @@ -596,8 +596,7 @@ pub fn cached_config() -> Result<Arc<AclTree>, Error> {
@@ -40,7 +23,6 @@ index b8041688..f6b4f456 100644
      cache.data = Some(config.clone());
  
 diff --git a/proxmox-access-control/src/user.rs b/proxmox-access-control/src/user.rs
-index 95b70f25..bf0bb255 100644
 --- a/proxmox-access-control/src/user.rs
 +++ b/proxmox-access-control/src/user.rs
 @@ -83,7 +83,9 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
@@ -66,7 +48,6 @@ index 95b70f25..bf0bb255 100644
      cache.data = Some(config.clone());
  
 diff --git a/proxmox-shared-memory/src/lib.rs b/proxmox-shared-memory/src/lib.rs
-index b067d1b9..e8a994a8 100644
 --- a/proxmox-shared-memory/src/lib.rs
 +++ b/proxmox-shared-memory/src/lib.rs
 @@ -145,7 +145,7 @@ impl<T: Sized + Init> SharedMemory<T> {
@@ -79,7 +60,6 @@ index b067d1b9..e8a994a8 100644
          // link the file into place:
          let proc_path = format!("/proc/self/fd/{}\0", file.as_raw_fd());
 diff --git a/proxmox-sys/src/crypt.rs b/proxmox-sys/src/crypt.rs
-index 508b9c15..3b7ee7eb 100644
 --- a/proxmox-sys/src/crypt.rs
 +++ b/proxmox-sys/src/crypt.rs
 @@ -112,7 +112,7 @@ pub fn crypt_gensalt(prefix: &str, count: u64, rbytes: &[u8]) -> Result<String,
@@ -92,7 +72,6 @@ index 508b9c15..3b7ee7eb 100644
              rbytes.len().try_into()?,
              output.as_mut_ptr(),
 diff --git a/proxmox-sys/src/fs/mod.rs b/proxmox-sys/src/fs/mod.rs
-index 752b75d2..4556eac0 100644
 --- a/proxmox-sys/src/fs/mod.rs
 +++ b/proxmox-sys/src/fs/mod.rs
 @@ -170,7 +170,7 @@ pub fn fs_info<P: ?Sized + nix::NixPath>(path: &P) -> nix::Result<FileSystemInfo
@@ -105,7 +84,6 @@ index 752b75d2..4556eac0 100644
      })
  }
 diff --git a/proxmox-sys/src/linux/timer.rs b/proxmox-sys/src/linux/timer.rs
-index bb01dc81..0b0eccd1 100644
 --- a/proxmox-sys/src/linux/timer.rs
 +++ b/proxmox-sys/src/linux/timer.rs
 @@ -106,8 +106,8 @@ fn opt_duration_to_timespec(v: Option<Duration>) -> libc::timespec {
@@ -120,7 +98,6 @@ index bb01dc81..0b0eccd1 100644
      }
  }
 diff --git a/proxmox-sys/src/process_locker.rs b/proxmox-sys/src/process_locker.rs
-index 65d2793a..d5a32ddb 100644
 --- a/proxmox-sys/src/process_locker.rs
 +++ b/proxmox-sys/src/process_locker.rs
 @@ -160,7 +160,7 @@ impl ProcessLocker {
@@ -133,7 +110,6 @@ index 65d2793a..d5a32ddb 100644
          Ok(guard)
      }
 diff --git a/proxmox-time/src/posix.rs b/proxmox-time/src/posix.rs
-index c2146c47..e89876ea 100644
 --- a/proxmox-time/src/posix.rs
 +++ b/proxmox-time/src/posix.rs
 @@ -15,7 +15,7 @@ pub fn timelocal(t: &mut libc::tm) -> Result<i64, Error> {
@@ -170,6 +146,3 @@ index c2146c47..e89876ea 100644
          if libc::gmtime_r(&epoch, &mut result).is_null() {
              bail!("libc::gmtime failed for '{epoch}'");
          }
--- 
-2.39.2
-
