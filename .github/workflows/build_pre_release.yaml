@@ -2,9 +2,14 @@ on:
   workflow_dispatch:
     inputs:
       TAG:
-        description: 'Tag name to use'
+        description: 'The tag to use, defaults to VERSION-BUILD'
         required: false
         type: string
+      BUILD:
+        description: 'The build number to use'
+        required: false
+        type: number
+        default: 1
 
 env:
   REGISTRY: ${{ vars.DOCKERHUB_REGISTRY }}
@@ -16,6 +21,9 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+    - name: Define TAG
+      if: ${{ !inputs.TAG }}
+      run: echo "TAG=$(cat VERSION)-${{ inputs.BUILD }}" >> $GITHUB_ENV
     - name: Update version in RELEASE.md
       shell: bash
       run: |
@@ -48,6 +56,9 @@ jobs:
       uses: actions/checkout@v3
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
+    - name: Define TAG
+      if: ${{ !inputs.TAG }}
+      run: echo "TAG=$(cat VERSION)-${{ inputs.BUILD }}" >> $GITHUB_ENV
 
     # Compile and release
     - name: Compile and release for ${{matrix.arch}}
@@ -98,6 +109,9 @@ jobs:
       uses: actions/checkout@v3
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
+    - name: Define TAG
+      if: ${{ !inputs.TAG }}
+      run: echo "TAG=$(cat VERSION)-${{ inputs.BUILD }}" >> $GITHUB_ENV
 
     # Compile the client
     - name: Run client for ${{matrix.arch}}
@@ -122,6 +136,9 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+    - name: Define TAG
+      if: ${{ !inputs.TAG }}
+      run: echo "TAG=$(cat VERSION)-${{ inputs.BUILD }}" >> $GITHUB_ENV
 
     # Update docker manifest
     - name: Login to Docker Hub
