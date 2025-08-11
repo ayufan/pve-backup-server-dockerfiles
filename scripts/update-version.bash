@@ -23,7 +23,7 @@ fi
 
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRIPT_ROOT=$(realpath "$0")
-ROOT_REV="$2"
+ROOT_REV="${2}"
 ROOT_TS=""
 
 if [[ -z "$TMP_DIR" ]]; then
@@ -35,7 +35,7 @@ fi
 perform() {
   [[ -d "$1" ]] || git clone "git://git.proxmox.com/git/${3:-$1}.git" "$1" 2>/dev/null
 
-  if [[ -z "$ROOT_REV" ]] || [[ -z "$ROOT_TS" ]]; then
+  if [[ "$ROOT_REV" == "HEAD" ]] || [[ -z "$ROOT_TS" ]]; then
     REPO_REV=$(git -C "$1" rev-parse "${ROOT_REV:-HEAD}")
     ROOT_TS=$(git -C "$1" log -1 --format=%ct "$REPO_REV")
   else
