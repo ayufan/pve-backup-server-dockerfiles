@@ -9,8 +9,8 @@ fi
 
 perform() {
   local repo_name="${3:-$1}"
-  local primary_base="${GIT_CLONE_PRIMARY:-git://git.proxmox.com/git}"
-  local fallback_base="${GIT_CLONE_FALLBACK:-https://git.proxmox.com/git}"
+  local primary_base="${GIT_CLONE_PRIMARY:-https://git.proxmox.com/git}"
+  local fallback_base="${GIT_CLONE_FALLBACK:-git://git.proxmox.com/git}"
 
   if [[ ! -d "$1" ]]; then
     if ! git clone "${primary_base}/${repo_name}.git" "$1"; then
