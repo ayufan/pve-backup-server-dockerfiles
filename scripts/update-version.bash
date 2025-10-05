@@ -33,7 +33,15 @@ if [[ -z "$TMP_DIR" ]]; then
 fi
 
 perform() {
-  [[ -d "$1" ]] || git clone "git://git.proxmox.com/git/${3:-$1}.git" "$1" 2>/dev/null
+  local repo_name="${3:-$1}"
+  local primary_base="${GIT_CLONE_PRIMARY:-git://git.proxmox.com/git}"
+  local fallback_base="${GIT_CLONE_FALLBACK:-https://git.proxmox.com/git}"
+
+  if [[ ! -d "$1" ]]; then
+    if ! git clone "${primary_base}/${repo_name}.git" "$1" 2>/dev/null; then
+      git clone "${fallback_base}/${repo_name}.git" "$1" 2>/dev/null
+    fi
+  fi
 
   if [[ "$ROOT_REV" == "HEAD" ]] || [[ -z "$ROOT_TS" ]]; then
     REPO_REV=$(git -C "$1" rev-parse "${ROOT_REV:-HEAD}")
@@ -53,7 +61,15 @@ perform() {
   fi
 }
 
-while read REPO COMMIT_SHA REST; do
+while true; do
+  REPO=""
+  COMMIT_SHA=""
+  REST=""
+
+  if ! read REPO COMMIT_SHA REST; then
+    [[ -n "$REPO" ]] || break
+  fi
+
   echo "$REPO $COMMIT_SHA..." 1>&2
   REPO_TS=
   REPO_REV=
