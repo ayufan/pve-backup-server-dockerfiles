@@ -16,11 +16,15 @@ echo "Resolving dependencies in $search_dir"
 
 while read cargo_path; do
   cargo_path=$(dirname "$cargo_path")
+  cargo_toml="$cargo_path/Cargo.toml"
+  if ! grep -Eq '^[[:space:]]*\[package\]' "$cargo_toml"; then
+    continue
+  fi
   cargo_dep=$(basename "$cargo_path")
   git_repo=$(git -C "$cargo_path" rev-parse --show-toplevel)
   found_deps[$cargo_dep]="$cargo_path"
   git_deps[$cargo_dep]="$git_repo"
-  got_deps[$(realpath "$cargo_path/Cargo.toml")]="$(get_deps "$cargo_path/Cargo.toml" | sort -u)"
+  got_deps[$(realpath "$cargo_toml")]="$(get_deps "$cargo_toml" | sort -u)"
 done < <(find "$PWD" -wholename "*/Cargo.toml" -not -path "*/vendor/*" -not -path "*/.build/*")
 
 echo "Found dependencies:"

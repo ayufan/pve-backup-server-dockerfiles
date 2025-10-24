@@ -14,6 +14,13 @@ export DEBIAN_FRONTEND=noninteractive
 export DEB_BUILD_OPTIONS=nocheck
 KEEP=
 
+ensure_apt_updated() {
+  if [[ -z "${APT_UPDATED:-}" ]]; then
+    apt-get update
+    export APT_UPDATED=1
+  fi
+}
+
 while [[ -n "$1" ]]; do
   case "$1" in
     --rust)
@@ -87,7 +94,7 @@ do_dpkg_build_dep() {
   shift || true
 
   pushd "$d/"
-  [[ -e "debian/control" ]] && apt-get -y build-dep "$PWD"
+  [[ -e "debian/control" ]] && ensure_apt_updated && apt-get -y build-dep "$PWD"
   popd
   do_archive
 }
@@ -97,7 +104,7 @@ do_dpkg_build() {
   shift || true
 
   pushd "$d/"
-  [[ -e "debian/control" ]] && apt-get -y build-dep "$PWD"
+  [[ -e "debian/control" ]] && ensure_apt_updated && apt-get -y build-dep "$PWD"
   mkdir -p .build
   cp -av * .build/
   pushd .build/
@@ -108,6 +115,7 @@ do_dpkg_build() {
 }
 
 do_dpkg_install() {
+  ensure_apt_updated
   find "." -name "*.deb" | xargs -r apt -y install
 }
 
@@ -123,6 +131,7 @@ run_until_broken() {
     fi
 
     echo "APT reports broken dependencies."
+    ensure_apt_updated
     apt-get install -f -y
   done
 
@@ -137,7 +146,7 @@ do_make_dinstall() {
 
   pushd "$d/"
   git clean -ffdx -e '*.deb'
-  [[ -e "$p/debian/control" ]] && apt-get -y build-dep "$PWD/$p"
+  [[ -e "$p/debian/control" ]] && ensure_apt_updated && apt-get -y build-dep "$PWD/$p"
   run_until_broken make dinstall "$@"
   popd
   do_archive
@@ -151,7 +160,7 @@ do_make() {
 
   pushd "$d/"
   git clean -ffdx -e '*.deb'
-  [[ -e "$p/debian/control" ]] && apt-get -y build-dep "$PWD/$p"
+  [[ -e "$p/debian/control" ]] && ensure_apt_updated && apt-get -y build-dep "$PWD/$p"
   run_until_broken make "$@"
   popd
   do_archive
@@ -165,7 +174,7 @@ do_make_deb() {
 
   pushd "$d/"
   git clean -ffdx -e '*.deb'
-  [[ -e "$p/debian/control" ]] && apt-get -y build-dep "$PWD/$p"
+  [[ -e "$p/debian/control" ]] && ensure_apt_updated && apt-get -y build-dep "$PWD/$p"
   run_until_broken make deb "$@"
   popd
   do_archive

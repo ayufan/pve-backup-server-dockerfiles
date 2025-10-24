@@ -25,7 +25,7 @@ RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
     for tool in /root/.cargo/bin/*; do ln -vsf $tool /usr/bin/; done;
 
 # Specify default rust toolchain
-ENV RUSTUP_TOOLCHAIN=1.85
+ENV RUSTUP_TOOLCHAIN=1.88
 
 # Apply all patches
 ADD /scripts/build /src/scripts/build
