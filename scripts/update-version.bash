@@ -25,6 +25,7 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SCRIPT_ROOT=$(realpath "$0")
 ROOT_REV="${2}"
 ROOT_TS=""
+PROXMOX_GIT_URL="${PROXMOX_GIT_URL:-git://git.proxmox.com/git}"
 
 if [[ -z "$TMP_DIR" ]]; then
   export TMP_DIR=$(mktemp -d -t ci-XXXXXXXXXX)
@@ -33,7 +34,9 @@ if [[ -z "$TMP_DIR" ]]; then
 fi
 
 perform() {
-  [[ -d "$1" ]] || git clone "git://git.proxmox.com/git/${3:-$1}.git" "$1" 2>/dev/null
+  if [[ ! -d "$1" ]]; then
+    git clone "${PROXMOX_GIT_URL}/${3:-$1}.git" "$1" 2>/dev/null
+  fi
 
   if [[ "$ROOT_REV" == "HEAD" ]] || [[ -z "$ROOT_TS" ]]; then
     REPO_REV=$(git -C "$1" rev-parse "${ROOT_REV:-HEAD}")
@@ -54,6 +57,8 @@ perform() {
 }
 
 while read REPO COMMIT_SHA REST; do
+  [[ -n "$REPO" ]] || continue
+
   echo "$REPO $COMMIT_SHA..." 1>&2
   REPO_TS=
   REPO_REV=
