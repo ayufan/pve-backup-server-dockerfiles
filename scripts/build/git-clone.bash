@@ -7,9 +7,11 @@ if [[ $# -ne 1 ]] && [[ $# -ne 2 ]]; then
   exit 1
 fi
 
+PROXMOX_GIT_URL="${PROXMOX_GIT_URL:-git://git.proxmox.com/git}"
+
 perform() {
   if [[ ! -d "$1" ]]; then
-    git clone "git://git.proxmox.com/git/${3:-$1}.git" "$1"
+    git clone "${PROXMOX_GIT_URL}/${3:-$1}.git" "$1"
   else
     git -C "$1" fetch
   fi
@@ -24,7 +26,9 @@ perform() {
 }
 
 while read REPO COMMIT_SHA REST; do
+  [[ -n "$REPO" ]] || continue
   [[ -n "$2" ]] && [[ "$REPO" != "$2" ]] && continue
+
   echo "$REPO $COMMIT_SHA..." 1>&2
   REPO_URL=${REST%%#*}
   ( perform "$REPO" "$COMMIT_SHA" $REPO_URL )
