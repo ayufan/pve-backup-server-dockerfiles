@@ -26,7 +26,7 @@ ADD packages/ /src/packages/
 RUN cargo deb --manifest-path /src/packages/xtr/Cargo.toml --install
 
 # Specify default rust toolchain
-ENV RUSTUP_TOOLCHAIN=1.87
+ENV RUSTUP_TOOLCHAIN=1.88
 
 # Link /cargo/bin to /usr/local/bin
 RUN ln -s /cargo/bin/* /usr/local/bin/
@@ -52,7 +52,7 @@ RUN ./scripts/build/make.bash proxmox-mini-journalreader make_deb
 RUN ./scripts/build/make.bash libjs-qrcodejs make_deb
 RUN ./scripts/build/make.bash proxmox-acme make_deb
 RUN ./scripts/build/make.bash pve-xtermjs "make_deb termproxy" "make_deb xterm.js"
-RUN ./scripts/build/make.bash proxmox-backup --rust 1.85 make_deb
+RUN ./scripts/build/make.bash proxmox-backup --rust 1.88 make_deb
 
 #=================================
 
