@@ -59,7 +59,6 @@ jobs:
 
   client-build:
     runs-on: ${{ matrix.runs_on }}
-    continue-on-error: ${{ matrix.continue_on_error || false }}
     strategy:
       fail-fast: false
       matrix:
@@ -89,8 +88,13 @@ jobs:
         fi
 
     # Compile the client
-    - name: Run client for ${{matrix.arch}}
+    - name: Run client for ${{ matrix.arch }}
+      id: build
+      continue-on-error: ${{ matrix.continue_on_error || false }}
       run: ./release.bash "${{ env.REGISTRY }}:${{ env.TAG }}" client-tgz
+    - name: Warn on failure
+      if: steps.build.outcome == 'failure'
+      run: echo "::warning::${{ matrix.arch }} client build failed"
 
     # Push Artifacts to GitHub
     - uses: actions/upload-artifact@v4

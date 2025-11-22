@@ -10,7 +10,7 @@ RUN apt-get -y update && \
     libacl1-dev libpam0g-dev libfuse3-dev \
     libsystemd-dev uuid-dev libssl-dev \
     libclang-dev libjson-perl libcurl4-openssl-dev \
-    dh-exec wget
+    dh-exec wget jq
 
 WORKDIR /src
 
@@ -25,7 +25,7 @@ RUN wget https://static.rust-lang.org/rustup/rustup-init.sh && \
     for tool in /root/.cargo/bin/*; do ln -vsf $tool /usr/bin/; done;
 
 # Specify default rust toolchain
-ENV RUSTUP_TOOLCHAIN=1.88
+ENV RUSTUP_TOOLCHAIN=1.89
 
 # Apply all patches
 ADD /scripts/build /src/scripts/build
