@@ -10,7 +10,7 @@ RUN apt-get -y update && \
     libacl1-dev libpam0g-dev libfuse3-dev \
     libsystemd-dev uuid-dev libssl-dev \
     libclang-dev libjson-perl libcurl4-openssl-dev \
-    dh-exec dh-nodejs wget rsync
+    dh-exec dh-nodejs wget rsync jq
 
 ENV CARGO_HOME=/cargo \
   RUSTUP_HOME=/rustup \
@@ -52,7 +52,7 @@ RUN ./scripts/build/make.bash proxmox-mini-journalreader make_deb
 RUN ./scripts/build/make.bash libjs-qrcodejs make_deb
 RUN ./scripts/build/make.bash proxmox-acme make_deb
 RUN ./scripts/build/make.bash pve-xtermjs "make_deb termproxy" "make_deb xterm.js"
-RUN ./scripts/build/make.bash proxmox-backup --rust 1.88 make_deb
+RUN ./scripts/build/make.bash proxmox-backup --rust 1.89 make_deb
 
 #=================================
 
