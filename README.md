@@ -79,10 +79,10 @@ See [Releases](https://github.com/ayufan/pve-backup-server-dockerfiles/releases)
 Since it runs in a container, it is by default self-signed.
 Follow the tutorial: https://pbs.proxmox.com/docs/pve-integration.html.
 
-You might need to read a PBS fingerprint:
+You might need to read the PBS fingerprint:
 
 ```bash
-docker-compose exec server proxmox-backup-manager cert info | grep Fingerprint
+docker-compose exec pbs proxmox-backup-manager cert info | grep Fingerprint
 ```
 
 ### 2. Add a new directory to store data
