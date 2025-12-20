@@ -90,8 +90,6 @@ docker-compose exec pbs proxmox-backup-manager cert info | grep Fingerprint
 Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
-version: '2.1'
-
 services:
   pbs:
     volumes:
@@ -115,8 +113,6 @@ If you are running in Docker it might be advised to configure timezone.
 Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
-version: '2.1'
-
 services:
   pbs:
     environment:
@@ -131,8 +127,6 @@ a special capability.
 Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
-version: '2.1'
-
 services:
   pbs:
     devices:
@@ -155,8 +149,6 @@ mkdir /srv/pbs/lib
 Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
-version: '2.1'
-
 volumes:
   pbs_etc:
     driver: local
