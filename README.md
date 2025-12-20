@@ -142,7 +142,15 @@ services:
       - SYS_RAWIO
 ```
 
-### 5. Persist config, graphs, and logs (optional, but advised)
+### 5. Relocate persistent data from Docker-managed volumes to fixed host paths (optional)
+
+Create folders where volume data will be stored:
+
+```bash
+mkdir /srv/pbs/etc
+mkdir /srv/pbs/logs
+mkdir /srv/pbs/lib
+```
 
 Create a new file (or merge with existing): `docker-compose.override.yml`:
 
