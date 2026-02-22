@@ -110,7 +110,7 @@ diff --git a/pbs-config/src/acl.rs b/pbs-config/src/acl.rs
 diff --git a/pbs-config/src/user.rs b/pbs-config/src/user.rs
 --- a/pbs-config/src/user.rs
 +++ b/pbs-config/src/user.rs
-@@ -96,8 +96,7 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
+@@ -97,8 +97,7 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
          let cache = CACHED_CONFIG.read().unwrap();
          if let Some(ref config) = cache.data {
              if let Some(stat) = stat {
@@ -120,7 +120,7 @@ diff --git a/pbs-config/src/user.rs b/pbs-config/src/user.rs
                      return Ok(config.clone());
                  }
              } else if cache.last_mtime == 0 && cache.last_mtime_nsec == 0 {
-@@ -111,8 +110,8 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
+@@ -112,8 +111,8 @@ pub fn cached_config() -> Result<Arc<SectionConfigData>, Error> {
  
      let mut cache = CACHED_CONFIG.write().unwrap();
      if let Some(stat) = stat {
@@ -131,31 +131,10 @@ diff --git a/pbs-config/src/user.rs b/pbs-config/src/user.rs
      }
      cache.data = Some(config.clone());
  
-diff --git a/pbs-datastore/src/chunk_store.rs b/pbs-datastore/src/chunk_store.rs
---- a/pbs-datastore/src/chunk_store.rs
-+++ b/pbs-datastore/src/chunk_store.rs
-@@ -408,7 +408,7 @@ impl ChunkStore {
- 
-                 chunk_count += 1;
- 
--                if stat.st_atime < min_atime {
-+                if stat.st_atime < (min_atime as i32) {
-                     //let age = now - stat.st_atime;
-                     //println!("UNLINK {}  {:?}", age/(3600*24), filename);
-                     if let Err(err) = unlinkat(Some(dirfd), filename, UnlinkatFlags::NoRemoveDir) {
-@@ -426,7 +426,7 @@ impl ChunkStore {
-                         status.removed_chunks += 1;
-                     }
-                     status.removed_bytes += stat.st_size as u64;
--                } else if stat.st_atime < oldest_writer {
-+                } else if stat.st_atime < (oldest_writer as i32) {
-                     if bad {
-                         status.still_bad += 1;
-                     } else {
 diff --git a/pbs-datastore/src/fixed_index.rs b/pbs-datastore/src/fixed_index.rs
 --- a/pbs-datastore/src/fixed_index.rs
 +++ b/pbs-datastore/src/fixed_index.rs
-@@ -111,7 +111,7 @@ impl FixedIndexReader {
+@@ -108,7 +108,7 @@ impl FixedIndexReader {
                  nix::sys::mman::ProtFlags::PROT_READ,
                  nix::sys::mman::MapFlags::MAP_PRIVATE,
                  &file,
@@ -164,7 +143,7 @@ diff --git a/pbs-datastore/src/fixed_index.rs b/pbs-datastore/src/fixed_index.rs
              )
          }?
          .as_ptr()
-@@ -288,7 +288,7 @@ impl FixedIndexWriter {
+@@ -282,7 +282,7 @@ impl FixedIndexWriter {
  
          let index_length = size.div_ceil(chunk_size);
          let index_size = index_length * 32;
@@ -173,7 +152,7 @@ diff --git a/pbs-datastore/src/fixed_index.rs b/pbs-datastore/src/fixed_index.rs
  
          let data = unsafe {
              nix::sys::mman::mmap(
-@@ -298,7 +298,7 @@ impl FixedIndexWriter {
+@@ -292,7 +292,7 @@ impl FixedIndexWriter {
                  nix::sys::mman::ProtFlags::PROT_READ | nix::sys::mman::ProtFlags::PROT_WRITE,
                  nix::sys::mman::MapFlags::MAP_SHARED,
                  &file,
@@ -194,7 +173,7 @@ diff --git a/pbs-fuse-loop/src/fuse_loop.rs b/pbs-fuse-loop/src/fuse_loop.rs
                              req.reply(&entry)
                          },
                          Some(Request::Getattr(req)) => {
-@@ -425,6 +425,6 @@ fn minimal_stat(size: i64) -> libc::stat {
+@@ -424,6 +424,6 @@ fn minimal_stat(size: i64) -> libc::stat {
      stat.st_mode = libc::S_IFREG;
      stat.st_ino = 1;
      stat.st_nlink = 1;
@@ -205,7 +184,7 @@ diff --git a/pbs-fuse-loop/src/fuse_loop.rs b/pbs-fuse-loop/src/fuse_loop.rs
 diff --git a/pbs-pxar-fuse/src/lib.rs b/pbs-pxar-fuse/src/lib.rs
 --- a/pbs-pxar-fuse/src/lib.rs
 +++ b/pbs-pxar-fuse/src/lib.rs
-@@ -546,7 +546,7 @@ impl SessionImpl {
+@@ -551,7 +551,7 @@ impl SessionImpl {
              {
                  return Ok(lookups);
              }
@@ -214,7 +193,7 @@ diff --git a/pbs-pxar-fuse/src/lib.rs b/pbs-pxar-fuse/src/lib.rs
          }
  
          if next == entry_count {
-@@ -685,19 +685,19 @@ fn to_stat(inode: u64, entry: &pxar::Entry) -> Result<libc::stat, Error> {
+@@ -690,19 +690,19 @@ fn to_stat(inode: u64, entry: &pxar::Entry) -> Result<libc::stat, Error> {
      let metadata = entry.metadata();
  
      let mut stat: libc::stat = unsafe { mem::zeroed() };

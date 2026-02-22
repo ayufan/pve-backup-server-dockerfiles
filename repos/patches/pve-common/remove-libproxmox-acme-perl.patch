@@ -1,9 +1,9 @@
 diff --git a/debian/control b/debian/control
 --- a/debian/control
 +++ b/debian/control
-@@ -35,7 +35,6 @@ Depends: libanyevent-perl,
-          libnet-dbus-perl,
-          libnet-ip-perl,
+@@ -46,7 +46,6 @@ Depends: libanyevent-perl,
+          libnet-ldap-perl,
+          libnet-ssleay-perl,
           libnetaddr-ip-perl,
 -         libproxmox-acme-perl,
           libproxmox-rs-perl,

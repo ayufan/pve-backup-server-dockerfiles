@@ -1,7 +1,7 @@
 diff --git a/www/NavigationTree.js b/www/NavigationTree.js
 --- a/www/NavigationTree.js
 +++ b/www/NavigationTree.js
-@@ -95,12 +95,6 @@ Ext.define('PBS.store.NavigationStore', {
+@@ -101,12 +101,6 @@ Ext.define('PBS.store.NavigationStore', {
                  expanded: true,
                  leaf: false,
                  children: [

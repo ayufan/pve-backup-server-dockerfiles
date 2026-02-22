@@ -8,4 +8,4 @@ diff --git a/pve-rs/debian/control b/pve-rs/debian/control
 -               libproxmox-rs-perl (>= 0.3.5),
                 libstd-rust-dev <!nocheck>,
                 perlmod-bin (>= 0.2.1-1),
-                rustc:native <!nocheck>,
+                proxmox-frr-templates,
