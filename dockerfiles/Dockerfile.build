@@ -26,7 +26,7 @@ ADD packages/ /src/packages/
 RUN cargo deb --manifest-path /src/packages/xtr/Cargo.toml --install
 
 # Specify default rust toolchain
-ENV RUSTUP_TOOLCHAIN=1.88
+ENV RUSTUP_TOOLCHAIN=1.89
 
 # Link /cargo/bin to /usr/local/bin
 RUN ln -s /cargo/bin/* /usr/local/bin/
@@ -44,6 +44,7 @@ RUN ./scripts/build/make.bash pve-eslint make_dinstall
 RUN ./scripts/build/make.bash proxmox-biome make_dinstall
 RUN ./scripts/build/make.bash proxmox-widget-toolkit make_dinstall
 RUN ./scripts/build/make.bash perlmod "dpkg_build perlmod-bin" "dpkg_install"
+RUN ./scripts/build/make.bash proxmox-ve-rs "dpkg_build proxmox-frr-templates" "dpkg_install"
 RUN ./scripts/build/make.bash proxmox-perl-rs "make_deb common/pkg" "make_deb pve-rs" dpkg_install
 RUN ./scripts/build/make.bash pve-common make_dinstall
 RUN ./scripts/build/make.bash extjs make_deb

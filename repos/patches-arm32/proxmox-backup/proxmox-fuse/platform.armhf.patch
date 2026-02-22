@@ -1,8 +1,8 @@
 diff --git a/src/requests.rs b/src/requests.rs
 --- a/src/requests.rs
 +++ b/src/requests.rs
-@@ -362,7 +362,7 @@ impl ReaddirPlus {
-         })?;
+@@ -356,7 +356,7 @@ impl ReaddirPlus {
+             .map_err(|_| io::Error::other("tried to reply with invalid file name"))?;
  
          let entry = sys::EntryParam {
 -            inode: stat.st_ino,
@@ -10,7 +10,7 @@ diff --git a/src/requests.rs b/src/requests.rs
              generation,
              attr: *stat,
              attr_timeout,
-@@ -603,7 +603,7 @@ impl Setattr {
+@@ -597,7 +597,7 @@ impl Setattr {
      /// `Some` if the atime field should be modified.
      pub fn atime(&self) -> Option<SetTime> {
          if (self.to_set & sys::setattr::ATIME) != 0 {
@@ -19,7 +19,7 @@ diff --git a/src/requests.rs b/src/requests.rs
          } else if (self.to_set & sys::setattr::ATIME_NOW) != 0 {
              Some(SetTime::Now)
          } else {
-@@ -614,7 +614,7 @@ impl Setattr {
+@@ -608,7 +608,7 @@ impl Setattr {
      /// `Some` if the mtime field should be modified.
      pub fn mtime(&self) -> Option<SetTime> {
          if (self.to_set & sys::setattr::MTIME) != 0 {
@@ -28,7 +28,7 @@ diff --git a/src/requests.rs b/src/requests.rs
          } else if (self.to_set & sys::setattr::MTIME_NOW) != 0 {
              Some(SetTime::Now)
          } else {
-@@ -625,7 +625,7 @@ impl Setattr {
+@@ -619,7 +619,7 @@ impl Setattr {
      /// `Some` if the ctime field should be modified.
      pub fn ctime(&self) -> Option<Duration> {
          if (self.to_set & sys::setattr::CTIME) != 0 {
