@@ -91,4 +91,6 @@ VOLUME /var/log/proxmox-backup
 VOLUME /var/lib/proxmox-backup
 
 ADD /dockerfiles/runit/ /runit/
+
+ENTRYPOINT ["/runit/entrypoint.sh"]
 CMD ["runsvdir", "/runit"]
