@@ -79,10 +79,10 @@ See [Releases](https://github.com/ayufan/pve-backup-server-dockerfiles/releases)
 Since it runs in a container, it is by default self-signed.
 Follow the tutorial: https://pbs.proxmox.com/docs/pve-integration.html.
 
-You might need to read a PBS fingerprint:
+You might need to read the PBS fingerprint:
 
 ```bash
-docker-compose exec server proxmox-backup-manager cert info | grep Fingerprint
+docker-compose exec pbs proxmox-backup-manager cert info | grep Fingerprint
 ```
 
 ### 2. Add a new directory to store data
@@ -90,8 +90,6 @@ docker-compose exec server proxmox-backup-manager cert info | grep Fingerprint
 Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
-version: '2.1'
-
 services:
   pbs:
     volumes:
@@ -115,8 +113,6 @@ If you are running in Docker it might be advised to configure timezone.
 Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
-version: '2.1'
-
 services:
   pbs:
     environment:
@@ -131,8 +127,6 @@ a special capability.
 Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
-version: '2.1'
-
 services:
   pbs:
     devices:
@@ -142,13 +136,19 @@ services:
       - SYS_RAWIO
 ```
 
-### 5. Persist config, graphs, and logs (optional, but advised)
+### 5. Relocate persistent data from Docker-managed volumes to fixed host paths (optional)
+
+Create folders where volume data will be stored:
+
+```bash
+mkdir /srv/pbs/etc
+mkdir /srv/pbs/logs
+mkdir /srv/pbs/lib
+```
 
 Create a new file (or merge with existing): `docker-compose.override.yml`:
 
 ```yaml
-version: '2.1'
-
 volumes:
   pbs_etc:
     driver: local

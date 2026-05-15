@@ -1,5 +1,3 @@
-version: '2.1'
-
 services:
   pbs:
     image: ${IMAGE:-ayufan/proxmox-backup-server:${TAG:-latest}}
