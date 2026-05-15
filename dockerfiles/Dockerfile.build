@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 ARG IMAGE_PREFIX=
 FROM ${IMAGE_PREFIX}debian:trixie AS toolchain
 
@@ -74,14 +75,14 @@ RUN /src/scripts/release/bundle-tgz.bash /proxmox-backup-server-${TAG:-$VERSION}
 
 FROM ${IMAGE_PREFIX}debian:trixie AS release_env
 
-# Copy packages
-COPY --from=deb_env /release/ /release/
-
 # Install base packages
-RUN export DEBIAN_FRONTEND=noninteractive && \
-  apt-get -y update && \
+RUN --mount=type=bind,from=deb_env,source=/release,target=/release,ro \
+  export DEBIAN_FRONTEND=noninteractive && \
+  apt update -y && \
   apt install -y runit ssmtp cron && \
-  /release/install
+  /release/install && \
+  apt clean && \
+  rm -rf /var/lib/apt/lists/*
 
 # Add default configs
 ADD /dockerfiles/pbs/ /etc/proxmox-backup-default/

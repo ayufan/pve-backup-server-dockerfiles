@@ -52,7 +52,7 @@ DEB_IMAGE_TAG="$IMAGE_TAG-deb-${CROSS_ARCH:-$ARCH}"
 CLIENT_IMAGE_TAG="$IMAGE_TAG-client-${CROSS_ARCH:-$ARCH}"
 
 docker_build() {
-  docker build \
+  DOCKER_BUILDKIT=1 docker build \
     --build-arg=ARCH="$ARCH" \
     --build-arg=CROSS_ARCH="$CROSS_ARCH" \
     --build-arg=VERSION="$VERSION" \
