@@ -1,0 +1,115 @@
+diff --git a/src/api2/node/journal.rs b/src/api2/node/journal.rs
+--- a/src/api2/node/journal.rs
++++ b/src/api2/node/journal.rs
+@@ -102,6 +102,7 @@ fn get_journal(
+     let mut child = Command::new("mini-journalreader")
+         .args(&args)
+         .stdout(Stdio::piped())
++        .stderr(Stdio::null())
+         .spawn()?;
+ 
+     if let Some(ref mut stdout) = child.stdout {
+@@ -121,7 +122,7 @@ fn get_journal(
+ 
+     let status = child.wait().unwrap();
+     if !status.success() {
+-        log::error!("journalctl failed with {}", status);
++        return Ok(json!(lines));
+     }
+ 
+     Ok(json!(lines))
+
+diff --git a/src/api2/node/services.rs b/src/api2/node/services.rs
+--- a/src/api2/node/services.rs
++++ b/src/api2/node/services.rs
+@@ -29,10 +29,15 @@ pub fn real_service_name(service: &str) -> &str {
+ fn get_full_service_state(service: &str) -> Result<Value, Error> {
+     let real_service_name = real_service_name(service);
+ 
+-    let mut child = Command::new("systemctl")
++    let mut child = match Command::new("systemctl")
+         .args(["show", real_service_name])
+         .stdout(Stdio::piped())
+-        .spawn()?;
++        .stderr(Stdio::null())
++        .spawn()
++    {
++        Ok(child) => child,
++        Err(_) => return Ok(Value::Null),
++    };
+ 
+     use std::io::{BufRead, BufReader};
+ 
+@@ -60,7 +65,7 @@ fn get_full_service_state(service: &str) -> Result<Value, Error> {
+ 
+     let status = child.wait().unwrap();
+     if !status.success() {
+-        bail!("systemctl show failed with {}", status);
++        return Ok(Value::Null);
+     }
+ 
+     Ok(result)
+@@ -149,7 +154,7 @@ fn list_services(_param: Value) -> Result<Value, Error> {
+                     list.push(state);
+                 }
+             }
+-            Err(err) => log::error!("{}", err),
++            Err(_) => {}
+         }
+     }
+ 
+@@ -212,6 +217,7 @@ fn run_service_command(service: &str, cmd: &str, auth_id: Authid) -> Result<Valu
+ 
+             let status = Command::new("systemctl")
+                 .args([&cmd, real_service_name])
++                .stderr(Stdio::null())
+                 .status()?;
+ 
+             if !status.success() {
+
+diff --git a/src/api2/node/syslog.rs b/src/api2/node/syslog.rs
+--- a/src/api2/node/syslog.rs
++++ b/src/api2/node/syslog.rs
+@@ -35,6 +35,7 @@ fn dump_journal(
+     let mut child = Command::new("journalctl")
+         .args(&args)
+         .stdout(Stdio::piped())
++        .stderr(Stdio::null())
+         .spawn()?;
+ 
+     use std::io::{BufRead, BufReader};
+@@ -66,7 +67,8 @@ fn dump_journal(
+ 
+     let status = child.wait().unwrap();
+     if !status.success() {
+-        log::error!("journalctl failed with {}", status);
++        // In containers without systemd/journald, journalctl exits with an error.
++        // Do not spam docker logs; return the fallback/no-content response below.
+     }
+ 
+     // HACK: ExtJS store.guaranteeRange() does not like empty array
+
+diff --git a/src/bin/proxmox-backup-api.rs b/src/bin/proxmox-backup-api.rs
+--- a/src/bin/proxmox-backup-api.rs
++++ b/src/bin/proxmox-backup-api.rs
+@@ -44,7 +44,7 @@ fn get_index() -> Pin<Box<dyn Future<Output = Response<Body>> + Send>> {
+ 
+ async fn run() -> Result<(), Error> {
+     proxmox_log::Logger::from_env("PBS_LOG", LevelFilter::INFO)
+-        .journald_on_no_workertask()
++        .stderr_on_no_workertask()
+         .tasklog_pbs()
+         .init()?;
+ 
+diff --git a/src/bin/proxmox-backup-proxy.rs b/src/bin/proxmox-backup-proxy.rs
+--- a/src/bin/proxmox-backup-proxy.rs
++++ b/src/bin/proxmox-backup-proxy.rs
+@@ -181,7 +181,7 @@ async fn get_index_future(env: RestEnvironment, parts: Parts) -> Response<Body>
+ 
+ async fn run() -> Result<(), Error> {
+     proxmox_log::Logger::from_env("PBS_LOG", LevelFilter::INFO)
+-        .journald_on_no_workertask()
++        .stderr_on_no_workertask()
+         .tasklog_pbs()
+         .init()?;
+ 
